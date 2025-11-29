@@ -1,0 +1,68 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+
+# Data files (large files, don't commit to git)
+data/raw/elections/*.xlsx
+data/raw/elections/*.csv
+data/raw/geo/*.shp
+data/raw/geo/*.shx
+data/raw/geo/*.dbf
+data/raw/geo/*.prj
+data/raw/geo/*.cpg
+data/raw/geo/*.geojson
+
+# Keep directory structure
+!data/raw/elections/.gitkeep
+!data/raw/geo/.gitkeep
+!data/processed/.gitkeep
+
+# Logs
+*.log
+
+# Testing
+.coverage
+.pytest_cache/
+htmlcov/
