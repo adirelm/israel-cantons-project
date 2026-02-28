@@ -1,0 +1,69 @@
+{
+  "21": {
+    "מחל": "right",
+    "פה": "center",
+    "שס": "haredi",
+    "ג": "haredi",
+    "דעם": "arab",
+    "ום": "arab",
+    "טב": "right",
+    "ל": "right",
+    "מרצ": "left",
+    "אמת": "left",
+    "כ": "center",
+    "נ": "right",
+    "ז": "right",
+    "נר": "center"
+  },
+  "22": {
+    "מחל": "right",
+    "פה": "center",
+    "שס": "haredi",
+    "ג": "haredi",
+    "ודעם": "arab",
+    "ל": "right",
+    "טב": "right",
+    "אמת": "left",
+    "מרצ": "left",
+    "כף": "right"
+  },
+  "23": {
+    "מחל": "right",
+    "פה": "center",
+    "שס": "haredi",
+    "ג": "haredi",
+    "ודעם": "arab",
+    "ל": "right",
+    "טב": "right",
+    "אמת": "left"
+  },
+  "24": {
+    "מחל": "right",
+    "פה": "center",
+    "שס": "haredi",
+    "ג": "haredi",
+    "ודעם": "arab",
+    "ל": "right",
+    "טב": "right",
+    "ב": "right",
+    "כן": "center",
+    "מרצ": "left",
+    "אמת": "left",
+    "עם": "arab",
+    "ת": "center"
+  },
+  "25": {
+    "מחל": "right",
+    "פה": "center",
+    "שס": "haredi",
+    "ג": "haredi",
+    "ט": "right",
+    "ל": "right",
+    "ד": "arab",
+    "ום": "arab",
+    "מרצ": "left",
+    "אמת": "left",
+    "עם": "arab",
+    "כן": "center"
+  }
+}

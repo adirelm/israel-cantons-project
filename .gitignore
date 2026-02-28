@@ -54,10 +54,9 @@ data/raw/geo/*.prj
 data/raw/geo/*.cpg
 data/raw/geo/*.geojson
 
-# Keep directory structure
-!data/raw/elections/.gitkeep
-!data/raw/geo/.gitkeep
-!data/processed/.gitkeep
+# Large processed files (regenerable from notebooks)
+data/processed/*.geojson
+data/processed/adjacency_graph_augmented.json
 
 # Logs
 *.log

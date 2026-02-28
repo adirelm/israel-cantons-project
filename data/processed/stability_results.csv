@@ -1,0 +1,7 @@
+config,mean_ari,std_ari,mean_nmi,std_nmi
+BlocShares / Euclidean / SA,0.5542,0.1127,0.6015,0.095
+BlocShares / Cosine / Agglom,0.954,0.0594,0.9447,0.0714
+BlocShares / Euclidean / Louvain,1.0,0.0,1.0,0.0
+NMF_5 / Euclidean / SA,0.6158,0.2334,0.6816,0.1551
+PCA_5 / Euclidean / SA,0.3602,0.1371,0.4655,0.1233
+RawParty / Cosine / SA,0.4506,0.1203,0.5497,0.0987
