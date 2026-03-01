@@ -78,7 +78,7 @@ pytest tests/ -v
 The full experiment grid (264 configurations) is run in `notebooks/06_experiments.ipynb`. It evaluates:
 - **4 representations:** BlocShares, RawParty, PCA_5, NMF_5
 - **3 distance metrics:** Euclidean, Cosine, Jensen-Shannon
-- **4 algorithms:** Simulated Annealing, Agglomerative, Spectral, Louvain
+- **4 algorithms:** Simulated Annealing, Agglomerative, Louvain, KMeans (baseline)
 - **6 K values:** 3, 5, 7, 10, 15, 20
 
 Results are saved to `data/processed/experiments/`.

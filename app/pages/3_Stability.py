@@ -44,7 +44,7 @@ fig_ari.update_layout(
     margin=dict(l=40, r=20, t=30, b=80),
     xaxis_tickangle=-30,
 )
-st.plotly_chart(fig_ari, use_container_width=True)
+st.plotly_chart(fig_ari, width="stretch")
 
 # ---------------------------------------------------------------------------
 # Bar chart: mean NMI by configuration
@@ -68,7 +68,7 @@ fig_nmi.update_layout(
     margin=dict(l=40, r=20, t=30, b=80),
     xaxis_tickangle=-30,
 )
-st.plotly_chart(fig_nmi, use_container_width=True)
+st.plotly_chart(fig_nmi, width="stretch")
 
 # ---------------------------------------------------------------------------
 # Comparison table
@@ -78,7 +78,7 @@ st.subheader("Stability Comparison Table")
 
 st.dataframe(
     stability,
-    use_container_width=True,
+    width="stretch",
     hide_index=True,
     column_config={
         "config": st.column_config.TextColumn("Configuration"),

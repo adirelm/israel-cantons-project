@@ -1,6 +1,5 @@
 """Experiment Results -- heatmaps, elbow plots, and comparison tables."""
 
-import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -122,7 +121,7 @@ fig_heat.update_layout(
     height=350,
     margin=dict(l=40, r=20, t=50, b=30),
 )
-st.plotly_chart(fig_heat, use_container_width=True)
+st.plotly_chart(fig_heat, width="stretch")
 
 # ---------------------------------------------------------------------------
 # Line plot: metric vs K
@@ -144,7 +143,7 @@ with col1:
         labels={"k_target": "K", sel_metric_y: sel_metric_y.replace("_", " ").title()},
     )
     fig_line.update_layout(height=400, margin=dict(l=40, r=20, t=30, b=30))
-    st.plotly_chart(fig_line, use_container_width=True)
+    st.plotly_chart(fig_line, width="stretch")
 
 with col2:
     # Group by representation
@@ -158,7 +157,7 @@ with col2:
         labels={"k_target": "K", sel_metric_y: sel_metric_y.replace("_", " ").title()},
     )
     fig_line2.update_layout(height=400, margin=dict(l=40, r=20, t=30, b=30))
-    st.plotly_chart(fig_line2, use_container_width=True)
+    st.plotly_chart(fig_line2, width="stretch")
 
 # ---------------------------------------------------------------------------
 # Top configurations table
@@ -179,7 +178,7 @@ else:
 
 st.dataframe(
     top[display_cols].reset_index(drop=True),
-    use_container_width=True,
+    width="stretch",
     hide_index=True,
     column_config={
         "k_target": st.column_config.NumberColumn("K (target)"),

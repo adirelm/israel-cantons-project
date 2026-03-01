@@ -53,7 +53,6 @@ look like?**
 |---|---|---|
 | **Simulated Annealing** | Metaheuristic | Enforced (swap-based) |
 | **Agglomerative** | Hierarchical | Enforced (merge-based) |
-| **Spectral** | Graph-based | Soft (via graph Laplacian) |
 | **Louvain** | Community detection | Inherent (graph-based) |
 | **KMeans (baseline)** | Centroid-based | None (baseline) |
 

@@ -22,7 +22,6 @@ from utils import (
     METRIC_DESCRIPTIONS,
     ALGO_DESCRIPTIONS,
     EVAL_METRIC_DESCRIPTIONS,
-    K_VALUES,
     BLOC_COLORS,
     BLOCS,
     config_label,
@@ -178,7 +177,7 @@ with info_col:
         margin=dict(l=40, r=20, t=30, b=30),
         legend=dict(orientation="h", yanchor="bottom", y=1.05),
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
     # Population distribution
     pop_data = []
@@ -192,4 +191,4 @@ with info_col:
         })
 
     pop_df = pd.DataFrame(pop_data)
-    st.dataframe(pop_df, use_container_width=True, hide_index=True)
+    st.dataframe(pop_df, width="stretch", hide_index=True)

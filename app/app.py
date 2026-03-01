@@ -3,7 +3,6 @@
 Main page: project overview and key results.
 """
 
-import numpy as np
 import pandas as pd
 import streamlit as st
 import folium
@@ -130,7 +129,7 @@ if assignment is not None:
             margin=dict(l=40, r=20, t=10, b=30),
             legend=dict(orientation="h", yanchor="bottom", y=1.02),
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
         # Summary table
         pop_data = []
@@ -143,7 +142,7 @@ if assignment is not None:
                 "Avg Voters": f"{p['voters']:,.0f}",
             })
 
-        st.dataframe(pd.DataFrame(pop_data), use_container_width=True, hide_index=True)
+        st.dataframe(pd.DataFrame(pop_data), width="stretch", hide_index=True)
 
     st.info(
         "**Why multiple RIGHT cantons?** Cantons are *geographically contiguous* regions, "
@@ -154,7 +153,7 @@ if assignment is not None:
     )
 
 else:
-    st.warning("Primary K=5 assignment not found. Run notebook 06 first.")
+    st.warning("Featured K=5 assignment not found. Run notebook 06 first.")
 
 st.divider()
 
