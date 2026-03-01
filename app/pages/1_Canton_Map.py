@@ -50,7 +50,7 @@ with st.sidebar:
         "Representation",
         reprs,
         format_func=lambda x: REPR_LABELS.get(x, x),
-        index=reprs.index("bloc_shares") if "bloc_shares" in reprs else 0,
+        index=reprs.index("nmf_5") if "nmf_5" in reprs else 0,
     )
     st.caption(REPR_DESCRIPTIONS.get(sel_repr, ""))
 
@@ -69,7 +69,7 @@ with st.sidebar:
     compatible2 = compatible[compatible["metric"] == sel_metric]
     avail_algos = sorted(compatible2["algo"].unique())
 
-    default_algo_idx = avail_algos.index("simulated_annealing") if "simulated_annealing" in avail_algos else 0
+    default_algo_idx = avail_algos.index("louvain") if "louvain" in avail_algos else 0
     sel_algo = st.selectbox(
         "Algorithm",
         avail_algos,

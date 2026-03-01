@@ -65,8 +65,8 @@ st.divider()
 st.subheader("Featured Result: K=5 Canton Partition")
 st.markdown(
     "The map below shows the K=5 partition using "
-    "**BlocShares / Euclidean / Louvain**, which produces five well-balanced, "
-    "geographically contiguous cantons with high dominant-bloc margins. "
+    "**NMF_5 / Cosine / Louvain**, which produces five politically coherent "
+    "cantons with a positive silhouette (0.121) and perfect cross-election stability (ARI = 1.0). "
     "Explore all 264 configurations in the **Canton Map Explorer** page."
 )
 
@@ -74,7 +74,7 @@ geo = load_geojson()
 features = load_political_features()
 
 # Load best balanced k=5 assignment
-assignment = load_canton_assignment("bloc_shares", "euclidean", "louvain", 5)
+assignment = load_canton_assignment("nmf_5", "cosine", "louvain", 5)
 
 if assignment is not None:
     merged = assignment.merge(features, on="municipality", how="left")

@@ -28,7 +28,7 @@ CANTON_COLORS = [
     "#ffff33", "#a65628", "#f781bf", "#999999", "#66c2a5",
 ]
 BLOC_COLORS = {
-    "right": "#3b82f6", "haredi": "#1e1e1e", "center": "#a855f7",
+    "right": "#3b82f6", "haredi": "#6b7280", "center": "#a855f7",
     "left": "#ef4444", "arab": "#22c55e",
 }
 BLOCS = ["right", "haredi", "center", "left", "arab"]
@@ -40,22 +40,14 @@ BLOCS = ["right", "haredi", "center", "left", "arab"]
 print("Generating Figure 1: Canton map...")
 
 geo = gpd.read_file(DATA_DIR / "municipalities_dissolved.geojson")
-assignment_path = DATA_DIR / "experiments" / "bloc_shares__euclidean__louvain__k5.csv"
 
-# Use the actual primary result: SA with cosine
-sa_path = DATA_DIR / "experiments" / "bloc_shares__cosine__simulated_annealing__k5.csv"
-if sa_path.exists():
-    asgn_df = pd.read_csv(sa_path)
-elif assignment_path.exists():
-    asgn_df = pd.read_csv(assignment_path)
+# Primary result: NMF_5 with cosine Louvain
+primary_path = DATA_DIR / "experiments" / "nmf_5__cosine__louvain__k5.csv"
+if primary_path.exists():
+    asgn_df = pd.read_csv(primary_path)
 else:
-    # Find any k5 SA assignment
-    candidates = list((DATA_DIR / "experiments").glob("*simulated_annealing*k5*"))
-    if candidates:
-        asgn_df = pd.read_csv(candidates[0])
-    else:
-        print("  No K=5 assignment found, skipping map")
-        asgn_df = None
+    print("  No K=5 assignment found, skipping map")
+    asgn_df = None
 
 if asgn_df is not None:
     asgn_map = dict(zip(asgn_df["municipality"], asgn_df["canton"]))
@@ -67,11 +59,11 @@ if asgn_df is not None:
     fig, ax = plt.subplots(figsize=(10, 14))
 
     canton_labels = {
-        0: "Canton 0: RIGHT South",
-        1: "Canton 1: RIGHT Center",
-        2: "Canton 2: CENTER Coastal",
-        3: "Canton 3: LEFT North",
-        4: "Canton 4: ARAB North",
+        0: "Canton 0: CENTER Metro",
+        1: "Canton 1: RIGHT South",
+        2: "Canton 2: RIGHT North",
+        3: "Canton 3: ARAB Galilee",
+        4: "Canton 4: ARAB Periphery",
     }
 
     patches = []
@@ -84,7 +76,7 @@ if asgn_df is not None:
 
     ax.legend(handles=patches, loc="lower right", fontsize=9, title="Cantons",
               title_fontsize=10, framealpha=0.9)
-    ax.set_title("K=5 Canton Partition (BlocShares / Cosine / SA)", fontsize=13)
+    ax.set_title("K=5 Canton Partition (NMF_5 / Cosine / Louvain)", fontsize=13)
     ax.set_axis_off()
     fig.tight_layout()
     fig.savefig(FIGURES_DIR / "canton_map_k5.png", dpi=200, bbox_inches="tight")
@@ -105,18 +97,18 @@ bloc_euc = results[(results["repr"] == "bloc_shares") & (results["metric"] == "e
 fig, ax = plt.subplots(figsize=(9, 5))
 algo_labels = {
     "simulated_annealing": "Simulated Annealing",
-    "agglomerative": "Agglomerative",
+    "agglomerative_average": "Agglomerative",
     "louvain": "Louvain",
     "kmeans_baseline": "K-Means (baseline)",
 }
 algo_colors = {
     "simulated_annealing": "#e41a1c",
-    "agglomerative": "#377eb8",
+    "agglomerative_average": "#377eb8",
     "louvain": "#4daf4a",
     "kmeans_baseline": "#984ea3",
 }
 
-for algo in ["simulated_annealing", "agglomerative", "kmeans_baseline", "louvain"]:
+for algo in ["simulated_annealing", "agglomerative_average", "kmeans_baseline", "louvain"]:
     subset = bloc_euc[bloc_euc["algo"] == algo].sort_values("k_target")
     if len(subset) > 0:
         ax.plot(subset["k_target"], subset["silhouette"], marker="o", linewidth=2,
@@ -173,7 +165,7 @@ if asgn_df is not None:
     ax.set_xticks(x_pos)
     ax.set_xticklabels(canton_labels_short, fontsize=9)
     ax.set_ylabel("Vote Share (%)", fontsize=11)
-    ax.set_title("Political Composition by Canton (K=5 SA)", fontsize=12)
+    ax.set_title("Political Composition by Canton (K=5 Louvain)", fontsize=12)
     ax.set_ylim(0, 105)
     ax.legend(loc="upper right", fontsize=9)
     fig.tight_layout()
@@ -188,11 +180,11 @@ if asgn_df is not None:
 print("Generating Figure 4: Heatmap...")
 
 repr_labels = {
-    "bloc_shares": "BlocShares", "raw_party": "RawParty",
+    "bloc_shares": "BlocShares", "raw_party_shares": "RawParty",
     "pca_5": "PCA_5", "nmf_5": "NMF_5",
 }
 algo_labels_map = {
-    "simulated_annealing": "SA", "agglomerative": "Agglom.",
+    "simulated_annealing": "SA", "agglomerative_average": "Agglom.",
     "louvain": "Louvain", "kmeans_baseline": "K-Means",
 }
 

@@ -70,12 +70,12 @@ look like?**
 - **264 experiment configurations** (4 representations x 3 metrics x 4 algorithms x 6 K values, minus incompatible)
 - **Highest silhouette: 0.905** (BlocShares / Cosine / Agglomerative, K=3; contiguity enforced)
 - **Temporal stability: ARI up to 1.0** (Louvain), **0.954** (Agglomerative)
-- **K=5 identifies five politically coherent regions:**
-  1. Right-wing southern periphery
-  2. Haredi-influenced urban center
-  3. Center-right coastal belt
-  4. Left-leaning Druze enclave
-  5. Arab-majority northern bloc
+- **K=5 identifies five politically coherent cantons:**
+  1. CENTER Metro -- secular-center belt from Tel Aviv through the Sharon plain (42.0% Center)
+  2. RIGHT South -- southern periphery arc from Jerusalem through the Negev (44.9% Right)
+  3. RIGHT North -- mixed northern region including Haifa and the Galilee (38.0% Right)
+  4. ARAB Galilee -- Arab-majority municipalities in the Galilee and Triangle (89.9% Arab)
+  5. ARAB Periphery -- Bedouin towns in the Negev and central Arab towns (86.1% Arab)
 
 ---
 
