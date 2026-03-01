@@ -44,8 +44,9 @@ class KMeansBaselineClusterer:
         if "municipality" in feat.columns:
             feat = feat.set_index("municipality")
 
-        X = feat[feature_cols].values
-        munis = list(feat.index)
+        # Filter to municipalities present in graph (consistent with other clusterers)
+        munis = [m for m in feat.index if m in graph.nodes()]
+        X = feat.loc[munis, feature_cols].values
 
         if k < 1 or k > len(munis):
             raise ValueError(

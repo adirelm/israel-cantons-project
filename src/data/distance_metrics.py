@@ -64,7 +64,11 @@ class CosineDistance:
         return "cosine"
 
     def pairwise(self, X: np.ndarray) -> np.ndarray:
-        return squareform(pdist(X, metric="cosine"))
+        D = squareform(pdist(X, metric="cosine"))
+        # Handle zero vectors consistently with between() method
+        # scipy's pdist returns NaN for zero vectors; replace with 0.0
+        D = np.nan_to_num(D, nan=0.0)
+        return D
 
     def between(self, a: np.ndarray, b: np.ndarray) -> float:
         dot = np.dot(a, b)

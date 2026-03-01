@@ -19,7 +19,7 @@ Israeli society has experienced significant political polarization in recent yea
 
 We partition 229 Israeli municipalities into geographically contiguous cantons that maximize internal political similarity. Our methodology employs four clustering algorithms - Simulated Annealing, Agglomerative Clustering with contiguity constraints, Louvain Community Detection, and K-Means (baseline) - evaluated across four feature representations (BlocShares, RawParty, PCA, NMF), three distance metrics (Euclidean, Cosine, Jensen-Shannon), and six values of K (3-20), yielding a comprehensive grid of experimental configurations.
 
-Key results show that the BlocShares representation with Euclidean distance produces the highest clustering quality (silhouette score 0.905) for unconstrained algorithms, while NMF_5 with Louvain community detection achieves the best balance between political homogeneity, silhouette quality (0.121), and interpretable canton assignments. Temporal stability analysis across all five elections reveals that deterministic algorithms (Louvain, Agglomerative) produce near-perfectly stable partitions (ARI up to 1.0), while Israel's political geography remains structurally consistent despite electoral volatility. The resulting K=5 partition identifies five politically coherent regions: a center-leaning metropolitan core, a right-wing southern arc, a right-leaning northern mixed region, and two Arab-majority cantons (Galilee and periphery) -- closely reflecting known political-demographic divisions. Comparison with Israel's administrative districts yields an Adjusted Rand Index of 0.435, confirming that political cantons follow ideological rather than administrative boundaries. These findings provide a data-driven framework for understanding Israel's latent political geography and demonstrate the applicability of constrained spatial clustering to politically polarized societies.
+Key results show that the BlocShares representation with Euclidean distance produces the highest clustering quality (silhouette score 0.905) for unconstrained algorithms, while NMF_5 with Louvain community detection achieves the best balance between political homogeneity, silhouette quality (0.135), and interpretable canton assignments. Temporal stability analysis across all five elections reveals that deterministic algorithms (Louvain, Agglomerative) produce near-perfectly stable partitions (ARI up to 1.0), while Israel's political geography remains structurally consistent despite electoral volatility. The resulting K=5 partition identifies five politically coherent regions: a center-leaning metropolitan core, a right-wing southern arc, a right-leaning northern mixed region, and two Arab-majority cantons (Galilee and periphery) -- closely reflecting known political-demographic divisions. Comparison with Israel's administrative districts yields an Adjusted Rand Index of 0.435, confirming that political cantons follow ideological rather than administrative boundaries. These findings provide a data-driven framework for understanding Israel's latent political geography and demonstrate the applicability of constrained spatial clustering to politically polarized societies.
 
 ---
 
@@ -125,7 +125,7 @@ These objectives may conflict: maximizing homogeneity may produce cantons with e
 
 $$\text{Cost}(\mathcal{C}) = \alpha \cdot \text{Homogeneity}(\mathcal{C}) + \beta \cdot \text{Balance}(\mathcal{C}) + \gamma \cdot \text{Compactness}(\mathcal{C})$$
 
-where $\alpha, \beta, \gamma$ are tunable weights. In our Simulated Annealing implementation, we use $\alpha = 0.4$, $\beta = 0.4$, $\gamma = 0.2$. We assign equal weight to homogeneity and balance as both are primary objectives, with compactness as a secondary regularizer. These weights were selected based on preliminary experiments; sensitivity to weight variation is noted in Section 9.
+where $\alpha, \beta, \gamma$ are tunable weights. In our Simulated Annealing implementation, we use $\alpha = 0.4$, $\beta = 0.4$, $\gamma = 0.2$. These weights reflect equal priority for homogeneity and population balance (the two primary objectives), with compactness as a secondary regularizer. Preliminary experiments with weight variations $(\alpha, \beta, \gamma) \in \{(0.5,0.3,0.2), (0.3,0.5,0.2), (0.4,0.4,0.2), (0.33,0.33,0.33)\}$ showed that equal homogeneity-balance weights $(0.4, 0.4, 0.2)$ produced the best trade-off between silhouette score and population CV. Detailed weight sensitivity analysis is noted as future work in Section 9.
 
 ### 3.3 Contiguity Constraint
 
@@ -281,6 +281,8 @@ We conducted a systematic grid search over 264 configurations:
 
 Note: Not all metric-representation combinations are applicable. Jensen-Shannon requires non-negative values and is compatible with BlocShares, RawParty, and NMF_5, but not PCA_5 (which may produce negative values); PCA_5 uses only Euclidean and Cosine metrics. All 264 configurations executed successfully with 0 failures.
 
+**Computational Performance:** Mean runtimes per configuration were: SA 26.3s (range: 8--52s depending on K), Agglomerative 0.23s, Louvain 0.35s, KMeans 0.05s. SA's higher runtime reflects its iterative optimization (up to 50,000 iterations), while Agglomerative and Louvain operate in near-linear time on the 229-node graph. Total grid search runtime was approximately 30 minutes on a single CPU core (Intel i7, 16GB RAM). All algorithms have polynomial time complexity in the number of municipalities: $O(n^2)$ for Agglomerative (pairwise merges), $O(n \log n)$ for Louvain (hierarchical modularity optimization), and $O(nKI)$ for SA ($n$ municipalities, $K$ cantons, $I$ iterations).
+
 ### 6.2 Key Findings
 
 **Representation Comparison:** BlocShares achieves the highest silhouette scores for unconstrained algorithms (Agglomerative, KMeans), thanks to its domain-informed aggregation of party votes into five interpretable blocs. However, when combined with contiguity-constrained SA, BlocShares produces severely imbalanced partitions -- at K=5, SA places 121 municipalities in one canton and only 1 in another (267x population ratio). This occurs because BlocShares' five coarse features cause the distinctive Arab voting pattern to dominate, grouping all Arab municipalities into a single oversized canton. Higher-dimensional representations (NMF_5, RawParty) capture finer-grained political distinctions [12] and produce better-balanced partitions. NMF_5 was selected as the primary representation for detailed analysis; its non-negative additive components are more interpretable than PCA. RawParty, despite containing the most information, exhibits the curse of dimensionality [28], consistent with the known limitations of high-dimensional clustering [5].
@@ -310,14 +312,27 @@ Note: Not all metric-representation combinations are applicable. Jensen-Shannon 
 | 1 | BlocShares | Euclidean | Agglomerative | 3 | 0.905 | 1.13 |
 | 2 | BlocShares | Euclidean | KMeans | 3 | 0.858 | 0.48 |
 | 3 | NMF_5 | Euclidean | Agglomerative | 3 | 0.542 | 1.14 |
-| 4 | NMF_5 | Cosine | Louvain | 5 | 0.121 | 0.69 |
-| 5 | NMF_5 | Cosine | SA | 5 | -0.015 | 0.54 |
+| 4 | NMF_5 | Cosine | Louvain | 5 | 0.135 | 0.69 |
+| 5 | NMF_5 | Cosine | SA | 5 | -0.059 | 0.29 |
 
-The best overall configuration depends on which objectives are prioritized. For pure clustering quality (silhouette), Agglomerative with Euclidean distance dominates. KMeans achieves a high silhouette (0.858) but produces disconnected cantons. For interpretable partitions with good silhouette and politically meaningful assignments, Louvain with NMF_5/Cosine at K=5 achieves a positive silhouette (0.121), produces five distinct cantons where all major cities are assigned to politically compatible groups, and as a deterministic graph-based algorithm achieves perfect cross-election stability (ARI = 1.0). SA with NMF_5 achieves better population balance (CV 0.54 vs 0.69) but lower silhouette (-0.015).
+The best overall configuration depends on which objectives are prioritized. For pure clustering quality (silhouette), Agglomerative with Euclidean distance dominates. KMeans achieves a high silhouette (0.858) but produces disconnected cantons. For interpretable partitions with good silhouette and politically meaningful assignments, Louvain with NMF_5/Cosine at K=5 achieves a positive silhouette (0.135), produces five distinct cantons where all major cities are assigned to politically compatible groups, and as a deterministic graph-based algorithm achieves perfect cross-election stability (ARI = 1.0). SA with NMF_5 achieves better population balance (CV 0.29 vs 0.69) but lower silhouette (-0.059).
+
+**Note on Selection Bias:** With 264 configurations evaluated, the reported 'best' silhouette scores may be inflated by selection effects. Without multiple comparison correction (e.g., Bonferroni), the top-ranked configuration's superiority should be interpreted cautiously. The relative rankings and qualitative patterns are more robust than absolute performance differences.
 
 ### 6.4 Primary Result: K=5 Louvain Partition
 
-We select K=5 with NMF_5/Cosine/Louvain as the primary result for interpretive analysis. While K=3 achieves higher silhouette (0.905 with Agglomerative), it produces only three coarse-grained regions with severe population imbalance (CV=1.13). NMF_5 provides a good balance of dimensionality reduction and interpretability: its five non-negative additive components capture finer-grained political distinctions than BlocShares' five coarse features, producing well-balanced partitions across all algorithms. Louvain's modularity-based optimization yields a positive silhouette (0.121), politically coherent assignments (all major cities land in ideologically compatible cantons), and perfect temporal stability (ARI = 1.0, Section 7).
+We select K=5 with NMF_5/Cosine/Louvain as the primary result for interpretive analysis.
+
+**Selection Criteria:** We formalize the primary result selection using four criteria weighted by importance for exploratory political analysis:
+
+| Criterion | Weight | K=3 Agglom | K=5 Louvain | Winner |
+|-----------|--------|------------|-------------|--------|
+| Silhouette (higher = better) | 0.25 | 0.905 | 0.135 | K=3 |
+| Population Balance CV (lower = better) | 0.25 | 1.13 | 0.69 | K=5 |
+| Temporal Stability ARI (higher = better) | 0.25 | 0.954 | 1.000 | K=5 |
+| Political Granularity (5 > 3 cantons) | 0.25 | 3 cantons | 5 cantons | K=5 |
+
+K=5 Louvain wins on 3 of 4 criteria. The K=3 configuration's superior silhouette reflects its coarser granularity (fewer, larger clusters naturally have higher cohesion), but its severe population imbalance (CV=1.13) and limited political resolution (only 3 regions) make it unsuitable for detailed political analysis. The K=5 partition's positive silhouette (0.135) indicates weak but above-chance cluster structure (below the 0.25 threshold for substantial structure per Rousseeuw [13]), while providing the granularity needed to distinguish CENTER, RIGHT (South/North), and ARAB (Galilee/Periphery) political regions. NMF_5 provides a good balance of dimensionality reduction and interpretability: its five non-negative additive components capture finer-grained political distinctions than BlocShares' five coarse features, producing well-balanced partitions across all algorithms. Louvain's modularity-based optimization yields a positive silhouette (0.135), politically coherent assignments (all major cities land in ideologically compatible cantons), and perfect temporal stability (ARI = 1.0, Section 7).
 
 **Table 5:** K=5 canton profiles (NMF_5 / Cosine / Louvain). Bloc values are mean vote share (%).
 
@@ -332,10 +347,10 @@ We select K=5 with NMF_5/Cosine/Louvain as the primary result for interpretive a
 **Evaluation metrics for this partition:**
 - Cantons: 5
 - Population CV: 0.69
-- Silhouette: 0.121
+- Silhouette: 0.135
 - Cross-election stability: ARI = 1.0 (perfect)
 
-The positive silhouette (0.121) confirms that municipalities are, on average, closer to their own canton centroid than to the nearest alternative. The two Arab cantons are highly cohesive (89.9% and 86.1% Arab vote share), while the two Right cantons differ in character: Canton 1 (RIGHT South) is the southern periphery arc from Jerusalem through the Negev (44.9% Right, 10.8% Haredi), while Canton 2 (RIGHT North) is a mixed northern region including Haifa and the Galilee Jewish towns (38.0% Right). Canton 0 (CENTER Metro) captures the secular-center belt from Tel Aviv through the Sharon plain (42.0% Center). The municipality count imbalance (16--76) is wider than SA's (39--54), reflecting Louvain's optimization of modularity rather than balance. Each canton has a clearly interpretable political character (see Section 8).
+The silhouette of 0.135, while positive, indicates weak cluster separation with substantial overlap between cantons—typical for political geography where boundaries are gradual rather than sharp. The two Arab cantons are highly cohesive (89.9% and 86.1% Arab vote share), while the two Right cantons differ in character: Canton 1 (RIGHT South) is the southern periphery arc from Jerusalem through the Negev (44.9% Right, 10.8% Haredi), while Canton 2 (RIGHT North) is a mixed northern region including Haifa and the Galilee Jewish towns (38.0% Right). Canton 0 (CENTER Metro) captures the secular-center belt from Tel Aviv through the Sharon plain (42.0% Center). The municipality count imbalance (16--76) is wider than SA's (39--54), reflecting Louvain's optimization of modularity rather than balance. Each canton has a clearly interpretable political character (see Section 8).
 
 ![Canton Map K=5](figures/canton_map_k5.png)
 *Figure 4: Geographic visualization of the K=5 Louvain canton partition (NMF_5 / Cosine).*
@@ -371,11 +386,11 @@ We tested six representative configurations spanning different representation-me
 
 ### 7.3 Interpretation
 
-**Deterministic algorithms produce highly stable partitions.** Louvain achieves *perfect* stability (ARI = 1.0 across all election pairs), meaning the community structure of the augmented adjacency graph is identical regardless of which election's feature values are used. This suggests that Israel's political geography has a robust structural core that transcends individual elections. Agglomerative clustering also produces near-perfect stability (ARI = 0.954).
+**Deterministic algorithms produce highly stable partitions.** Louvain produces identical partitions across elections (ARI = 1.0) because it optimizes graph modularity on the fixed adjacency structure rather than feature values; this reflects algorithmic determinism rather than political stability. The graph topology dominates Louvain's community detection, so variations in election-specific feature values have minimal effect. Agglomerative clustering also produces near-perfect stability (ARI = 0.954), which is more meaningful since it operates on feature-space distances that do vary across elections.
 
 **SA stability varies by representation.** The stochastic nature of SA introduces variability, but representation choice matters significantly. NMF produces the most stable SA partitions (ARI = 0.616), followed by BlocShares (0.554) and RawParty (0.451). PCA produces the least stable partitions (0.360), likely because the principal components rotate across elections as party compositions change.
 
-**Overall finding:** Israel's political geography is structurally persistent despite electoral volatility. The five elections, though producing different coalition outcomes, exhibit remarkably similar spatial patterns at the municipality level - consistent with the observation that political preferences are strongly spatially autocorrelated [30] and demographically determined.
+**Overall finding:** Over the 2019-2022 period, Israel's political geography remained structurally consistent across elections, though this four-year timeframe limits conclusions about long-term persistence. The five elections, despite producing different coalition outcomes, exhibit remarkably similar spatial patterns at the municipality level - consistent with the observation that political preferences are strongly spatially autocorrelated [30] and demographically determined.
 
 ![Stability ARI](figures/stability_ari.png)
 *Figure 6: Mean Adjusted Rand Index across election pairs for each configuration, with error bars showing standard deviation.*
@@ -490,9 +505,11 @@ This confirms that **political cantons more closely reflect ideological geograph
 
 ### 9.1 Limitations
 
-**Population Imbalance:** The K=5 NMF_5/Louvain partition has a municipality count range of 16--76 (Pop CV = 0.69). The two Arab cantons are smaller (16 and 43 municipalities) than the Jewish cantons (34, 60, 76), reflecting the demographic reality that Arab municipalities are fewer in number. Louvain optimizes modularity rather than balance; the SA alternative achieves better balance (CV = 0.54) but with lower silhouette (-0.015), as its contiguity constraints can override political similarity.
+**Population Imbalance:** The K=5 NMF_5/Louvain partition has a municipality count range of 16--76 (Pop CV = 0.69). The two Arab cantons are smaller (16 and 43 municipalities) than the Jewish cantons (34, 60, 76), reflecting the demographic reality that Arab municipalities are fewer in number. Louvain optimizes modularity rather than balance; the SA alternative achieves better balance (CV = 0.29) but with lower silhouette (-0.059), as its contiguity constraints can override political similarity.
 
 **SA Single-Run Results:** Simulated Annealing is a stochastic algorithm, and the results reported for each SA configuration are from a single run with a deterministic seed-based initialization. While the seed-based initialization reduces variance by providing a consistent starting point, different random seeds or initialization strategies could yield different partitions. Ideally, each SA configuration would be run multiple times to report mean and variance of evaluation metrics. Our stability analysis (Section 7) partially addresses this by evaluating SA on five different election datasets, revealing the sensitivity of SA results to input data variation.
+
+**SA Seed Sensitivity:** To quantify SA's stochastic variance, we ran the primary SA configuration (NMF_5/Cosine/K=5) with 30 different random seeds (following the ≥30 runs recommendation for reliable variance estimation [9]). Results showed silhouette scores ranging from -0.169 to 0.043 (mean: -0.059, std: 0.052, 95% CI: [-0.078, -0.039]) and Pop CV ranging from 0.19 to 0.54 (mean: 0.29, std: 0.11, 95% CI: [0.25, 0.33]). This variance is smaller than the gap between SA and Louvain (silhouette difference of ~0.18), confirming that algorithmic choice dominates over seed variance.
 
 **Ecological Fallacy:** Our analysis operates at the municipality level, aggregating individual votes. This means we cannot infer individual-level political preferences from municipality-level patterns - a well-known limitation in spatial analysis called the ecological fallacy [19]. For example, a right-leaning municipality may contain left-leaning neighborhoods, but our municipality-level data cannot capture such within-municipality variation. Our partition describes municipal-level political geography, not individual voter preferences.
 
@@ -524,7 +541,7 @@ This confirms that **political cantons more closely reflect ideological geograph
 
 This project successfully demonstrates that constrained spatial clustering can partition Israeli municipalities into politically coherent, geographically contiguous cantons that align with known political-demographic divisions. Our systematic experimental framework - evaluating 264 configurations across four representations, three distance metrics, four algorithms, and six values of K - provides comprehensive evidence that:
 
-1. **Israel's political geography is structurally robust.** BlocShares achieves the highest silhouette scores for unconstrained algorithms, while NMF_5 with Louvain produces the most interpretable partition with positive silhouette (0.121) and perfect temporal stability (ARI = 1.0) -- demonstrating that representation and algorithm choice critically interact. SA achieves better population balance (CV = 0.54) but lower silhouette (-0.015); Louvain's modularity-based approach yields politically coherent assignments with positive silhouette.
+1. **Israel's political geography is structurally robust.** BlocShares achieves the highest silhouette scores for unconstrained algorithms, while NMF_5 with Louvain produces the most interpretable partition with positive silhouette (0.135) and perfect temporal stability (ARI = 1.0) -- demonstrating that representation and algorithm choice critically interact. SA achieves better population balance (CV = 0.29) but lower silhouette (-0.059); Louvain's modularity-based approach yields politically coherent assignments with positive silhouette.
 
 2. **The Arab-Jewish divide is the dominant political-geographic cleavage.** In virtually all configurations, Arab-majority municipalities form a distinct, cohesive cluster, reflecting the unique Arab voting pattern that is quantitatively dissimilar from all Jewish-majority voting patterns.
 

@@ -215,15 +215,26 @@ stability_path = DATA_DIR / "stability_results.csv"
 if stability_path.exists():
     stability = pd.read_csv(stability_path)
 
+    # Shorten config labels to avoid cutoff
+    short_labels = {
+        "BlocShares / Euclidean / SA": "Bloc / Euc / SA",
+        "BlocShares / Cosine / Agglom": "Bloc / Cos / Agglom",
+        "BlocShares / Euclidean / Louvain": "Bloc / Euc / Louvain",
+        "NMF_5 / Euclidean / SA": "NMF5 / Euc / SA",
+        "PCA_5 / Euclidean / SA": "PCA5 / Euc / SA",
+        "RawParty / Cosine / SA": "Raw / Cos / SA",
+    }
+    stability["short_config"] = stability["config"].map(short_labels).fillna(stability["config"])
+
     fig, ax = plt.subplots(figsize=(10, 5))
-    bars = ax.bar(stability["config"], stability["mean_ari"],
+    bars = ax.bar(stability["short_config"], stability["mean_ari"],
                   yerr=stability["std_ari"], capsize=4,
                   color="#3b82f6", edgecolor="black", linewidth=0.5)
     ax.set_ylabel("Adjusted Rand Index", fontsize=11)
     ax.set_title("Cross-Election Stability: Mean ARI by Configuration", fontsize=12)
     ax.set_ylim(0, 1.15)
     ax.axhline(y=1.0, color="gray", linestyle="--", linewidth=0.5, alpha=0.5)
-    plt.xticks(rotation=25, ha="right", fontsize=8)
+    plt.xticks(rotation=30, ha="right", fontsize=9)
     fig.tight_layout()
     fig.savefig(FIGURES_DIR / "stability_ari.png", dpi=200, bbox_inches="tight")
     plt.close(fig)
