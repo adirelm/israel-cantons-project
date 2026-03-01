@@ -26,6 +26,7 @@ israel-cantons-project/
 │   ├── evaluation/          # Metrics, stability analysis, experiments
 │   └── visualization/       # Maps and charts
 ├── notebooks/               # Jupyter notebooks (01-06)
+├── app/                     # Streamlit web application
 ├── tests/                   # Unit tests
 ├── docs/                    # Final report and documentation
 ├── requirements.txt

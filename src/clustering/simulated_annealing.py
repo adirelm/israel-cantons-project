@@ -74,6 +74,12 @@ class SimulatedAnnealingClusterer:
         municipalities = list(feat.index)
         G = graph.subgraph(municipalities).copy()
 
+        n = len(municipalities)
+        if k < 1 or k > n:
+            raise ValueError(
+                f"k must be between 1 and {n} (number of municipalities), got {k}"
+            )
+
         if weights is None:
             weights = {m: 1.0 for m in municipalities}
 

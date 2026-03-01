@@ -470,6 +470,8 @@ This confirms that **political cantons reflect ideological geography rather than
 
 **Contiguity Approximation:** The augmented graph includes virtual edges for isolate municipalities and enclaves, which means some "contiguous" cantons are not strictly geographically connected but rather connected through feature-space proximity. This is a pragmatic compromise to handle Israel's complex municipal geography.
 
+**Spectral Clustering Contiguity:** While Simulated Annealing and Agglomerative Clustering explicitly enforce contiguity constraints during optimization, Spectral Clustering operates on the graph Laplacian embedding and applies K-Means in the spectral space, which does not guarantee that the resulting clusters are contiguous in the original graph. In practice, the graph-weighted affinity matrix encourages spatial coherence, but some spectral partitions may contain disconnected cantons. Users should verify contiguity post-hoc when using spectral results.
+
 ### 9.2 Future Work
 
 **Interactive Web Application:** Develop a web-based interface (React + Leaflet) allowing users to explore canton divisions across different parameters (K, algorithm, election) interactively.

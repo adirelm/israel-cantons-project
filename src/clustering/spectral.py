@@ -59,6 +59,12 @@ class LouvainSpatialClusterer:
             feat = feat.set_index("municipality")
 
         munis = [m for m in feat.index if m in graph.nodes()]
+
+        if k < 1 or k > len(munis):
+            raise ValueError(
+                f"k must be between 1 and {len(munis)} (number of municipalities), got {k}"
+            )
+
         G = graph.subgraph(munis).copy()
 
         # Weight edges by political similarity
@@ -137,6 +143,13 @@ class SpectralSpatialClusterer:
             feat = feat.set_index("municipality")
 
         munis = [m for m in feat.index if m in graph.nodes()]
+        n = len(munis)
+
+        if k < 1 or k > n:
+            raise ValueError(
+                f"k must be between 1 and {n} (number of municipalities), got {k}"
+            )
+
         G = graph.subgraph(munis).copy()
 
         # Build affinity matrix from graph + similarity

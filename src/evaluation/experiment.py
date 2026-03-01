@@ -119,6 +119,7 @@ class ExperimentRunner:
                 feature_cols=feature_cols,
                 graph=self.graph,
                 weights=self.weights,
+                distance_metric=config.distance_metric,
             )
 
             elapsed = time.time() - t0

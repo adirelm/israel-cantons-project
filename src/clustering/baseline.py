@@ -47,6 +47,11 @@ class KMeansBaselineClusterer:
         X = feat[feature_cols].values
         munis = list(feat.index)
 
+        if k < 1 or k > len(munis):
+            raise ValueError(
+                f"k must be between 1 and {len(munis)} (number of municipalities), got {k}"
+            )
+
         km = KMeans(
             n_clusters=k,
             random_state=self._random_state,

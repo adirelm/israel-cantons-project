@@ -49,6 +49,12 @@ class AgglomerativeSpatialClusterer:
         munis = [m for m in feat.index if m in graph.nodes()]
         X = feat.loc[munis, feature_cols].values
         n = len(munis)
+
+        if k < 1 or k > n:
+            raise ValueError(
+                f"k must be between 1 and {n} (number of municipalities), got {k}"
+            )
+
         muni_to_idx = {m: i for i, m in enumerate(munis)}
 
         # Pairwise distance matrix

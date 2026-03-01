@@ -109,8 +109,14 @@ def silhouette(
     assignment: CantonAssignment,
     features: pd.DataFrame,
     feature_cols: list[str],
+    distance_metric: "DistanceMetric | None" = None,
 ) -> float:
-    """Silhouette score (higher is better, range [-1, 1])."""
+    """Silhouette score (higher is better, range [-1, 1]).
+
+    When *distance_metric* is provided the score is computed on the
+    precomputed distance matrix so that it matches the metric used
+    during clustering.  Otherwise falls back to Euclidean.
+    """
     feat = features.copy()
     if "municipality" in feat.columns:
         feat = feat.set_index("municipality")
@@ -121,6 +127,10 @@ def silhouette(
 
     X = feat.loc[munis, feature_cols].values
     labels = assignment.labels_for(munis)
+
+    if distance_metric is not None:
+        D = distance_metric.pairwise(X)
+        return float(_sklearn_silhouette(D, labels, metric="precomputed"))
     return float(_sklearn_silhouette(X, labels))
 
 
@@ -191,12 +201,13 @@ def evaluate_all(
     feature_cols: list[str],
     graph: nx.Graph,
     weights: dict[str, float],
+    distance_metric: "DistanceMetric | None" = None,
 ) -> dict:
     """Run all evaluation metrics and return a consolidated dict."""
     result: dict = {"k": assignment.k}
     result.update(population_balance(assignment, weights))
     result.update(political_homogeneity(assignment, features, feature_cols, weights))
     result["wcss"] = wcss(assignment, features, feature_cols)
-    result["silhouette"] = silhouette(assignment, features, feature_cols)
+    result["silhouette"] = silhouette(assignment, features, feature_cols, distance_metric)
     result.update(contiguity_check(assignment, graph))
     return result
