@@ -9,7 +9,6 @@ from __future__ import annotations
 import copy
 
 import networkx as nx
-import numpy as np
 import pandas as pd
 from sklearn.metrics import adjusted_rand_score, normalized_mutual_info_score
 

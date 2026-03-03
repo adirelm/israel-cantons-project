@@ -11,7 +11,6 @@ from typing import Protocol, runtime_checkable
 
 import numpy as np
 from scipy.spatial.distance import (
-    cdist,
     jensenshannon,
     pdist,
     squareform,
