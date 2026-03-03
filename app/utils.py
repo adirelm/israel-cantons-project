@@ -18,6 +18,108 @@ import streamlit as st
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = PROJECT_ROOT / "data" / "processed"
 EXPERIMENTS_DIR = DATA_DIR / "experiments"
+FIGURES_DIR = PROJECT_ROOT / "docs" / "figures"
+
+
+# ---------------------------------------------------------------------------
+# Custom CSS
+# ---------------------------------------------------------------------------
+
+def inject_custom_css() -> None:
+    """Inject global custom CSS for a polished, professional look."""
+    st.markdown(
+        """
+        <style>
+        /* --- Metric cards --- */
+        [data-testid="stMetric"] {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 14px 18px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        [data-testid="stMetricLabel"] {
+            font-size: 0.82rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+        [data-testid="stMetricValue"] {
+            font-weight: 700;
+        }
+
+        /* --- Section headers accent --- */
+        .main h2 {
+            border-left: 4px solid #3b82f6;
+            padding-left: 14px;
+            margin-top: 1.5rem;
+        }
+        .main h3 {
+            border-left: 3px solid #93c5fd;
+            padding-left: 12px;
+        }
+
+        /* --- Sidebar polish --- */
+        [data-testid="stSidebar"] [data-testid="stMetric"] {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 4px 0;
+        }
+
+        /* --- Tabs --- */
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 8px;
+        }
+        .stTabs [data-baseweb="tab"] {
+            border-radius: 6px 6px 0 0;
+            padding: 8px 20px;
+        }
+
+        /* --- Info/success/warning boxes --- */
+        [data-testid="stAlert"] {
+            border-radius: 8px;
+        }
+
+        /* --- Container cards --- */
+        [data-testid="stVerticalBlock"] > div[data-testid="stExpander"] {
+            border-radius: 8px;
+        }
+
+        /* --- Footer --- */
+        .app-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            padding: 6px 0;
+            font-size: 0.72rem;
+            color: #94a3b8;
+            background: rgba(255,255,255,0.9);
+            border-top: 1px solid #f1f5f9;
+            z-index: 999;
+        }
+        </style>
+        <div class="app-footer">
+            M.Sc. Computer Science Project &middot; Bar-Ilan University &middot; Adir Elmakais
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Plotly shared layout
+# ---------------------------------------------------------------------------
+
+PLOTLY_LAYOUT = dict(
+    font=dict(family="Inter, system-ui, sans-serif", color="#1e293b"),
+    paper_bgcolor="rgba(0,0,0,0)",
+    plot_bgcolor="rgba(0,0,0,0)",
+    xaxis=dict(gridcolor="#e2e8f0", zerolinecolor="#e2e8f0"),
+    yaxis=dict(gridcolor="#e2e8f0", zerolinecolor="#e2e8f0"),
+    hoverlabel=dict(bgcolor="white", font_size=13, font_family="Inter, system-ui, sans-serif"),
+)
 
 # ---------------------------------------------------------------------------
 # Color palettes
@@ -128,6 +230,24 @@ def load_political_features() -> pd.DataFrame:
 def load_stability_results() -> pd.DataFrame:
     """Load cross-election stability results."""
     return pd.read_csv(DATA_DIR / "stability_results.csv")
+
+
+@st.cache_data
+def load_elections_summary() -> pd.DataFrame:
+    """Load the election-level summary table."""
+    return pd.read_csv(DATA_DIR / "elections_summary.csv")
+
+
+@st.cache_data
+def load_sa_sensitivity() -> pd.DataFrame:
+    """Load SA seed sensitivity results (30 seeds)."""
+    return pd.read_csv(DATA_DIR / "sa_seed_sensitivity.csv")
+
+
+@st.cache_data
+def load_cantons_labeled() -> pd.DataFrame:
+    """Load canton assignments with human-readable labels."""
+    return pd.read_csv(DATA_DIR / "cantons_labeled.csv")
 
 
 def config_label(repr_name: str, metric: str, algo: str, k: int) -> str:

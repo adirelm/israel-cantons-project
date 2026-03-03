@@ -11,13 +11,16 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from utils import (
     load_experiment_results,
+    inject_custom_css,
     REPR_LABELS,
     METRIC_LABELS,
     ALGO_LABELS,
     EVAL_METRIC_DESCRIPTIONS,
+    PLOTLY_LAYOUT,
 )
 
 st.set_page_config(page_title="Experiment Results", page_icon=":bar_chart:", layout="wide")
+inject_custom_css()
 
 st.title(":bar_chart: Experiment Results")
 st.markdown("Explore results across all 264 experiment configurations.")
@@ -117,6 +120,7 @@ fig_heat = px.imshow(
 fig_heat.update_traces(text=_text_labels, texttemplate="%{text}")
 _metric_display = _METRIC_VIZ_LABELS.get(sel_metric_y, sel_metric_y)
 fig_heat.update_layout(
+    **PLOTLY_LAYOUT,
     title=f"Best {_metric_display} ({better} is better)",
     height=350,
     margin=dict(l=40, r=20, t=50, b=30),
@@ -142,7 +146,7 @@ with col1:
         markers=True,
         labels={"k_target": "K", sel_metric_y: sel_metric_y.replace("_", " ").title()},
     )
-    fig_line.update_layout(height=400, margin=dict(l=40, r=20, t=30, b=30))
+    fig_line.update_layout(**PLOTLY_LAYOUT, height=400, margin=dict(l=40, r=20, t=30, b=30))
     st.plotly_chart(fig_line, width="stretch")
 
 with col2:
@@ -156,7 +160,7 @@ with col2:
         markers=True,
         labels={"k_target": "K", sel_metric_y: sel_metric_y.replace("_", " ").title()},
     )
-    fig_line2.update_layout(height=400, margin=dict(l=40, r=20, t=30, b=30))
+    fig_line2.update_layout(**PLOTLY_LAYOUT, height=400, margin=dict(l=40, r=20, t=30, b=30))
     st.plotly_chart(fig_line2, width="stretch")
 
 # ---------------------------------------------------------------------------
@@ -176,20 +180,37 @@ if sel_metric_y in ("wcss", "pop_cv"):
 else:
     top = filtered.nlargest(20, sel_metric_y)
 
-st.dataframe(
-    top[display_cols].reset_index(drop=True),
-    width="stretch",
-    hide_index=True,
-    column_config={
-        "k_target": st.column_config.NumberColumn("K (target)"),
-        "k_actual": st.column_config.NumberColumn("K (actual)"),
-        "silhouette": st.column_config.NumberColumn("Silhouette", format="%.3f"),
-        "wcss": st.column_config.NumberColumn("WCSS", format="%.0f"),
-        "pop_cv": st.column_config.NumberColumn("Pop. CV", format="%.3f"),
-        "avg_dominant_margin": st.column_config.NumberColumn("Dom. Margin", format="%.1f"),
-        "n_disconnected": st.column_config.NumberColumn("Disconnected"),
-        "elapsed_s": st.column_config.NumberColumn("Time (s)", format="%.1f"),
-    },
+# Styled dataframe with conditional formatting
+top_display = top[display_cols].reset_index(drop=True)
+styled = (
+    top_display.style
+    .background_gradient(subset=["silhouette"], cmap="RdYlGn", vmin=-0.2, vmax=1.0)
+    .background_gradient(subset=["pop_cv"], cmap="RdYlGn_r", vmin=0, vmax=2.0)
+    .map(
+        lambda v: "background-color: #dcfce7" if v == 0 else "",
+        subset=["n_disconnected"],
+    )
+    .format({
+        "k_target": "{:.0f}",
+        "k_actual": "{:.0f}",
+        "silhouette": "{:.3f}",
+        "wcss": "{:,.0f}",
+        "pop_cv": "{:.3f}",
+        "avg_dominant_margin": "{:.1f}",
+        "n_disconnected": "{:.0f}",
+        "elapsed_s": "{:.1f}",
+    })
+)
+st.dataframe(styled, width="stretch", hide_index=True)
+
+# Download button
+csv_data = filtered[display_cols].to_csv(index=False)
+st.download_button(
+    "Download filtered results as CSV",
+    csv_data,
+    "experiment_results_filtered.csv",
+    "text/csv",
+    width="content",
 )
 
 # ---------------------------------------------------------------------------
