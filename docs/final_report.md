@@ -226,7 +226,7 @@ Our implementation uses $d(P, Q) = \sqrt{\text{JSD}(P \| Q)}$, which is a proper
 
 3. **Bridge edges for disconnected components:** For any remaining disconnected components after steps 1-2, connect each component to the largest component via an edge between the most politically similar pair of municipalities. This ensures full graph connectivity.
 
-The augmented graph has $234$ nodes and $2{,}208$ edges and is fully connected. During clustering, the graph is subsetted to the 229 analysis municipalities.
+After subsetting the raw graph to the 229 analysis municipalities (488 edges), the augmentation pipeline produces a fully connected graph with $229$ nodes and $2{,}178$ edges.
 
 ### 5.4 Clustering Algorithms
 
@@ -236,7 +236,7 @@ SA optimizes a multi-objective cost function over the partition space. Starting 
 - Population balance (weight $0.4$): Coefficient of variation of canton populations.
 - Compactness (weight $0.2$): Graph cut ratio -- fraction of inter-canton edges over total edges.
 
-Parameters: initial temperature $T_0 = 1.0$, cooling rate $0.9995$, maximum $50{,}000$ iterations, following standard SA practice [9]. These parameters were sufficient for convergence in preliminary tests. Contiguity is enforced by rejecting moves that disconnect any canton. Note that SA uses a deterministic seed-based *initialization* (providing a reproducible starting point) but stochastic *optimization* (random move proposals with probabilistic acceptance), so results may vary with different random seeds. Each configuration was executed once; the stability analysis in Section 7 partially addresses sensitivity by evaluating SA across five different election datasets.
+Parameters: initial temperature $T_0 = 1.0$, cooling rate $0.9995$, following standard SA practice [9]. The code default is $50{,}000$ iterations; the systematic grid search (Section 6) used $5{,}000$ iterations per configuration for computational efficiency, while the SA seed-sensitivity analysis (Section 9.1) used the full $50{,}000$. Contiguity is enforced by rejecting moves that disconnect any canton. Note that SA uses a deterministic seed-based *initialization* (providing a reproducible starting point) but stochastic *optimization* (random move proposals with probabilistic acceptance), so results may vary with different random seeds. Each configuration was executed once; the stability analysis in Section 7 partially addresses sensitivity by evaluating SA across five different election datasets.
 
 **Agglomerative Clustering:**
 Average-linkage with contiguity constraints [6] - starting from 229 singleton clusters, iteratively merge the two adjacent clusters with the smallest average pairwise distance. The contiguity constraint ensures only adjacent clusters merge, maintaining geographic connectedness. This deterministic algorithm produces a dendrogram that can be cut at any level to obtain K cantons.
@@ -281,7 +281,7 @@ We conducted a systematic grid search over 264 configurations:
 
 Note: Not all metric-representation combinations are applicable. Jensen-Shannon requires non-negative values and is compatible with BlocShares, RawParty, and NMF_5, but not PCA_5 (which may produce negative values); PCA_5 uses only Euclidean and Cosine metrics. All 264 configurations executed successfully with 0 failures.
 
-**Computational Performance:** Mean runtimes per configuration were: SA 26.3s (range: 16--43s depending on K), Agglomerative 0.23s, Louvain 0.35s, KMeans 0.05s. SA's higher runtime reflects its iterative optimization (up to 50,000 iterations), while Agglomerative and Louvain operate in near-linear time on the 229-node graph. Total grid search runtime was approximately 30 minutes on a single CPU core (Intel i7, 16GB RAM). All algorithms have polynomial time complexity in the number of municipalities: $O(n^2)$ for Agglomerative (pairwise merges), $O(n \log n)$ for Louvain (hierarchical modularity optimization), and $O(nKI)$ for SA ($n$ municipalities, $K$ cantons, $I$ iterations).
+**Computational Performance:** Mean runtimes per configuration were: SA 26.3s (range: 16--43s depending on K), Agglomerative 0.23s, Louvain 0.35s, KMeans 0.05s. SA's higher runtime reflects its iterative optimization (5,000 iterations in the grid search), while Agglomerative and Louvain operate in near-linear time on the 229-node graph. Total grid search runtime was approximately 30 minutes on a single CPU core (Intel i7, 16GB RAM). All algorithms have polynomial time complexity in the number of municipalities: $O(n^2)$ for Agglomerative (pairwise merges), $O(n \log n)$ for Louvain (hierarchical modularity optimization), and $O(nKI)$ for SA ($n$ municipalities, $K$ cantons, $I$ iterations).
 
 ### 6.2 Key Findings
 
@@ -371,7 +371,7 @@ To assess whether canton boundaries are structurally stable or sensitive to elec
 - **Adjusted Rand Index (ARI) [14]:** Measures partition similarity corrected for chance. $\text{ARI} = 1.0$ indicates identical partitions; $\text{ARI} = 0$ indicates random agreement.
 - **Normalized Mutual Information (NMI) [15]:** Information-theoretic measure of partition similarity. $\text{NMI} = 1.0$ indicates identical partitions.
 
-We tested six representative configurations spanning different representation-metric-algorithm combinations.
+We tested six representative configurations spanning different representation-metric-algorithm combinations. SA configurations used $2{,}000$ iterations per run for computational efficiency (5 elections × 6 configurations = 30 SA executions).
 
 ### 7.2 Results
 

@@ -9,7 +9,6 @@ from __future__ import annotations
 from typing import Protocol, runtime_checkable
 
 import networkx as nx
-import numpy as np
 import pandas as pd
 
 from src.data.distance_metrics import DistanceMetric
