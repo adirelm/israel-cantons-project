@@ -68,7 +68,7 @@ look like?**
 ### Key Results
 
 - **264 experiment configurations** (4 representations x 3 metrics x 4 algorithms x 6 K values, minus incompatible)
-- **Highest silhouette: 0.905** (BlocShares / Cosine / Agglomerative, K=3; contiguity enforced)
+- **Highest silhouette: 0.905** (BlocShares / Euclidean / Agglomerative, K=3; contiguity enforced)
 - **Temporal stability: ARI up to 1.0** (Louvain), **0.954** (Agglomerative)
 - **K=5 identifies five politically coherent cantons:**
   1. CENTER Metro -- secular-center belt from Tel Aviv through the Sharon plain (42.0% Center)
@@ -81,7 +81,7 @@ look like?**
 
 ### Data Sources
 
-- **Election Data:** Israel Central Elections Committee (Knesset elections 21-25)
+- **Election Data:** Israel Central Bureau of Statistics (CBS) (Knesset elections 21-25)
 - **Geographic Data:** CBS GIS repository, municipal boundary polygons
 
 ### References

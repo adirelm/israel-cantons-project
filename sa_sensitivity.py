@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SA Seed Sensitivity Analysis - Run 5 SA experiments with different seeds.
+"""SA Seed Sensitivity Analysis - Run 30 SA experiments with different seeds.
 
 Mirrors the experiment setup from notebooks/06_experiments.ipynb
 """
@@ -114,6 +114,11 @@ def main():
 
     df = pd.DataFrame(results)
 
+    # Save results to CSV for reproducibility
+    out_path = DATA_PROCESSED / "sa_seed_sensitivity.csv"
+    df.to_csv(out_path, index=False)
+    print(f"\nSaved {len(df)} rows to {out_path}")
+
     print("\n" + "=" * 60)
     print("SUMMARY - SA Seed Sensitivity (NMF_5/Cosine/K=5)")
     print("=" * 60)
@@ -148,7 +153,7 @@ def main():
     print("TEXT FOR REPORT (copy this):")
     print("=" * 60)
     print(f"""
-**SA Seed Sensitivity:** To quantify SA's stochastic variance, we ran the primary SA configuration (NMF_5/Cosine/K=5) with {n} different random seeds (following the ≥30 runs recommendation for reliable variance estimation [9]). Results showed silhouette scores ranging from {sil_min:.3f} to {sil_max:.3f} (mean: {sil_mean:.3f}, std: {sil_std:.3f}, 95% CI: [{sil_ci[0]:.3f}, {sil_ci[1]:.3f}]) and Pop CV ranging from {cv_min:.2f} to {cv_max:.2f} (mean: {cv_mean:.2f}, std: {cv_std:.2f}, 95% CI: [{cv_ci[0]:.2f}, {cv_ci[1]:.2f}]). This variance is smaller than the gap between SA and Louvain (silhouette difference of ~0.14), confirming that algorithmic choice dominates over seed variance.
+**SA Seed Sensitivity:** To quantify SA's stochastic variance, we ran the primary SA configuration (NMF_5/Cosine/K=5) with {n} different random seeds (following the ≥30 runs recommendation for reliable variance estimation [9]). Results showed silhouette scores ranging from {sil_min:.3f} to {sil_max:.3f} (mean: {sil_mean:.3f}, std: {sil_std:.3f}, 95% CI: [{sil_ci[0]:.3f}, {sil_ci[1]:.3f}]) and Pop CV ranging from {cv_min:.2f} to {cv_max:.2f} (mean: {cv_mean:.2f}, std: {cv_std:.2f}, 95% CI: [{cv_ci[0]:.2f}, {cv_ci[1]:.2f}]). This variance is smaller than the gap between SA and Louvain (silhouette difference of ~0.16), confirming that algorithmic choice dominates over seed variance.
 """)
 
 

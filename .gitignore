@@ -66,3 +66,6 @@ data/processed/experiments/*.csv
 .coverage
 .pytest_cache/
 htmlcov/
+
+# QA agents (internal tooling, not part of submission)
+qa_agents/

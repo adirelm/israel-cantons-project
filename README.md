@@ -21,7 +21,7 @@ israel-cantons-project/
 ├── src/
 │   ├── config.py            # Project paths, constants
 │   ├── data/                # Data loading, processing, representations
-│   ├── clustering/          # SA, Agglomerative, Spectral, Louvain
+│   ├── clustering/          # SA, Agglomerative, Louvain, KMeans (baseline)
 │   ├── graph/               # Contiguity graph construction & preprocessing
 │   ├── evaluation/          # Metrics, stability analysis, experiments
 │   └── visualization/       # Maps and charts
@@ -34,6 +34,8 @@ israel-cantons-project/
 ```
 
 ## Setup
+
+**Requires Python 3.12+**
 
 1. Create a virtual environment:
    ```bash
@@ -86,7 +88,7 @@ Results are saved to `data/processed/experiments/`.
 ## Key Results
 
 - **229 municipalities** partitioned into **5 cantons** (primary result)
-- Best silhouette score: **0.905** (BlocShares / Cosine / Agglomerative, K=3)
+- Best silhouette score: **0.905** (BlocShares / Euclidean / Agglomerative, K=3)
 - Temporal stability: ARI up to **1.0** (Louvain), **0.954** (Agglomerative)
 - 264 experiment configurations, 0 failures
 - Cantons align with known political-geographic divisions (Arab sector, periphery Right, coastal Center-Right)
