@@ -55,9 +55,7 @@ data/raw/geo/*.cpg
 data/raw/geo/*.geojson
 
 # Large processed files (regenerable from notebooks)
-data/processed/*.geojson
-data/processed/adjacency_graph_augmented.json
-data/processed/experiments/*.csv
+# Kept in git for Streamlit Cloud deployment
 
 # Logs
 *.log
