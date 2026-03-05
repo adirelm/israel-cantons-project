@@ -211,7 +211,7 @@ with tab_tech:
 - Plotly (interactive charts)
 - Folium / Leaflet.js (interactive maps)
 - Streamlit (web application)
-- Streamlit Cloud (deployment)
+- [Streamlit Cloud (live demo)](https://israel-cantons-project-5j7kgq8acxrbiflraqnhgb.streamlit.app/)
 """)
 
     st.divider()
