@@ -68,7 +68,7 @@ htmlcov/
 # Scratch / temp
 qa_agents/
 
-# Docs (keep only final_report.md and final_report.pdf)
+# Docs (keep only project report)
 docs/*
-!docs/final_report.md
-!docs/final_report.pdf
+!docs/Elmakais_MSc_Project_2026.md
+!docs/Elmakais_MSc_Project_2026.pdf
