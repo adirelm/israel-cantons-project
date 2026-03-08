@@ -47,7 +47,7 @@ This project makes the following contributions:
 - A comprehensive experimental framework evaluating 264 configurations across four representations, three distance metrics, four algorithms, and six values of K.
 - Temporal stability analysis across five elections using Adjusted Rand Index (ARI) and Normalized Mutual Information (NMI).
 - Qualitative case studies validating that algorithmic cantons align with known political-demographic divisions.
-- An interactive Streamlit web application for exploring canton partitions, experiment results, and stability analysis.
+- An interactive Streamlit web application for exploring canton partitions, experiment results, and stability analysis (live at https://israel-cantons-project-5j7kgq8acxrbiflraqnhgb.streamlit.app/).
 - An open-source, modular Python codebase enabling reproducible analysis and extension.
 
 ### 1.4 Report Outline

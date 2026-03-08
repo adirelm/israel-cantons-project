@@ -2,6 +2,8 @@
 
 Dividing Israel into politically homogeneous cantons based on Knesset election results using spatially-constrained clustering.
 
+**Live Demo:** https://israel-cantons-project-5j7kgq8acxrbiflraqnhgb.streamlit.app/
+
 ## Project Overview
 
 This M.Sc. project develops a data-driven algorithmic approach to partition Israeli municipalities into geographically contiguous "cantons" that maximize internal political similarity. The system uses town-level election results from the five most recent Knesset elections (2019-2022) combined with municipal boundary data.

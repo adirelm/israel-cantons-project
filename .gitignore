@@ -55,9 +55,7 @@ data/raw/geo/*.cpg
 data/raw/geo/*.geojson
 
 # Large processed files (regenerable from notebooks)
-data/processed/*.geojson
-data/processed/adjacency_graph_augmented.json
-data/processed/experiments/*.csv
+# Kept in git for Streamlit Cloud deployment
 
 # Logs
 *.log
@@ -67,5 +65,10 @@ data/processed/experiments/*.csv
 .pytest_cache/
 htmlcov/
 
-# QA agents (internal tooling, not part of submission)
+# Scratch / temp
 qa_agents/
+
+# Docs (keep only final_report.md and final_report.pdf)
+docs/*
+!docs/final_report.md
+!docs/final_report.pdf
