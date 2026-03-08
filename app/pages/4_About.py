@@ -51,7 +51,7 @@ with tab_method:
     # Pipeline figure
     pipeline_path = FIGURES_DIR / "pipeline.png"
     if pipeline_path.exists():
-        st.image(str(pipeline_path), caption="Methodology Pipeline", width="stretch")
+        st.image(str(pipeline_path), caption="Methodology Pipeline", width=700)
 
     with st.expander("Feature Representations", expanded=True):
         st.markdown("""
@@ -134,7 +134,7 @@ with tab_results:
 
     canton_map_path = FIGURES_DIR / "canton_map_k5.png"
     if canton_map_path.exists():
-        st.image(str(canton_map_path), caption="K=5 Canton Map", width="stretch")
+        st.image(str(canton_map_path), caption="K=5 Canton Map", width=500)
 
 # ===== DATA SOURCES TAB ====================================================
 with tab_data:

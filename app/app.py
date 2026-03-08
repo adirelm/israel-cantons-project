@@ -178,7 +178,7 @@ else:
 pipeline_path = FIGURES_DIR / "pipeline.png"
 if pipeline_path.exists():
     st.divider()
-    st.image(str(pipeline_path), caption="Methodology Pipeline -- from raw data to cantons", width="stretch")
+    st.image(str(pipeline_path), caption="Methodology Pipeline -- from raw data to cantons", width=700)
 
 st.divider()
 
