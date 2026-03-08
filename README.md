@@ -29,6 +29,7 @@ israel-cantons-project/
 │   └── visualization/       # Maps and charts
 ├── notebooks/               # Jupyter notebooks (01-06)
 ├── app/                     # Streamlit web application
+├── scripts/                 # Standalone analysis scripts
 ├── tests/                   # Unit tests
 ├── docs/                    # Final report and documentation
 ├── requirements.txt
