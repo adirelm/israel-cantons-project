@@ -44,15 +44,13 @@ Thumbs.db
 .env
 .env.local
 
-# Data files (large files, don't commit to git)
+# Raw data (keep CSVs and GeoJSON for reproducibility, exclude large binaries)
 data/raw/elections/*.xlsx
-data/raw/elections/*.csv
 data/raw/geo/*.shp
 data/raw/geo/*.shx
 data/raw/geo/*.dbf
 data/raw/geo/*.prj
 data/raw/geo/*.cpg
-data/raw/geo/*.geojson
 
 # Large processed files (regenerable from notebooks)
 # Kept in git for Streamlit Cloud deployment
