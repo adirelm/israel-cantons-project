@@ -57,7 +57,7 @@ israel-cantons-project/
 
 ## Quick Start
 
-Run the notebooks in order to reproduce the full pipeline:
+Run the notebooks in order to walk through the pipeline (to regenerate the committed results, see [Regenerating Results](#regenerating-results)):
 
 ```bash
 jupyter notebook
@@ -69,7 +69,7 @@ jupyter notebook
 | `02_data_processing.ipynb` | Process elections, match municipalities across 5 elections |
 | `03_adjacency_graph.ipynb` | Build municipality adjacency graph from polygons |
 | `04_political_features.ipynb` | Build feature representations (BlocShares, PCA, NMF) |
-| `05_clustering.ipynb` | Run Simulated Annealing clustering (K=5), evaluate and map |
+| `05_clustering.ipynb` | Run Simulated Annealing clustering (K=5) as a worked example, evaluate and map |
 | `06_experiments.ipynb` | Full 264-configuration experiment grid and stability analysis |
 
 ## Running Tests
@@ -80,21 +80,33 @@ pytest tests/ -v
 
 ## Running the Experiment Grid
 
-The full experiment grid (264 configurations) is run in `notebooks/06_experiments.ipynb`. It evaluates:
+The full experiment grid (264 configurations) evaluates:
 - **4 representations:** BlocShares, RawParty, PCA_5, NMF_5
 - **3 distance metrics:** Euclidean, Cosine, Jensen-Shannon
 - **4 algorithms:** Simulated Annealing, Agglomerative, Louvain, KMeans (baseline)
 - **6 K values:** 3, 5, 7, 10, 15, 20
 
-Results are saved to `data/processed/experiments/`.
+## Regenerating Results
+
+The committed results in `data/processed/` and the report figures are produced by two scripts (about 30 minutes in total):
+
+```bash
+python scripts/rebuild_results.py      # grid, stability, primary K=5 map (NMF_5 / Cosine / Louvain)
+python scripts/make_report_figures.py  # docs/figures/*.png
+python scripts/sa_sensitivity.py       # 30-seed SA sensitivity (about 1 hour)
+```
+
+Run `rebuild_results.py` after any change to the party-to-bloc mapping in `src/config.py`. The notebooks document the original exploratory analysis; notebooks 05 and 06 save their outputs under separate names so they do not overwrite the published results.
 
 ## Key Results
 
-- **229 municipalities** partitioned into **5 cantons** (primary result)
-- Best silhouette score: **0.905** (BlocShares / Euclidean / Agglomerative, K=3)
-- Temporal stability: ARI up to **1.0** (Louvain), **0.954** (Agglomerative)
+- **229 municipalities** partitioned into **5 cantons** (primary result: NMF_5 / Cosine / Louvain)
+- Best silhouette score: **0.987** (BlocShares / Cosine / Agglomerative, K=3); primary K=5 partition: **0.138**
+- Temporal stability: ARI **0.996** (BlocShares Louvain), **0.954** (Agglomerative), **0.795** (primary partition)
 - 264 experiment configurations, 0 failures
 - Cantons align with known political-geographic divisions (Arab sector, periphery Right, coastal Center-Right)
+
+Results were regenerated in October 2026 after fixing the party-to-bloc mapping (see `CHANGELOG.md`).
 
 ## Data Sources
 

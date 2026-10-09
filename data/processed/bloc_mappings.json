@@ -35,6 +35,7 @@
     "ודעם": "arab",
     "ל": "right",
     "טב": "right",
+    "נץ": "right",
     "אמת": "left"
   },
   "24": {
@@ -44,8 +45,8 @@
     "ג": "haredi",
     "ודעם": "arab",
     "ל": "right",
-    "טב": "right",
     "ב": "right",
+    "ט": "right",
     "כן": "center",
     "מרצ": "left",
     "אמת": "left",
@@ -58,6 +59,7 @@
     "שס": "haredi",
     "ג": "haredi",
     "ט": "right",
+    "ב": "right",
     "ל": "right",
     "ד": "arab",
     "ום": "arab",

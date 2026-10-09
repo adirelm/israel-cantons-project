@@ -98,8 +98,8 @@ with tab_results:
 
     r1, r2, r3 = st.columns(3)
     r1.metric("Total Configurations", "264")
-    r2.metric("Highest Silhouette", "0.905", help="BlocShares / Euclidean / Agglomerative, K=3")
-    r3.metric("Best Stability (ARI)", "1.000", help="Louvain -- deterministic on fixed graph")
+    r2.metric("Highest Silhouette", "0.987", help="BlocShares / Cosine / Agglomerative, K=3")
+    r3.metric("Best Stability (ARI)", "0.996", help="BlocShares / Euclidean / Louvain -- near-deterministic on a fixed graph")
 
     st.divider()
 
@@ -125,11 +125,13 @@ with tab_results:
     st.subheader("K=5 Canton Descriptions")
 
     st.markdown("""
-1. **CENTER Metro** -- Secular-center belt from Tel Aviv through the Sharon plain (42.0% Center)
-2. **RIGHT South** -- Southern periphery arc from Jerusalem through the Negev (44.9% Right)
-3. **RIGHT North** -- Mixed northern region including Haifa and the Galilee (38.0% Right)
-4. **ARAB Galilee** -- Arab-majority municipalities in the Galilee and Triangle (89.9% Arab)
+1. **CENTER Metro** -- Secular-center belt from Tel Aviv through the Sharon plain (38.5% Center)
+2. **RIGHT South** -- Southern periphery arc from Jerusalem through the Negev (49.5% Right, 17.4% Haredi)
+3. **RIGHT North** -- Mixed northern region including Haifa and the Galilee (44.6% Right)
+4. **ARAB Galilee** -- Arab-majority municipalities in the Galilee and Triangle (90.6% Arab)
 5. **ARAB Periphery** -- Bedouin towns in the Negev and central Arab towns (86.1% Arab)
+
+*Shares are weighted by voters and averaged over the five elections (2019-2022).*
 """)
 
     canton_map_path = FIGURES_DIR / "canton_map_k5.png"

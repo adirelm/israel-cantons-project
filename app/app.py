@@ -71,7 +71,8 @@ st.subheader("Featured Result: K=5 Canton Partition")
 st.markdown(
     "The map below shows the K=5 partition using "
     "**NMF_5 / Cosine / Louvain**, which produces five politically coherent "
-    "cantons with a positive silhouette (0.121) and perfect cross-election stability (ARI = 1.0). "
+    "cantons with a positive silhouette (0.138) and stable boundaries across the five elections "
+    "(mean ARI = 0.795). "
     "Explore all 264 configurations in the **Canton Map Explorer** page."
 )
 
