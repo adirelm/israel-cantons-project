@@ -131,3 +131,38 @@ class TestSAKGreaterThan5:
         result = clust.fit(features, feature_cols, G, k=7,
                            distance_metric=EuclideanDistance())
         assert result.k == 7, f"Expected K=7 but got K={result.k}"
+
+
+_SA_RUN = """
+import json, sys
+import networkx as nx, numpy as np, pandas as pd
+from src.clustering.simulated_annealing import SimulatedAnnealingClusterer
+from src.data.distance_metrics import EuclideanDistance
+G = nx.relabel_nodes(nx.grid_2d_graph(6, 6), lambda n: f"muni_{n[0]}_{n[1]}")
+munis = sorted(G.nodes())
+rng = np.random.RandomState(0)
+cols = ["right_avg", "haredi_avg", "center_avg", "left_avg", "arab_avg"]
+features = pd.DataFrame({"municipality": munis, **{c: rng.uniform(0, 60, len(munis)) for c in cols},
+                         "avg_votes": rng.uniform(500, 5000, len(munis))})
+weights = dict(zip(features["municipality"], features["avg_votes"]))
+result = SimulatedAnnealingClusterer(max_iterations=3000, random_seed=42).fit(
+    features, cols, G, k=4, distance_metric=EuclideanDistance(), weights=weights)
+print(json.dumps(result.assignments, sort_keys=True))
+"""
+
+
+def test_same_seed_gives_same_result_across_processes():
+    """random_seed must fully determine the result, whatever Python's string-hash seed."""
+    import os
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parent.parent
+    outputs = []
+    for hash_seed in ("1", "2", "3"):
+        env = {**os.environ, "PYTHONHASHSEED": hash_seed, "PYTHONPATH": str(root)}
+        proc = subprocess.run([sys.executable, "-c", _SA_RUN], env=env, cwd=root,
+                              capture_output=True, text=True, check=True)
+        outputs.append(proc.stdout)
+    assert outputs[0] == outputs[1] == outputs[2]

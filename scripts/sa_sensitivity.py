@@ -5,20 +5,22 @@ Mirrors the experiment setup from notebooks/06_experiments.ipynb
 """
 
 import sys
-sys.path.insert(0, 'src')
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import json
 import pandas as pd
 import numpy as np
 import networkx as nx
 
-from config import DATA_PROCESSED, BLOC_COLS
-from data.processing import process_all_elections
-from data.representations import NMFRepresentation
-from data.distance_metrics import CosineDistance
-from graph.preprocessing import preprocess_graph
-from clustering.simulated_annealing import SimulatedAnnealingClusterer
-from evaluation.metrics import evaluate_all
+from src.config import DATA_PROCESSED, BLOC_COLS
+from src.data.processing import process_all_elections
+from src.data.representations import NMFRepresentation
+from src.data.distance_metrics import CosineDistance
+from src.graph.preprocessing import preprocess_graph
+from src.clustering.simulated_annealing import SimulatedAnnealingClusterer
+from src.evaluation.metrics import evaluate_all
 
 
 def main():
@@ -49,7 +51,7 @@ def main():
     G = G_raw.subgraph(feat_munis & set(G_raw.nodes())).copy()
 
     # Preprocess graph (needs bloc features for preprocessing)
-    from data.representations import BlocShares
+    from src.data.representations import BlocShares
     bloc_repr = BlocShares(include_std=True)
     bloc_features = bloc_repr.fit_transform(elections)
     bloc_feature_cols = bloc_repr.feature_names

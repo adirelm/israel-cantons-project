@@ -77,6 +77,7 @@ BLOC_MAPPING: dict[int, dict[str, str]] = {
         "ודעם": "arab",      # Joint List
         "ל": "right",        # Yisrael Beiteinu
         "טב": "right",       # Yamina
+        "נץ": "right",       # Otzma Yehudit
         "אמת": "left",       # Labor-Gesher-Meretz
     },
     24: {  # March 2021
@@ -86,8 +87,8 @@ BLOC_MAPPING: dict[int, dict[str, str]] = {
         "ג": "haredi",       # UTJ
         "ודעם": "arab",      # Joint List (Hadash-Ta'al)
         "ל": "right",        # Yisrael Beiteinu
-        "טב": "right",       # Yamina
-        "ב": "right",        # Religious Zionist Party
+        "ב": "right",        # Yamina
+        "ט": "right",        # Religious Zionist Party
         "כן": "center",      # Blue & White
         "מרצ": "left",       # Meretz
         "אמת": "left",       # Labor
@@ -100,6 +101,7 @@ BLOC_MAPPING: dict[int, dict[str, str]] = {
         "שס": "haredi",      # Shas
         "ג": "haredi",       # UTJ
         "ט": "right",        # Religious Zionist Party
+        "ב": "right",        # Jewish Home
         "ל": "right",        # Yisrael Beiteinu
         "ד": "arab",         # Hadash-Ta'al
         "ום": "arab",        # Balad

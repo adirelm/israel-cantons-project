@@ -175,7 +175,7 @@ class SimulatedAnnealingClusterer:
             best: tuple[str, int] | None = None
             best_cost = float("inf")
 
-            for muni in list(unassigned):
+            for muni in sorted(unassigned):
                 adj_cantons = {
                     assignments[n]
                     for n in ctx.G.neighbors(muni)
@@ -334,7 +334,9 @@ def _get_boundary_nodes(
         if u in assignments and v in assignments and assignments[u] != assignments[v]:
             boundary.add(u)
             boundary.add(v)
-    return list(boundary)
+    # Sorted, not list(): set order of strings changes between processes,
+    # which would make random.choice() ignore random_seed.
+    return sorted(boundary)
 
 
 def _is_valid_move(
