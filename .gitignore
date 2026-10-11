@@ -71,3 +71,6 @@ docs/*
 !docs/Elmakais_MSc_Project_2026.md
 !docs/Elmakais_MSc_Project_2026.pdf
 !docs/figures/
+
+# Judea and Samaria raw boundary layers (see data/raw/geo/SOURCES.md)
+data/raw/geo/js/
