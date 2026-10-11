@@ -8,7 +8,7 @@ from __future__ import annotations
 import pandas as pd
 import geopandas as gpd
 
-from src.config import ELECTIONS_DIR, ELECTION_FILES, DATA_RAW, GEO_DIR
+from src.config import ELECTIONS_DIR, ELECTION_FILES, DATA_RAW, GEO_DIR, GEO_NAME_FIXES
 
 
 def load_election_csv(knesset: int) -> pd.DataFrame:
@@ -37,9 +37,22 @@ def load_cbs_localities() -> pd.DataFrame:
     return pd.read_excel(DATA_RAW / "localities_bycode.xlsx")
 
 
-def load_municipality_geojson() -> gpd.GeoDataFrame:
-    """Load raw ``municipalities.geojson``."""
-    return gpd.read_file(GEO_DIR / "municipalities.geojson")
+def load_municipality_geojson(include_js: bool = True) -> gpd.GeoDataFrame:
+    """Load ``municipalities.geojson`` with out-of-date names corrected.
+
+    With ``include_js``, also ``municipalities_js.geojson`` (Judea and Samaria) when present.
+    """
+    geo = gpd.read_file(GEO_DIR / "municipalities.geojson")
+    geo["MUN_HEB"] = geo["MUN_HEB"].str.strip()
+    for old_name, (name, name_en) in GEO_NAME_FIXES.items():
+        rows = geo["MUN_HEB"] == old_name
+        geo.loc[rows, "MUN_HEB"] = name
+        geo.loc[rows, "MUN_ENG"] = name_en
+    js_path = GEO_DIR / "municipalities_js.geojson"
+    if include_js and js_path.exists():
+        js = gpd.read_file(js_path).to_crs(geo.crs)
+        geo = gpd.GeoDataFrame(pd.concat([geo, js[geo.columns]], ignore_index=True), crs=geo.crs)
+    return geo
 
 
 def build_locality_to_municipality_mapping(

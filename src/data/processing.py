@@ -137,6 +137,20 @@ def filter_to_geojson_matches(
 # Full pipeline
 # ---------------------------------------------------------------------------
 
+def aggregate_all_elections(
+    knesset_ids: list[int] | None = None,
+) -> dict[int, pd.DataFrame]:
+    """Load → standardise → aggregate → add percentages → fix names (no GeoJSON filter)."""
+    knesset_ids = knesset_ids or KNESSET_IDS
+    raw = load_all_elections()
+    locality_to_muni = build_locality_to_municipality_mapping(load_cbs_localities())
+    elections: dict[int, pd.DataFrame] = {}
+    for k_id in knesset_ids:
+        agg_df, party_cols = aggregate_to_municipalities(raw[k_id], k_id, locality_to_muni)
+        elections[k_id] = apply_name_fixes(add_vote_percentages(agg_df, party_cols))
+    return elections
+
+
 def process_all_elections(
     knesset_ids: list[int] | None = None,
 ) -> dict[int, pd.DataFrame]:
@@ -146,22 +160,4 @@ def process_all_elections(
 
     Returns ``{knesset_id: matched_DataFrame}``.
     """
-    knesset_ids = knesset_ids or KNESSET_IDS
-
-    raw = load_all_elections()
-    cbs = load_cbs_localities()
-    locality_to_muni = build_locality_to_municipality_mapping(cbs)
-    geo = load_municipality_geojson()
-
-    elections: dict[int, pd.DataFrame] = {}
-    party_cols_by_knesset: dict[int, list[str]] = {}
-
-    for k_id in knesset_ids:
-        agg_df, party_cols = aggregate_to_municipalities(raw[k_id], k_id, locality_to_muni)
-        agg_df = add_vote_percentages(agg_df, party_cols)
-        agg_df = apply_name_fixes(agg_df)
-        elections[k_id] = agg_df
-        party_cols_by_knesset[k_id] = party_cols
-
-    matched = filter_to_geojson_matches(elections, geo)
-    return matched
+    return filter_to_geojson_matches(aggregate_all_elections(knesset_ids), load_municipality_geojson())

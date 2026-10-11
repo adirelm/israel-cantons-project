@@ -90,3 +90,14 @@ class TestApplyNameFixes:
         result = apply_name_fixes(df)
         # Should return a copy, not mutate
         assert result is not df
+
+
+def test_previously_unmatched_municipalities_now_match():
+    """Renamed or respelled municipalities inside the Green Line must have a polygon."""
+    from src.data.loader import load_municipality_geojson
+    from src.data.processing import aggregate_all_elections
+
+    geo = set(load_municipality_geojson(include_js=False)["MUN_HEB"].str.strip())
+    in_all = set.intersection(*(set(df["municipality"]) for df in aggregate_all_elections().values()))
+    assert {"נוף הגליל", "שבלי - אום אל-ג'נם", "שדות דן"} <= in_all & geo
+    assert "נצרת עילית" not in geo and "עמק לוד" not in geo

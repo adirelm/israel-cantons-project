@@ -98,6 +98,13 @@ NAME_FIXES: dict[str, str] = {
     "קריית עקרון": "קרית עקרון",
     "קריית שמונה": "קרית שמונה",
     "שבלי - אום אל-ע'נם": "שבלי - אום אל-ג'נם",
+    "שבלי - אום אל-גנם": "שבלי - אום אל-ג'נם",
     "שגב-שלום": "שגב שלום",
     "שוהם": "שהם",
+}
+
+# Boundary-file names that are out of date (GeoJSON spelling → current name, English name)
+GEO_NAME_FIXES: dict[str, tuple[str, str]] = {
+    "נצרת עילית": ("נוף הגליל", "Nof HaGalil"),  # renamed in 2019
+    "עמק לוד": ("שדות דן", "Sdot Dan"),          # regional council's current name; its villages fall inside
 }
