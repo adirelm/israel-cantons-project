@@ -38,7 +38,8 @@ from src.evaluation.experiment import ExperimentRunner
 from src.evaluation.stability import run_stability_analysis
 from src.evaluation.canton_names import name_cantons
 from src.evaluation.metrics import canton_profiles
-from src.evaluation.per_election import changes_table, per_election_maps
+from src.evaluation.canton_tests import canton_tests
+from src.evaluation.per_election import align_to_reference, changes_table, per_election_maps
 
 PRIMARY_CONFIG = "nmf_5__cosine__louvain__k5"
 # (anchor municipality, canton ID, name): one anchor per canton of the primary map
@@ -50,6 +51,8 @@ PRIMARY_CANTON_ANCHORS = [
     ("בני ברק", 4, "HAREDI Cities"),
 ]
 EXPERIMENTS_DIR = DATA_PROCESSED / "experiments"
+TRAIN_ELECTIONS = [21, 22, 23, 24]
+TEST_ELECTION = 25
 
 
 def save_bloc_mappings() -> None:
@@ -196,6 +199,32 @@ def save_per_election_maps(elections, G_aug) -> None:
     changes_table(maps, reference).to_csv(out_dir / "per_election_changes.csv", index=False, encoding="utf-8")
 
 
+def training_map(elections, train: list[int], reference: dict[str, int]) -> dict[str, int]:
+    """Primary configuration built from ``train`` elections only (features, graph and weights)."""
+    rep = BlocShares(include_std=True, elections_to_use=train)
+    bf = rep.fit_transform(elections)
+    G = build_graph(bf, rep.feature_names)
+    weights = dict(zip(bf["municipality"], bf["avg_votes"]))
+    nmf = NMFRepresentation(n_components=5, base_repr=RawPartyShares(elections_to_use=train))
+    feats = nmf.fit_transform(elections)
+    a = LouvainSpatialClusterer(random_seed=42).fit(
+        features=feats, feature_cols=nmf.feature_names, graph=G, k=len(set(reference.values())),
+        distance_metric=CosineDistance(), weights=weights)
+    return align_to_reference(a.assignments, reference)
+
+
+def save_canton_tests(elections) -> None:
+    """Differences between training-map cantons, measured on the held-out election."""
+    reference = dict(pd.read_csv(DATA_PROCESSED / "cantons_final.csv").values)
+    train = training_map(elections, TRAIN_ELECTIONS, reference)
+    pd.DataFrame(sorted(train.items()), columns=["municipality", "canton"]).to_csv(
+        DATA_PROCESSED / "cantons_training_21_24.csv", index=False, encoding="utf-8")
+    test = BlocShares(include_std=False, elections_to_use=[TEST_ELECTION]).fit_transform(elections)
+    test = test.set_index("municipality")
+    shares = test[[f"{b}_avg" for b in BLOC_COLS]].rename(columns=lambda c: c.removesuffix("_avg"))
+    canton_tests(shares, test["avg_votes"], train).to_csv(DATA_PROCESSED / "canton_tests.csv", index=False)
+
+
 def main() -> None:
     logging.basicConfig(level=logging.WARNING)
     elections = process_all_elections()
@@ -214,6 +243,7 @@ def main() -> None:
     run_stability(elections, G_aug)
     save_primary_map(bloc_features, weights)
     save_per_election_maps(elections, G_aug)
+    save_canton_tests(elections)
     print("Done.")
 
 
