@@ -218,11 +218,14 @@ def save_canton_tests(elections) -> None:
     reference = dict(pd.read_csv(DATA_PROCESSED / "cantons_final.csv").values)
     train = training_map(elections, TRAIN_ELECTIONS, reference)
     pd.DataFrame(sorted(train.items()), columns=["municipality", "canton"]).to_csv(
-        DATA_PROCESSED / "cantons_training_21_24.csv", index=False, encoding="utf-8")
+        DATA_PROCESSED / "cantons_training.csv", index=False, encoding="utf-8")
     test = BlocShares(include_std=False, elections_to_use=[TEST_ELECTION]).fit_transform(elections)
     test = test.set_index("municipality")
     shares = test[[f"{b}_avg" for b in BLOC_COLS]].rename(columns=lambda c: c.removesuffix("_avg"))
-    canton_tests(shares, test["avg_votes"], train).to_csv(DATA_PROCESSED / "canton_tests.csv", index=False)
+    results = canton_tests(shares, test["avg_votes"], train)
+    results.insert(0, "train_elections", ",".join(map(str, TRAIN_ELECTIONS)))
+    results.insert(1, "test_election", TEST_ELECTION)
+    results.to_csv(DATA_PROCESSED / "canton_tests.csv", index=False)
 
 
 def main() -> None:

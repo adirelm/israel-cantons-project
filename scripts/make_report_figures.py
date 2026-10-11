@@ -22,7 +22,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-from src.config import BLOC_COLS, DATA_PROCESSED, PROJECT_ROOT
+from src.config import BLOC_COLS, DATA_PROCESSED, ELECTION_LABELS, PROJECT_ROOT
 
 FIG_DIR = PROJECT_ROOT / "docs" / "figures"
 DPI = 200
@@ -37,7 +37,6 @@ REPRS = {"bloc_shares": "BlocShares", "nmf_5": "NMF_5", "pca_5": "PCA_5", "raw_p
 BLOC_COLORS = {"right": "#5794f7", "haredi": "#808590", "center": "#b36ff5", "left": "#f06060", "arab": "#44cc77"}
 CANTON_COLORS = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00"]
 NO_COUNTERPART_COLOR = "#9e9e9e"
-ELECTION_LABELS = {21: "April 2019", 22: "September 2019", 23: "March 2020", 24: "March 2021", 25: "November 2022"}
 STABILITY_SHORT = {
     "BlocShares / Euclidean / SA": "Bloc / Euc / SA",
     "BlocShares / Cosine / Agglom": "Bloc / Cos / Agglom",
@@ -102,9 +101,10 @@ def canton_map(labeled: pd.DataFrame, geo: gpd.GeoDataFrame) -> None:
 def per_election_maps(labeled: pd.DataFrame, geo: gpd.GeoDataFrame) -> None:
     names = dict(zip(labeled["canton"], labeled["label"]))
     color = lambda c: CANTON_COLORS[c] if c in names else NO_COUNTERPART_COLOR  # noqa: E731
-    fig, axes = plt.subplots(1, 5, figsize=(15, 8.5))
+    elections = {k: t for k, t in ELECTION_LABELS.items() if (DATA_PROCESSED / "per_election" / f"knesset_{k}.csv").exists()}
+    fig, axes = plt.subplots(1, len(elections), figsize=(3 * len(elections), 8.5))
     unmatched = False
-    for ax, (k, title) in zip(axes, ELECTION_LABELS.items()):
+    for ax, (k, title) in zip(axes, elections.items()):
         canton = dict(pd.read_csv(DATA_PROCESSED / "per_election" / f"knesset_{k}.csv").values)
         g = geo.assign(canton=geo["MUN_HEB"].map(canton)).dropna(subset=["canton"])
         for cid in sorted(set(canton.values())):

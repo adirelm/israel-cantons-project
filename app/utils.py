@@ -216,6 +216,16 @@ def load_canton_assignment(repr_name: str, metric: str, algo: str, k: int) -> pd
 
 
 @st.cache_data
+def load_primary_assignment() -> pd.DataFrame:
+    """The primary K=5 map with the canton IDs used by cantons_labeled.csv.
+
+    The raw experiment file for the same configuration numbers cantons differently,
+    so pages must use this file wherever they show canton names.
+    """
+    return pd.read_csv(DATA_DIR / "cantons_final.csv")
+
+
+@st.cache_data
 def load_geojson() -> gpd.GeoDataFrame:
     """Load municipality boundaries GeoJSON."""
     return gpd.read_file(DATA_DIR / "municipalities_dissolved.geojson")
@@ -251,6 +261,7 @@ def load_cantons_labeled() -> pd.DataFrame:
     return pd.read_csv(DATA_DIR / "cantons_labeled.csv")
 
 
+# Copy of src.config.ELECTION_LABELS (the app does not import src); tests/test_app_labels.py keeps them equal
 ELECTION_LABELS = {21: "April 2019", 22: "September 2019", 23: "March 2020", 24: "March 2021", 25: "November 2022"}
 
 

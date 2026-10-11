@@ -133,14 +133,17 @@ with col2:
         f"(+/- {best_nmi['std_nmi']:.4f})"
     )
 
+_ari = stability.set_index("config")["mean_ari"]
 st.info(
     "**Interpretation:** Deterministic algorithms (Louvain, Agglomerative) "
     "produce near-perfectly stable partitions across elections, while "
     "stochastic methods (Simulated Annealing) show more variation. "
-    "Note: the BlocShares Louvain configuration's near-perfect ARI (0.996) mostly reflects "
+    f"Note: the BlocShares Louvain configuration's near-perfect ARI "
+    f"({_ari.get('BlocShares / Euclidean / Louvain', float('nan')):.3f}) mostly reflects "
     "the algorithm's determinism on a fixed adjacency graph -- the same graph structure "
     "yields almost the same communities regardless of which election's features are used. "
-    "The primary NMF_5 / Cosine / Louvain partition is less stable (ARI = 0.795). "
+    f"The primary NMF_5 / Cosine / Louvain partition is somewhat less stable "
+    f"(ARI = {_ari.get('NMF_5 / Cosine / Louvain', float('nan')):.3f}). "
     "Overall, this confirms that Israel's political geography is structurally "
     "persistent despite electoral volatility."
 )

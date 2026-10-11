@@ -28,6 +28,11 @@ ELECTION_FILES: dict[int, str] = {
 
 KNESSET_IDS: list[int] = [21, 22, 23, 24, 25]
 
+# Election dates for figures and the app (app/utils.py keeps a copy; a test keeps them equal)
+ELECTION_LABELS: dict[int, str] = {
+    21: "April 2019", 22: "September 2019", 23: "March 2020", 24: "March 2021", 25: "November 2022",
+}
+
 # Columns that are NOT party vote columns
 NON_PARTY_COLS: list[str] = [
     "municipality", "locality_name", "locality_code",

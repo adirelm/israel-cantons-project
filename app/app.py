@@ -9,9 +9,9 @@ import plotly.graph_objects as go
 from streamlit_folium import st_folium
 
 from utils import (
+    load_primary_assignment,
     load_experiment_results,
     load_geojson,
-    load_canton_assignment,
     load_political_features,
     load_cantons_labeled,
     inject_custom_css,
@@ -87,8 +87,8 @@ _canton_label_map = (
     .to_dict()
 )
 
-# Load best balanced k=5 assignment
-assignment = load_canton_assignment("nmf_5", "cosine", "louvain", 5)
+# Primary K=5 map, numbered like cantons_labeled.csv
+assignment = load_primary_assignment()
 
 if assignment is not None:
     merged = assignment.merge(features, on="municipality", how="left")

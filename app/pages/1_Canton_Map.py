@@ -10,6 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from utils import (
+    load_primary_assignment,
     load_experiment_results,
     load_geojson,
     load_canton_assignment,
@@ -132,6 +133,8 @@ _is_featured = (sel_repr == "nmf_5" and sel_metric == "cosine"
                 and sel_algo == "louvain" and sel_k == 5)
 canton_label_map = {}
 if _is_featured:
+    # Same partition as the raw experiment file, numbered like cantons_labeled.csv
+    assignment = load_primary_assignment()
     _lbl_df = load_cantons_labeled()
     canton_label_map = _lbl_df.drop_duplicates("canton").set_index("canton")["label"].to_dict()
 

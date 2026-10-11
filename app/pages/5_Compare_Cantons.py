@@ -7,7 +7,7 @@ import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from utils import inject_custom_css, load_canton_tests, load_cantons_labeled
+from utils import ELECTION_LABELS, inject_custom_css, load_canton_tests, load_cantons_labeled
 
 st.set_page_config(page_title="Compare Cantons", page_icon=":bar_chart:", layout="wide")
 inject_custom_css()
@@ -18,9 +18,14 @@ if tests is None:
     st.info("Canton comparison tests are not available in this build.")
     st.stop()
 
+_train = [int(k) for k in str(tests["train_elections"].iloc[0]).split(",")]
+_test = int(tests["test_election"].iloc[0])
+_label = lambda k: ELECTION_LABELS.get(k, f"Knesset {k}")  # noqa: E731
 st.markdown(
-    "Cantons are built from the **2019–2021** elections only. Differences are measured on the "
-    "**November 2022** election, which did not shape the map, so the test is not circular.\n\n"
+    f"Cantons are built from the **{_label(_train[0])} – {_label(_train[-1])}** elections only. "
+    f"Differences are measured on the **{_label(_test)}** election, which did not shape the map, "
+    "so they show that the differences between cantons persist into a new election "
+    "(they do not show that these exact boundaries beat other ways of grouping the same towns).\n\n"
     "- **Difference and interval:** the canton's share of all its voters, A minus B, with a 95% "
     "bootstrap interval.\n"
     "- **p-value:** whether the *typical town* in A differs from the typical town in B "
