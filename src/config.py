@@ -3,6 +3,7 @@
 All paths, constants, and mappings in one place.
 """
 
+import csv
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
@@ -39,78 +40,20 @@ NON_PARTY_COLS: list[str] = [
 # ---------------------------------------------------------------------------
 BLOC_COLS: list[str] = ["right", "haredi", "center", "left", "arab"]
 
-# Party-code → bloc mapping for each Knesset
-BLOC_MAPPING: dict[int, dict[str, str]] = {
-    21: {  # April 2019
-        "מחל": "right",      # Likud
-        "פה": "center",      # Blue & White (Kahol Lavan)
-        "שס": "haredi",      # Shas
-        "ג": "haredi",       # UTJ (Yahadut HaTorah)
-        "דעם": "arab",       # Hadash-Ta'al
-        "ום": "arab",        # Ra'am-Balad
-        "טב": "right",       # Union of Right-Wing Parties
-        "ל": "right",        # Yisrael Beiteinu
-        "מרצ": "left",       # Meretz
-        "אמת": "left",       # Labor
-        "כ": "center",       # Kulanu
-        "נ": "right",        # New Right
-        "ז": "right",        # Zehut
-        "נר": "center",      # Gesher
-    },
-    22: {  # September 2019
-        "מחל": "right",      # Likud
-        "פה": "center",      # Blue & White
-        "שס": "haredi",      # Shas
-        "ג": "haredi",       # UTJ
-        "ודעם": "arab",      # Joint List
-        "ל": "right",        # Yisrael Beiteinu
-        "טב": "right",       # Yamina
-        "אמת": "left",       # Labor-Gesher
-        "מרצ": "left",       # Democratic Union (Meretz+)
-        "כף": "right",       # Otzma Yehudit
-    },
-    23: {  # March 2020
-        "מחל": "right",      # Likud
-        "פה": "center",      # Blue & White
-        "שס": "haredi",      # Shas
-        "ג": "haredi",       # UTJ
-        "ודעם": "arab",      # Joint List
-        "ל": "right",        # Yisrael Beiteinu
-        "טב": "right",       # Yamina
-        "נץ": "right",       # Otzma Yehudit
-        "אמת": "left",       # Labor-Gesher-Meretz
-    },
-    24: {  # March 2021
-        "מחל": "right",      # Likud
-        "פה": "center",      # Yesh Atid
-        "שס": "haredi",      # Shas
-        "ג": "haredi",       # UTJ
-        "ודעם": "arab",      # Joint List (Hadash-Ta'al)
-        "ל": "right",        # Yisrael Beiteinu
-        "ב": "right",        # Yamina
-        "ט": "right",        # Religious Zionist Party
-        "כן": "center",      # Blue & White
-        "מרצ": "left",       # Meretz
-        "אמת": "left",       # Labor
-        "עם": "arab",        # Ra'am
-        "ת": "center",       # New Hope
-    },
-    25: {  # November 2022
-        "מחל": "right",      # Likud
-        "פה": "center",      # Yesh Atid
-        "שס": "haredi",      # Shas
-        "ג": "haredi",       # UTJ
-        "ט": "right",        # Religious Zionist Party
-        "ב": "right",        # Jewish Home
-        "ל": "right",        # Yisrael Beiteinu
-        "ד": "arab",         # Hadash-Ta'al
-        "ום": "arab",        # Balad
-        "מרצ": "left",       # Meretz
-        "אמת": "left",       # Labor
-        "עם": "arab",        # Ra'am
-        "כן": "center",      # National Unity (Gantz)
-    },
-}
+PARTIES_CSV = PROJECT_ROOT / "data" / "reference" / "parties.csv"
+
+
+def _load_bloc_mapping(path: Path) -> dict[int, dict[str, str]]:
+    """Ballot letters → bloc for each Knesset, read from the party table."""
+    mapping: dict[int, dict[str, str]] = {}
+    with open(path, encoding="utf-8", newline="") as f:
+        for row in csv.DictReader(f):
+            mapping.setdefault(int(row["knesset"]), {})[row["letters"]] = row["bloc"]
+    return mapping
+
+
+# Party-code → bloc mapping for each Knesset (names in data/reference/parties.csv)
+BLOC_MAPPING: dict[int, dict[str, str]] = _load_bloc_mapping(PARTIES_CSV)
 
 # ---------------------------------------------------------------------------
 # Municipality name fixes (election spelling → GeoJSON spelling)

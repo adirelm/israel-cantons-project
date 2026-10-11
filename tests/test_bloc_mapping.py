@@ -51,3 +51,34 @@ def test_saved_bloc_mappings_match_config():
     path = DATA_PROCESSED / "bloc_mappings.json"
     saved = json.loads(path.read_text(encoding="utf-8"))
     assert {int(k): v for k, v in saved.items()} == BLOC_MAPPING
+
+
+EXPECTED_MAPPING = {
+    21: {"מחל": "right", "פה": "center", "שס": "haredi", "ג": "haredi", "דעם": "arab", "ום": "arab",
+         "טב": "right", "ל": "right", "מרצ": "left", "אמת": "left", "כ": "center", "נ": "right",
+         "ז": "right", "נר": "center"},
+    22: {"מחל": "right", "פה": "center", "שס": "haredi", "ג": "haredi", "ודעם": "arab", "ל": "right",
+         "טב": "right", "אמת": "left", "מרצ": "left", "כף": "right"},
+    23: {"מחל": "right", "פה": "center", "שס": "haredi", "ג": "haredi", "ודעם": "arab", "ל": "right",
+         "טב": "right", "נץ": "right", "אמת": "left"},
+    24: {"מחל": "right", "פה": "center", "שס": "haredi", "ג": "haredi", "ודעם": "arab", "ל": "right",
+         "ב": "right", "ט": "right", "כן": "center", "מרצ": "left", "אמת": "left", "עם": "arab",
+         "ת": "center"},
+    25: {"מחל": "right", "פה": "center", "שס": "haredi", "ג": "haredi", "ט": "right", "ב": "right",
+         "ל": "right", "ד": "arab", "ום": "arab", "מרצ": "left", "אמת": "left", "עם": "arab",
+         "כן": "center"},
+}
+
+
+def test_mapping_from_party_table_matches_previous_dict():
+    assert BLOC_MAPPING == EXPECTED_MAPPING
+
+
+def test_party_table_rows_are_unique_and_named():
+    from src.config import PARTIES_CSV
+    table = pd.read_csv(PARTIES_CSV)
+    assert not table.duplicated(["knesset", "letters"]).any()
+    assert table["bloc"].isin(BLOC_COLS).all()
+    assert table["name_he"].str.strip().ne("").all()
+    assert table["name_en"].str.strip().ne("").all()
+    assert set(table["knesset"]) <= set(KNESSET_IDS)
