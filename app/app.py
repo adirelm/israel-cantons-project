@@ -56,7 +56,7 @@ st.divider()
 results = load_experiment_results()
 
 col1, col2, col3, col4 = st.columns(4)
-col1.metric("Municipalities", "229", help="Consistently matched across all 5 elections")
+col1.metric("Municipalities", "255", help="With votes in all 5 elections, including 23 Israeli local authorities in Judea and Samaria")
 col2.metric("Experiments", f"{len(results)}", help="4 representations x 3 metrics x 4 algorithms x 6 K values (minus incompatible)")
 col3.metric("Algorithms", "4", help="Simulated Annealing, Agglomerative, Louvain, KMeans")
 col4.metric("Elections Analyzed", "5", help="Knesset 21-25 (April 2019 -- November 2022)")
@@ -71,8 +71,8 @@ st.subheader("Featured Result: K=5 Canton Partition")
 st.markdown(
     "The map below shows the K=5 partition using "
     "**NMF_5 / Cosine / Louvain**, which produces five politically coherent "
-    "cantons with a positive silhouette (0.138) and stable boundaries across the five elections "
-    "(mean ARI = 0.795). "
+    "cantons with a positive silhouette (0.180) and stable boundaries across the five elections "
+    "(mean ARI = 0.909). "
     "Explore all 264 configurations in the **Canton Map Explorer** page."
 )
 
@@ -162,11 +162,12 @@ if assignment is not None:
         st.dataframe(pd.DataFrame(pop_data), width="stretch", hide_index=True)
 
     st.info(
-        "**Why multiple RIGHT cantons?** Cantons are *geographically contiguous* regions, "
-        "not political blocs. The right bloc dominates most municipalities across the country, "
+        "**Why several right-leaning cantons?** Cantons are *geographically contiguous* regions, "
+        "not political blocs. The right bloc leads in most municipalities across the country, "
         "but these municipalities are spread across different geographic areas that cannot form "
-        "a single contiguous canton. Each RIGHT canton has a distinct political mix -- "
-        "see the stacked bar chart above."
+        "a single contiguous canton. Each has a distinct political mix -- see the stacked bar chart above. "
+        "The exception is **HAREDI Cities**: its seven municipalities share no borders and are joined "
+        "by political similarity."
     )
 
 else:

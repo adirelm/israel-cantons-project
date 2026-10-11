@@ -99,7 +99,7 @@ with tab_results:
     r1, r2, r3 = st.columns(3)
     r1.metric("Total Configurations", "264")
     r2.metric("Highest Silhouette", "0.987", help="BlocShares / Cosine / Agglomerative, K=3")
-    r3.metric("Best Stability (ARI)", "0.996", help="BlocShares / Euclidean / Louvain -- near-deterministic on a fixed graph")
+    r3.metric("Best Stability (ARI)", "0.992", help="BlocShares / Euclidean / Louvain -- near-deterministic on a fixed graph")
 
     st.divider()
 
@@ -125,11 +125,11 @@ with tab_results:
     st.subheader("K=5 Canton Descriptions")
 
     st.markdown("""
-1. **CENTER Metro** -- Secular-center belt from Tel Aviv through the Sharon plain (38.5% Center)
-2. **RIGHT South** -- Southern periphery arc from Jerusalem through the Negev (49.5% Right, 17.4% Haredi)
-3. **RIGHT North** -- Mixed northern region including Haifa and the Galilee (44.6% Right)
-4. **ARAB Galilee** -- Arab-majority municipalities in the Galilee and Triangle (90.6% Arab)
-5. **ARAB Periphery** -- Bedouin towns in the Negev and central Arab towns (86.1% Arab)
+1. **METRO Tel Aviv** -- Greater Tel Aviv and the Sharon, from Netanya to Rehovot (41.1% Right, 39.0% Center)
+2. **RIGHT Jerusalem & South** -- Jerusalem, the southern periphery and the Negev, and the Judea and Samaria authorities (53.1% Right, 22.1% Haredi)
+3. **RIGHT North** -- Mixed northern region including Haifa and the Galilee (44.8% Right)
+4. **ARAB** -- Arab-majority municipalities in the Galilee, the Triangle and the Negev (89.6% Arab)
+5. **HAREDI Cities** -- Bnei Brak, El'ad, Rekhasim, Kiryat Ye'arim, Modi'in Illit, Beitar Illit and Immanuel (90.0% Haredi); not contiguous, joined by political similarity
 
 *Shares are weighted by voters and averaged over the five elections (2019-2022).*
 """)
@@ -144,7 +144,8 @@ with tab_data:
     st.markdown(
         "Municipality-level results from **Knesset elections 21-25** "
         "(Israel Central Bureau of Statistics). "
-        "**229 municipalities** consistently matchable across all 5 elections."
+        "**255 municipalities** with votes in all 5 elections, including the 23 Israeli local "
+        "authorities in Judea and Samaria."
     )
 
     elections = load_elections_summary()
@@ -185,9 +186,11 @@ with tab_data:
     st.divider()
     st.subheader("Geographic Data")
     st.markdown(
-        "Municipal boundary polygons from **CBS GIS repository**. "
-        "Adjacency graph: 234 raw nodes, 516 edges (queen contiguity). "
-        "After subsetting to 229 analysis municipalities and 3-step augmentation: 229 nodes, 2,178 edges."
+        "Municipal boundary polygons from the **CBS GIS repository**; Judea and Samaria from the CBS 2023 "
+        "municipal layer (cities and local councils) and the Civil Administration's council and settlement "
+        "jurisdiction layers (regional councils). "
+        "Adjacency graph: 257 raw nodes, 574 edges. "
+        "After subsetting to 255 analysis municipalities and 3-step augmentation: 255 nodes, 2,490 edges."
     )
 
 # ===== TECHNOLOGY TAB =======================================================

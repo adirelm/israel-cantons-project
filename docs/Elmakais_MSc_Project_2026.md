@@ -11,7 +11,7 @@ header-includes:
 
 **Advisor:** Dr. Oren Glickman, Department of Computer Science, Bar-Ilan University
 
-*Revised October 2026.* All results were regenerated after correcting the party-to-bloc mapping: the Religious Zionist Party (March 2021), Otzma Yehudit (March 2020) and Jewish Home (November 2022) had not been assigned to any bloc. This revision also computes silhouette scores in each configuration's own distance metric, reports canton profiles weighted by voters, reports cross-election stability for the primary configuration itself, makes Simulated Annealing reproducible for a given seed, and corrects the comparison with administrative districts. One municipality (Kiryat Shmona) changes canton in the primary partition.
+*Revised October 2026.* All results were regenerated after correcting the party-to-bloc mapping: the Religious Zionist Party (March 2021), Otzma Yehudit (March 2020) and Jewish Home (November 2022) had not been assigned to any bloc. This revision also computes silhouette scores in each configuration's own distance metric, reports canton profiles weighted by voters, reports cross-election stability for the primary configuration itself, makes Simulated Annealing reproducible for a given seed, and corrects the comparison with administrative districts. It also adds the 23 Israeli local authorities in Judea and Samaria (Section 4.2), restores three municipalities inside the Green Line that had been dropped by name mismatches (Nof HaGalil, Sdot Dan and Shibli-Umm al-Ghanam), maps the cantons of each election separately (Section 7.4) and tests differences between cantons on an election the map did not use (Section 7.5). With these municipalities the primary partition changes: the seven predominantly Haredi cities form a canton of their own and the two Arab cantons merge.
 
 ---
 
@@ -19,9 +19,9 @@ header-includes:
 
 Israeli society has experienced significant political polarization in recent years, reflected in five Knesset elections held within a four-year period (2019-2022). Public discourse increasingly references hypothetical divisions of the country into politically homogeneous "cantons." This project develops a data-driven algorithmic approach to explore such divisions using publicly available municipality-level election results and geographic boundary data from the Israel Central Bureau of Statistics (CBS).
 
-We partition 229 Israeli municipalities into geographically contiguous cantons that maximize internal political similarity. Our methodology employs four clustering algorithms - Simulated Annealing, Agglomerative Clustering with contiguity constraints, Louvain Community Detection, and K-Means (baseline) - evaluated across four feature representations (BlocShares, RawParty, PCA, NMF), three distance metrics (Euclidean, Cosine, Jensen-Shannon), and six values of K (3-20), yielding a comprehensive grid of experimental configurations.
+We partition 255 Israeli municipalities, including the Israeli local authorities in Judea and Samaria, into geographically contiguous cantons that maximize internal political similarity. Our methodology employs four clustering algorithms - Simulated Annealing, Agglomerative Clustering with contiguity constraints, Louvain Community Detection, and K-Means (baseline) - evaluated across four feature representations (BlocShares, RawParty, PCA, NMF), three distance metrics (Euclidean, Cosine, Jensen-Shannon), and six values of K (3-20), yielding a comprehensive grid of experimental configurations.
 
-Key results show that the BlocShares representation produces the highest clustering quality for unconstrained algorithms (silhouette score 0.987 with Cosine distance, 0.905 with Euclidean), while NMF_5 with Louvain community detection achieves the best balance between political homogeneity, silhouette quality (0.138), and interpretable canton assignments. Temporal stability analysis across all five elections reveals that deterministic algorithms (Louvain, Agglomerative) produce highly stable partitions (ARI 0.954--0.996 for the BlocShares configurations; 0.795 for the primary NMF_5/Louvain partition), while Israel's political geography remains structurally consistent despite electoral volatility. The resulting K=5 partition identifies five politically coherent regions: a center-leaning metropolitan core, a right-wing southern arc, a right-leaning northern mixed region, and two Arab-majority cantons (Galilee and periphery) -- closely reflecting known political-demographic divisions. Comparison with Israel's administrative districts yields an Adjusted Rand Index of 0.286, confirming that political cantons follow ideological rather than administrative boundaries. These findings provide a data-driven framework for understanding Israel's latent political geography and demonstrate the applicability of constrained spatial clustering to politically polarized societies.
+Key results show that the BlocShares representation produces the highest clustering quality for unconstrained algorithms (silhouette score 0.987 with Cosine distance, 0.910 with Euclidean), while NMF_5 with Louvain community detection achieves the best balance between political homogeneity, silhouette quality (0.180), and interpretable canton assignments. Temporal stability analysis across all five elections reveals that deterministic algorithms (Louvain, Agglomerative) produce highly stable partitions (ARI 0.954--0.992 for the BlocShares configurations; 0.909 for the primary NMF_5/Louvain partition), while Israel's political geography remains structurally consistent despite electoral volatility. The resulting K=5 partition identifies five politically coherent regions: a mixed center-right metropolitan core around Tel Aviv, a right-wing region from Jerusalem through the south and the Judea and Samaria authorities, a right-leaning northern region, an Arab canton, and a canton of the seven predominantly Haredi cities, which is held together by political similarity rather than shared borders. Built from the 2019--2021 elections only, the cantons differ significantly in every bloc's vote share in the held-out 2022 election. Comparison with Israel's administrative districts yields an Adjusted Rand Index of 0.360, confirming that political cantons follow ideological rather than administrative boundaries. These findings provide a data-driven framework for understanding Israel's latent political geography and demonstrate the applicability of constrained spatial clustering to politically polarized societies.
 
 ---
 
@@ -37,7 +37,7 @@ While such discourse is largely rhetorical, it raises a compelling computational
 
 This project has three primary objectives:
 
-1. **Partition 229 Israeli municipalities into K geographically contiguous cantons** that maximize internal political homogeneity, using municipality-level election results from five Knesset elections.
+1. **Partition 255 Israeli municipalities into K geographically contiguous cantons** that maximize internal political homogeneity, using municipality-level election results from five Knesset elections.
 2. **Systematically compare clustering approaches** across multiple feature representations, distance metrics, algorithms, and values of K, evaluating trade-offs between political homogeneity, population balance, and geographic compactness.
 3. **Analyze the temporal stability** of canton boundaries across election cycles to determine whether Israel's political geography is structurally persistent or volatile.
 
@@ -49,6 +49,7 @@ This project makes the following contributions:
 - A comprehensive experimental framework evaluating 264 configurations across four representations, three distance metrics, four algorithms, and six values of K.
 - Temporal stability analysis across five elections using Adjusted Rand Index (ARI) and Normalized Mutual Information (NMI).
 - Qualitative case studies validating that algorithmic cantons align with known political-demographic divisions.
+- A held-out test of differences between cantons, using an election that did not shape the map.
 - An interactive Streamlit web application for exploring canton partitions, experiment results, and stability analysis (live at https://israel-cantons-project-5j7kgq8acxrbiflraqnhgb.streamlit.app/).
 - An open-source, modular Python codebase enabling reproducible analysis and extension.
 
@@ -141,21 +142,30 @@ The contiguity constraint is fundamental to producing geographically meaningful 
 
 We use municipality-level election results from five consecutive Knesset elections, obtained from the Israel Central Bureau of Statistics (CBS) [26]:
 
-**Table 1:** Municipality-level election data across five Knesset elections (all cover 229 municipalities).
+**Table 1:** Municipality-level election data across five Knesset elections (all cover 255 municipalities).
 
 | Election | Knesset | Date | Eligible Voters | Actual Voters | Turnout |
 |----------|---------|-----------|-----------------|---------------|---------|
-| 1 | 21 | Apr.\ 2019 | 6,014,124 | 3,873,326 | 64.4% |
-| 2 | 22 | Sep.\ 2019 | 6,061,316 | 3,950,538 | 65.2% |
-| 3 | 23 | Mar.\ 2020 | 6,118,607 | 4,048,714 | 66.2% |
-| 4 | 24 | Mar.\ 2021 | 6,232,307 | 3,781,640 | 60.7% |
-| 5 | 25 | Nov.\ 2022 | 6,426,211 | 4,084,119 | 63.6% |
+| 1 | 21 | Apr.\ 2019 | 6,303,973 | 4,089,609 | 64.9% |
+| 2 | 22 | Sep.\ 2019 | 6,354,847 | 4,166,925 | 65.6% |
+| 3 | 23 | Mar.\ 2020 | 6,416,082 | 4,268,189 | 66.5% |
+| 4 | 24 | Mar.\ 2021 | 6,539,675 | 3,998,159 | 61.1% |
+| 5 | 25 | Nov.\ 2022 | 6,742,445 | 4,311,984 | 64.0% |
 
-All five elections cover the same 229 municipalities after name normalization and cross-election matching. Each record contains per-party vote counts, enabling computation of vote share vectors.
+All five elections cover the same 255 municipalities after name normalization and cross-election matching. Each record contains per-party vote counts, enabling computation of vote share vectors.
 
 ### 4.2 Geographic Data
 
-Municipal boundary polygons were obtained from the Israel CBS geographic databases [27] in Shapefile format. Municipalities were dissolved (merged) from locality-level polygons to municipality-level using an official locality-to-municipality mapping. The resulting GeoJSON file contains 234 polygon features with Hebrew municipality names. Of these, 229 are consistently matchable across all five elections and form the analysis set; the remaining 5 appear in the geographic data but could not be matched across all election datasets.
+Municipal boundary polygons were obtained from the Israel CBS geographic databases [27] in Shapefile format. Municipalities were dissolved (merged) from locality-level polygons to municipality-level using an official locality-to-municipality mapping. The CBS boundary file covers municipalities inside the Green Line. Three of them carried outdated names and were missing from earlier versions of the analysis: the file still calls Nof HaGalil by its former name (Nazareth Illit), names the Sdot Dan regional council Emek Lod, and spells Shibli-Umm al-Ghanam differently from the election data; all three are now matched.
+
+**Judea and Samaria.** Election results include the 23 Israeli local authorities in Judea and Samaria, but the CBS file has no polygons for them. Their boundaries come from two further sources (documented in `data/raw/geo/SOURCES.md`):
+
+- The 17 cities and local councils (including Ariel, Ma'ale Adumim, Beitar Illit and Modi'in Illit) from the CBS municipal layer based on the Ministry of Interior's boundaries as of the end of 2023.
+- The 6 regional councils (Shomron, Mateh Binyamin, Gush Etzion, Har Hevron, Megilot and Arvot HaYarden) from the Civil Administration's council-area and settlement-jurisdiction layers, published under freedom of information. Each council is the union of its own area and its member settlements' jurisdictions, minus the cities and local councils. The council layer overlaps in places (79 km$^2$ between Mateh Binyamin and Arvot HaYarden); an overlap is assigned to the council with more of its settlements' area inside it, or, with none on either side, to the council for which it is the larger share of its area.
+
+Invalid source geometries are repaired, polygons are clipped so they do not overlap existing ones, and all new polygons are simplified together by 5 m so shared borders stay shared. As a check, points inside Ramallah, Al-Bireh, Nablus, Jericho, Bethlehem and Hebron's old city fall outside every polygon: the analysis covers Israeli local authorities, whose jurisdictions in Judea and Samaria are fragmented, and Palestinian areas, which do not vote in Knesset elections, are outside it.
+
+The combined file has 257 municipalities. Of these, 255 have votes in all five elections and form the analysis set; the other 2 are industrial local councils with no voters.
 
 ### 4.3 Party-to-Bloc Mapping
 
@@ -218,7 +228,7 @@ Our implementation uses $d(P, Q) = \sqrt{\text{JSD}(P \| Q)}$, which is a proper
 
 ### 5.3 Graph Construction and Preprocessing
 
-**Raw Adjacency Graph:** We construct a contiguity graph $G = (V, E)$ where municipalities are nodes and edges connect municipalities that share a geographic boundary (detected via polygon intersection using GeoPandas and Shapely). The raw graph has $234$ nodes and $516$ edges but is *disconnected* - some municipalities are geographic isolates (enclaves, exclave communities, or municipalities with no shared boundaries due to polygon precision issues).
+**Raw Adjacency Graph:** We construct a contiguity graph $G = (V, E)$ where municipalities are nodes and edges connect municipalities that share a geographic boundary (detected via polygon intersection using GeoPandas and Shapely). The raw graph has $257$ nodes and $574$ edges but is *disconnected* - some municipalities are geographic isolates (enclaves, exclave communities, or municipalities with no shared boundaries due to polygon precision issues).
 
 **Graph Preprocessing:** To ensure a connected graph (required for contiguous clustering), we apply three preprocessing steps:
 
@@ -228,7 +238,7 @@ Our implementation uses $d(P, Q) = \sqrt{\text{JSD}(P \| Q)}$, which is a proper
 
 3. **Bridge edges for disconnected components:** For any remaining disconnected components after steps 1-2, connect each component to the largest component via an edge between the most politically similar pair of municipalities. This ensures full graph connectivity.
 
-After subsetting the raw graph to the 229 analysis municipalities (488 edges), the augmentation pipeline produces a fully connected graph with $229$ nodes and $2{,}178$ edges.
+Municipalities inside the Green Line are adjacent when their polygons share a boundary line. Polygons from different sources do not share exact borders, so a Judea and Samaria authority is adjacent to any polygon that runs alongside it within 100 m (their 100 m buffers overlap by at least 200 m $\times$ 200 m); Ariel and Elkana, which touch nothing within that distance, are joined to their geographically nearest authority (Shomron). After subsetting the raw graph to the 255 analysis municipalities (569 edges), the augmentation pipeline produces a fully connected graph with $255$ nodes and $2{,}490$ edges.
 
 ### 5.4 Clustering Algorithms
 
@@ -242,7 +252,7 @@ SA optimizes a multi-objective cost function over the partition space. Starting 
 Parameters: initial temperature $T_0 = 1.0$, cooling rate $0.9995$, following standard SA practice [9]. The code default is $50{,}000$ iterations; the systematic grid search (Section 6) used $5{,}000$ iterations per configuration for computational efficiency, while the SA seed-sensitivity analysis (Section 9.1) used the full $50{,}000$. Contiguity is enforced by rejecting moves that disconnect any canton. Note that SA uses a deterministic seed-based *initialization* (providing a reproducible starting point) but stochastic *optimization* (random move proposals with probabilistic acceptance), so results may vary with different random seeds. Each configuration was executed once; the stability analysis in Section 7 partially addresses sensitivity by evaluating SA across five different election datasets.
 
 **Agglomerative Clustering:**
-Average-linkage with contiguity constraints [6] - starting from 229 singleton clusters, iteratively merge the two adjacent clusters with the smallest average pairwise distance. The contiguity constraint ensures only adjacent clusters merge, maintaining geographic connectedness. This deterministic algorithm produces a dendrogram that can be cut at any level to obtain K cantons.
+Average-linkage with contiguity constraints [6] - starting from 255 singleton clusters, iteratively merge the two adjacent clusters with the smallest average pairwise distance. The contiguity constraint ensures only adjacent clusters merge, maintaining geographic connectedness. This deterministic algorithm produces a dendrogram that can be cut at any level to obtain K cantons.
 
 **K-Means Baseline:**
 Standard K-Means clustering [5] in feature space without geographic contiguity constraints. Serves as a baseline to measure the cost of enforcing contiguity - cantons may be geographically disconnected.
@@ -284,19 +294,19 @@ We conducted a systematic grid search over 264 configurations:
 
 Note: Not all metric-representation combinations are applicable. Jensen-Shannon requires non-negative values and is compatible with BlocShares, RawParty, and NMF_5, but not PCA_5 (which may produce negative values); PCA_5 uses only Euclidean and Cosine metrics. All 264 configurations executed successfully with 0 failures.
 
-**Computational Performance:** Mean runtimes per configuration were: SA 23.4s (range: 15--39s depending on K), Agglomerative 0.27s, Louvain 0.35s, KMeans 0.13s. SA's higher runtime reflects its iterative optimization (5,000 iterations in the grid search), while Agglomerative and Louvain operate in near-linear time on the 229-node graph. Total grid search runtime was approximately 30 minutes on a single CPU core (Apple M1 Pro, 16GB RAM). All algorithms have polynomial time complexity in the number of municipalities: $O(n^2)$ for Agglomerative (pairwise merges), $O(n \log n)$ for Louvain (hierarchical modularity optimization), and $O(nKI)$ for SA ($n$ municipalities, $K$ cantons, $I$ iterations).
+**Computational Performance:** Mean runtimes per configuration were: SA 34.4s (range: 22--58s depending on K), Agglomerative 0.34s, Louvain 0.42s, KMeans 0.14s. SA's higher runtime reflects its iterative optimization (5,000 iterations in the grid search), while Agglomerative and Louvain operate in near-linear time on the 255-node graph. Total grid search runtime was approximately 40 minutes on a single CPU core (Apple M1 Pro, 16GB RAM). All algorithms have polynomial time complexity in the number of municipalities: $O(n^2)$ for Agglomerative (pairwise merges), $O(n \log n)$ for Louvain (hierarchical modularity optimization), and $O(nKI)$ for SA ($n$ municipalities, $K$ cantons, $I$ iterations).
 
 ### 6.2 Key Findings
 
-**Representation Comparison:** BlocShares achieves the highest silhouette scores for unconstrained algorithms (Agglomerative, KMeans), thanks to its domain-informed aggregation of party votes into five interpretable blocs. However, when combined with contiguity-constrained SA, BlocShares produces severely imbalanced partitions -- at K=5, SA places 86 municipalities in one canton and only 1 in another (300x population ratio). This occurs because BlocShares' five coarse features cause the distinctive Arab voting pattern to dominate: the oversized canton holds 63 of the 68 Arab-majority municipalities. Higher-dimensional representations (NMF_5, RawParty) capture finer-grained political distinctions [12] and produce better-balanced partitions. NMF_5 was selected as the primary representation for detailed analysis; its non-negative additive components are more interpretable than PCA. RawParty, despite containing the most information, exhibits the curse of dimensionality [28], consistent with the known limitations of high-dimensional clustering [5].
+**Representation Comparison:** BlocShares achieves the highest silhouette scores for unconstrained algorithms (Agglomerative, KMeans), thanks to its domain-informed aggregation of party votes into five interpretable blocs. However, when combined with contiguity-constrained SA, BlocShares produces severely imbalanced partitions -- at K=5, SA places 93 municipalities in one canton and only 1 in another (270x population ratio). This occurs because BlocShares' five coarse features cause the distinctive Arab voting pattern to dominate: the oversized canton holds 66 of the 69 Arab-majority municipalities. Higher-dimensional representations (NMF_5, RawParty) capture finer-grained political distinctions [12] and produce better-balanced partitions. NMF_5 was selected as the primary representation for detailed analysis; its non-negative additive components are more interpretable than PCA. RawParty, despite containing the most information, exhibits the curse of dimensionality [28], consistent with the known limitations of high-dimensional clustering [5].
 
-**Distance Metric Comparison:** Silhouette scores are computed in each configuration's own distance metric. Cosine distance produces the highest silhouette score overall (0.987 with BlocShares/Agglomerative at K=3), ahead of Euclidean (0.905) and Jensen-Shannon (0.798) for the same configuration. Metric choice matters most for the KMeans baseline, which optimizes Euclidean distance regardless of the metric used for evaluation: its K=3 BlocShares partition scores 0.858 under Euclidean distance but -0.864 under Cosine and -0.195 under Jensen-Shannon. Jensen-Shannon offers no advantage over Euclidean or Cosine for any representation.
+**Distance Metric Comparison:** Silhouette scores are computed in each configuration's own distance metric. Cosine distance produces the highest silhouette score overall (0.987 with BlocShares/Agglomerative at K=3), ahead of Euclidean (0.910) and Jensen-Shannon (0.793) for the same configuration. Metric choice matters most for the KMeans baseline, which optimizes Euclidean distance regardless of the metric used for evaluation: its K=3 BlocShares partition scores 0.861 under Euclidean distance but -0.864 under Cosine and -0.199 under Jensen-Shannon. Jensen-Shannon offers no advantage over Euclidean or Cosine for any representation.
 
 **Algorithm Comparison:**
 
-- **Agglomerative** achieves the highest silhouette scores (up to 0.987) but can produce severe population imbalance, sometimes placing 225+ municipalities in a single canton.
+- **Agglomerative** achieves the highest silhouette scores (up to 0.987) but can produce severe population imbalance, sometimes placing 250+ municipalities in a single canton.
 - **Simulated Annealing** produces the most balanced cantons due to its explicit population balance objective, at the cost of slightly lower silhouette scores. SA is the preferred algorithm when population balance matters.
-- **Louvain** ignores the target K parameter and finds its own natural community count. Its partitions are highly stable across elections (ARI 0.795--0.996, Section 7) but may not match the desired K.
+- **Louvain** ignores the target K parameter and finds its own natural community count. Its partitions are highly stable across elections (ARI 0.909--0.992, Section 7) but may not match the desired K.
 - **KMeans (baseline)** achieves competitive silhouette scores but produces geographically disconnected cantons, confirming the necessity of contiguity constraints.
 
 **Effect of K:** WCSS decreases monotonically with increasing K (as expected - more cantons means smaller, more homogeneous clusters). Silhouette scores [13] peak at low K values (K=3 or K=5) for most configurations, suggesting that Israel's political geography is naturally structured into a small number of macro-regions.
@@ -314,14 +324,14 @@ Note: Not all metric-representation combinations are applicable. Jensen-Shannon 
 | Rank | Repr | Metric | Algorithm | K | Silhouette | Pop CV |
 |------|-----------|---------|---------------|------|------------|--------|
 | 1 | BlocShares | Cosine | Agglomerative | 3 | 0.987 | 1.41 |
-| 2 | BlocShares | Euclidean | KMeans | 3 | 0.858 | 0.48 |
-| 3 | NMF_5 | Cosine | Agglomerative | 3 | 0.642 | 1.14 |
-| 4 | NMF_5 | Cosine | Louvain | 5 | 0.138 | 0.69 |
-| 5 | NMF_5 | Cosine | SA | 5 | -0.035* | 0.28* |
+| 2 | BlocShares | Euclidean | KMeans | 3 | 0.861 | 0.52 |
+| 3 | NMF_5 | Euclidean | Agglomerative | 3 | 0.623 | 1.13 |
+| 4 | NMF_5 | Cosine | Louvain | 5 | 0.180 | 0.66 |
+| 5 | NMF_5 | Cosine | SA | 5 | 0.136* | 0.29* |
 
-*\*SA values are 30-seed means (single run: Sil=-0.059, CV=0.54); see Section 9.1 for full seed sensitivity analysis.*
+*\*SA values are 30-seed means (single run: Sil=0.136, CV=0.29); see Section 9.1 for full seed sensitivity analysis.*
 
-The best overall configuration depends on which objectives are prioritized. For pure clustering quality (silhouette), Agglomerative clustering on BlocShares dominates. KMeans achieves a high silhouette (0.858) but produces disconnected cantons. For interpretable partitions with good silhouette and politically meaningful assignments, Louvain with NMF_5/Cosine at K=5 achieves a positive silhouette (0.138), produces five distinct cantons where all major cities are assigned to politically compatible groups, and keeps its boundaries fairly stable across elections (mean ARI = 0.795). SA with NMF_5 achieves better population balance (CV 0.28 vs 0.69) but lower silhouette (-0.035).
+The best overall configuration depends on which objectives are prioritized. For pure clustering quality (silhouette), Agglomerative clustering on BlocShares dominates. KMeans achieves a high silhouette (0.861) but produces disconnected cantons. For interpretable partitions with good silhouette and politically meaningful assignments, Louvain with NMF_5/Cosine at K=5 achieves a positive silhouette (0.180), produces five distinct cantons where all major cities are assigned to politically compatible groups, and keeps its boundaries stable across elections (mean ARI = 0.909). SA with NMF_5 achieves better population balance (CV 0.29 vs 0.66) but lower silhouette (0.136).
 
 **Note on Selection Bias:** With 264 configurations evaluated, the reported 'best' silhouette scores may be inflated by selection effects. Without multiple comparison correction (e.g., Bonferroni), the top-ranked configuration's superiority should be interpreted cautiously. The relative rankings and qualitative patterns are more robust than absolute performance differences.
 
@@ -333,31 +343,31 @@ We select K=5 with NMF_5/Cosine/Louvain as the primary result for interpretive a
 
 | Criterion | Weight | K=3 Agglom (BlocShares/Cosine) | K=5 Louvain (NMF_5/Cosine) | Winner |
 |-----------|--------|------------|-------------|--------|
-| Silhouette (higher = better) | 0.25 | 0.987 | 0.138 | K=3 |
-| Population Balance CV (lower = better) | 0.25 | 1.41 | 0.69 | K=5 |
-| Temporal Stability ARI (higher = better) | 0.25 | 0.954 | 0.795 | K=3 |
+| Silhouette (higher = better) | 0.25 | 0.987 | 0.180 | K=3 |
+| Population Balance CV (lower = better) | 0.25 | 1.41 | 0.66 | K=5 |
+| Temporal Stability ARI (higher = better) | 0.25 | 0.954 | 0.909 | K=3 |
 | Political Granularity (5 > 3 cantons) | 0.25 | 3 cantons | 5 cantons | K=5 |
 
-The criteria split 2--2: K=3 Agglomerative has the higher silhouette and stability, K=5 Louvain the better population balance and political resolution. We select K=5 because the K=3 configuration's superior silhouette reflects its coarser granularity (fewer, larger clusters naturally have higher cohesion), while its severe population imbalance (CV=1.41) and limited political resolution (only 3 regions) make it unsuitable for detailed political analysis. The K=5 partition's positive silhouette (0.138) indicates weak but above-chance cluster structure (below the 0.25 threshold for substantial structure per Rousseeuw [13]), while providing the granularity needed to distinguish CENTER, RIGHT (South/North), and ARAB (Galilee/Periphery) political regions. NMF_5 provides a good balance of dimensionality reduction and interpretability: its five non-negative additive components capture finer-grained political distinctions than BlocShares' five coarse features, producing well-balanced partitions across all algorithms. Louvain's modularity-based optimization yields a positive silhouette (0.138), politically coherent assignments (all major cities land in ideologically compatible cantons), and fairly stable boundaries across elections (mean ARI = 0.795, Section 7).
+The criteria split 2--2: K=3 Agglomerative has the higher silhouette and stability, K=5 Louvain the better population balance and political resolution. We select K=5 because the K=3 configuration's superior silhouette reflects its coarser granularity (fewer, larger clusters naturally have higher cohesion), while its severe population imbalance (CV=1.41) and limited political resolution (only 3 regions) make it unsuitable for detailed political analysis. The K=5 partition's positive silhouette (0.180) indicates weak but above-chance cluster structure (below the 0.25 threshold for substantial structure per Rousseeuw [13]), while providing the granularity needed to distinguish the metropolitan core, two right-leaning regions, the Arab canton and the Haredi cities. K=6 was also examined: it splits off a two-town canton (Abu Snan and Kafr Yasif) and is worse on every criterion (silhouette 0.070, CV 0.85, ARI 0.801). NMF_5 provides a good balance of dimensionality reduction and interpretability: its five non-negative additive components capture finer-grained political distinctions than BlocShares' five coarse features, producing well-balanced partitions across all algorithms. Louvain's modularity-based optimization yields a positive silhouette (0.180), politically coherent assignments (all major cities land in ideologically compatible cantons), and stable boundaries across elections (mean ARI = 0.909, Section 7).
 
 **Table 5:** K=5 canton profiles (NMF_5 / Cosine / Louvain). Bloc values are vote shares (%) averaged over the five elections and weighted by each municipality's number of voters.
 
 | Canton | Munis | Right% | Haredi% | Center% | Left% | Arab% |
 |-------------------------|-------|--------|---------|---------|-------|-------|
-| 0 -- CENTER Metro | 34 | 33.9 | 14.0 | 38.5 | 11.7 | 1.0 |
-| 1 -- RIGHT South | 61 | 49.5 | 17.4 | 24.7 | 6.2 | 1.1 |
-| 2 -- RIGHT North | 75 | 44.6 | 7.5 | 31.1 | 9.5 | 6.2 |
-| 3 -- ARAB Galilee | 43 | 1.9 | 0.9 | 2.1 | 3.4 | 90.6 |
-| 4 -- ARAB Periphery | 16 | 2.0 | 0.7 | 3.6 | 6.0 | 86.1 |
+| 0 -- METRO Tel Aviv | 53 | 41.1 | 7.1 | 39.0 | 10.6 | 1.3 |
+| 1 -- RIGHT Jerusalem & South | 60 | 53.1 | 22.1 | 17.8 | 5.4 | 0.7 |
+| 2 -- RIGHT North | 75 | 44.8 | 7.3 | 30.7 | 9.4 | 6.6 |
+| 3 -- ARAB | 60 | 1.9 | 0.9 | 2.4 | 4.0 | 89.6 |
+| 4 -- HAREDI Cities | 7 | 8.6 | 90.0 | 0.9 | 0.3 | 0.0 |
 
 **Evaluation metrics for this partition:**
 
 - Cantons: 5
-- Population CV: 0.69
-- Silhouette: 0.138
-- Cross-election stability: mean ARI = 0.795 (std 0.074)
+- Population CV: 0.66
+- Silhouette: 0.180
+- Cross-election stability: mean ARI = 0.909 (std 0.077)
 
-The silhouette of 0.138, while positive, indicates weak cluster separation with substantial overlap between cantons—typical for political geography where boundaries are gradual rather than sharp. The two Arab cantons are highly cohesive (90.6% and 86.1% Arab vote share), while the two Right cantons differ in character: Canton 1 (RIGHT South) is the southern periphery arc from Jerusalem through the Negev (49.5% Right, 17.4% Haredi), while Canton 2 (RIGHT North) is a mixed northern region including Haifa and the Galilee Jewish towns (44.6% Right). Canton 0 (CENTER Metro) captures the secular-center belt from Tel Aviv through the Sharon plain (38.5% Center). The municipality count imbalance (16--75) is wider than SA's (40--54), reflecting Louvain's optimization of modularity rather than balance. Each canton has a clearly interpretable political character (see Section 8).
+The silhouette of 0.180, while positive, indicates weak cluster separation with substantial overlap between cantons—typical for political geography where boundaries are gradual rather than sharp. Canton 0 (METRO Tel Aviv) covers Greater Tel Aviv and the Sharon, from Netanya to Rehovot, with Right and Center almost level (41.1% and 39.0%). Canton 1 (RIGHT Jerusalem & South) runs from Jerusalem through the southern periphery and the Negev and includes the Judea and Samaria authorities (53.1% Right, 22.1% Haredi). Canton 2 (RIGHT North) is a mixed northern region including Haifa and the Galilee Jewish towns (44.8% Right). Canton 3 (ARAB) brings together the Arab municipalities of the Galilee, the Triangle and the Negev (89.6% Arab vote share). Canton 4 (HAREDI Cities) consists of the seven municipalities where Haredi parties receive more than 70% of the vote: Bnei Brak, El'ad, Rekhasim, Kiryat Ye'arim, Modi'in Illit, Beitar Illit and Immanuel (90.0% Haredi). None of the seven borders another; they are joined by the graph's enclave edges (Section 5.3), so this canton is a political rather than a geographic unit. It appears once Beitar Illit, Modi'in Illit and Immanuel are included, and the two Arab cantons of earlier versions merge to keep K=5. The municipality count imbalance (7--75) is wider than SA's (29--73), reflecting Louvain's optimization of modularity rather than balance. Each canton has a clearly interpretable political character (see Section 8).
 
 ![Canton Map K=5](figures/canton_map_k5.png)
 *Figure 4: Geographic visualization of the K=5 Louvain canton partition (NMF_5 / Cosine).*
@@ -384,24 +394,51 @@ We tested seven representative configurations spanning different representation-
 
 | Repr | Metric | Algorithm | Mean ARI | Std ARI | Mean NMI | Std NMI |
 |-----------|---------|---------------|----------|---------|----------|---------|
-| BlocShares | Euclidean | Louvain | 0.996 | 0.005 | 0.995 | 0.007 |
+| BlocShares | Euclidean | Louvain | 0.992 | 0.007 | 0.988 | 0.010 |
 | BlocShares | Cosine | Agglomerative | 0.954 | 0.059 | 0.945 | 0.071 |
-| NMF_5 | Cosine | Louvain (primary) | 0.795 | 0.074 | 0.839 | 0.039 |
-| NMF_5 | Euclidean | SA | 0.573 | 0.187 | 0.645 | 0.133 |
-| BlocShares | Euclidean | SA | 0.541 | 0.083 | 0.568 | 0.098 |
-| RawParty | Cosine | SA | 0.375 | 0.146 | 0.479 | 0.119 |
-| PCA_5 | Euclidean | SA | 0.348 | 0.211 | 0.443 | 0.195 |
+| NMF_5 | Cosine | Louvain (primary) | 0.909 | 0.077 | 0.920 | 0.065 |
+| BlocShares | Euclidean | SA | 0.587 | 0.103 | 0.636 | 0.083 |
+| RawParty | Cosine | SA | 0.458 | 0.165 | 0.518 | 0.140 |
+| NMF_5 | Euclidean | SA | 0.449 | 0.241 | 0.547 | 0.191 |
+| PCA_5 | Euclidean | SA | 0.383 | 0.119 | 0.497 | 0.098 |
 
 ### 7.3 Interpretation
 
-**Deterministic algorithms produce highly stable partitions.** The BlocShares Louvain configuration produces near-identical partitions across elections (ARI = 0.996) because it optimizes graph modularity on the fixed adjacency structure rather than feature values; this largely reflects algorithmic determinism rather than political stability. The graph topology dominates Louvain's community detection, so variations in election-specific feature values have little effect. The primary NMF_5/Cosine Louvain partition is less stable (ARI = 0.795) but still more stable than any SA configuration. Agglomerative clustering also produces near-perfect stability (ARI = 0.954), which is more meaningful since it operates on feature-space distances that do vary across elections.
+**Deterministic algorithms produce highly stable partitions.** The BlocShares Louvain configuration produces near-identical partitions across elections (ARI = 0.992) because it optimizes graph modularity on the fixed adjacency structure rather than feature values; this largely reflects algorithmic determinism rather than political stability. The graph topology dominates Louvain's community detection, so variations in election-specific feature values have little effect. The primary NMF_5/Cosine Louvain partition is somewhat less stable (ARI = 0.909) but still more stable than any SA configuration. Agglomerative clustering also produces near-perfect stability (ARI = 0.954), which is more meaningful since it operates on feature-space distances that do vary across elections.
 
-**SA stability varies by representation.** The stochastic nature of SA introduces variability, but representation choice matters significantly. NMF produces the most stable SA partitions (ARI = 0.573), followed by BlocShares (0.541) and RawParty (0.375). PCA produces the least stable partitions (0.348), likely because the principal components rotate across elections as party compositions change.
+**SA stability varies by representation.** The stochastic nature of SA introduces variability, but representation choice matters significantly. BlocShares produces the most stable SA partitions (ARI = 0.587), followed by RawParty (0.458) and NMF (0.449). PCA produces the least stable partitions (0.383), likely because the principal components rotate across elections as party compositions change.
 
 **Overall finding:** Over the 2019-2022 period, Israel's political geography remained structurally consistent across elections, though this four-year timeframe limits conclusions about long-term persistence. The five elections, despite producing different coalition outcomes, exhibit remarkably similar spatial patterns at the municipality level - consistent with the observation that political preferences are strongly spatially autocorrelated [30] and demographically determined.
 
 ![Stability ARI](figures/stability_ari.png)
 *Figure 6: Mean Adjusted Rand Index across election pairs for each configuration, with error bars showing standard deviation.*
+
+### 7.4 Cantons in Each Election
+
+To show the stability of the primary partition directly, the primary configuration was run on each election alone and each election's cantons were matched one-to-one to the primary map's (maximum overlap). A canton sharing less than half of its members with its match (Jaccard index below 0.5) keeps its own number instead of borrowing a label.
+
+![Per-election maps](figures/per_election_maps.png)
+*Figure 7: K=5 cantons computed from each election separately, coloured by their matching primary canton.*
+
+220 of the 255 municipalities are in the same canton in every election; 28 change in one election and 7 in two. The four elections from 2019 to 2021 give nearly the same map. November 2022 differs most: the seven Haredi cities join the metropolitan canton, and 18 Arab municipalities, most of them Bedouin towns in the Negev and towns in the southern Triangle (including Rahat, Hura, Tel Sheva, Kafr Qasem and Jaljulia), form a canton of their own with no counterpart in the primary map. These towns gave Ra'am 68% of their vote in 2022, against 26% in the Arab canton's other towns (65% and 34% in 2021), so the gap between the two widened.
+
+### 7.5 Do the Cantons Differ? A Held-Out Test
+
+Testing whether cantons differ in the vote shares they were built from would be circular: a clustering algorithm separates groups on exactly those features. We therefore rebuild the cantons from the 2019--2021 elections only (features, graph preprocessing and weights all use Knesset 21--24) and test differences on the November 2022 results, which did not shape the map. The training map agrees closely with the primary map (ARI = 0.967), and a unit test checks that scrambling the 2022 results leaves it unchanged.
+
+For each bloc, a Kruskal--Wallis test compares the five cantons, and each pair of cantons is compared twice: by the voter-weighted difference in bloc share with a 95% bootstrap interval (10,000 resamples of municipalities within each canton), and by a Mann--Whitney test of whether the typical municipality differs, Holm-adjusted across the ten pairs. Each municipality counts once in the Mann--Whitney test, so the two can disagree when a few large towns drive a canton's share.
+
+**Table 6b:** Kruskal--Wallis tests across the five cantons, November 2022 bloc shares.
+
+| Bloc | H | p | $\epsilon^2$ | Pairs differing (Holm $p<0.05$) |
+|------|---|---|---------------|-------------------------------|
+| Arab | 157.6 | $<10^{-30}$ | 0.62 | 9 of 10 |
+| Center | 156.6 | $<10^{-30}$ | 0.62 | 9 of 10 |
+| Right | 151.4 | $<10^{-30}$ | 0.60 | 9 of 10 |
+| Haredi | 111.4 | $<10^{-20}$ | 0.44 | 8 of 10 |
+| Left | 86.1 | $<10^{-15}$ | 0.34 | 9 of 10 |
+
+All five blocs differ strongly across cantons in the held-out election (large effect sizes, $\epsilon^2$ from 0.34 to 0.62), and 44 of the 50 canton pairs differ significantly. The pairs that do not are informative: the metropolitan canton and RIGHT North do not differ in their typical town's Right, Left or Haredi share, so the line between them is drawn by the Center vote (8.6 points higher in the metropolitan canton) and the Arab vote (6.4 points higher in RIGHT North); and the Haredi share of the metropolitan canton and of RIGHT Jerusalem & South differs in voters' terms (16.3 points, 95% interval 5.2 to 24.4, driven by Jerusalem) but not in the typical town ($p = 0.30$). Neighbouring municipalities vote alike, so these tests, which treat municipalities as independent, are somewhat optimistic. The full table is in the app's *Compare Cantons* page and in `data/processed/canton_tests.csv`.
 
 ---
 
@@ -409,11 +446,9 @@ We tested seven representative configurations spanning different representation-
 
 ### 8.1 The K=5 Partition in Detail
 
-Our primary K=5 NMF_5/Cosine/Louvain partition divides Israel into five politically coherent regions. We examine five case study areas to assess whether the algorithmic cantons align with known political geography.
+Our primary K=5 NMF_5/Cosine/Louvain partition divides Israel into five politically coherent regions. We examine seven case study areas to assess whether the algorithmic cantons align with known political geography. Dominant blocs and shares below are averages over the five elections.
 
 ### 8.2 Greater Tel Aviv (Gush Dan)
-
-The Greater Tel Aviv metropolitan area is concentrated in **Canton 0** (CENTER Metro) with some municipalities in **Canton 1** (RIGHT South):
 
 **Table 7:** Greater Tel Aviv canton assignments.
 
@@ -422,17 +457,17 @@ The Greater Tel Aviv metropolitan area is concentrated in **Canton 0** (CENTER M
 | Tel Aviv-Yafo | 0 | Center |
 | Ramat Gan | 0 | Center |
 | Givatayim | 0 | Center |
-| Bnei Brak | 0 | Haredi |
-| Holon | 1 | Right |
-| Bat Yam | 1 | Right |
-| Petah Tikva | 0 | Right |
-| Rishon LeZion | 1 | Right |
 | Herzliya | 0 | Center |
 | Ra'anana | 0 | Center |
 | Kfar Saba | 0 | Center |
+| Holon | 0 | Right |
+| Bat Yam | 0 | Right |
+| Petah Tikva | 0 | Right |
+| Rishon LeZion | 0 | Right |
 | Netanya | 0 | Right |
+| Bnei Brak | 4 | Haredi |
 
-**Analysis:** The Louvain partition places the secular center-leaning core of Greater Tel Aviv -- Tel Aviv, Ramat Gan, Givatayim, Herzliya, Ra'anana, Kfar Saba, and Netanya -- into Canton 0 (CENTER Metro, 38.5% Center). Bnei Brak, despite being Haredi-dominant, is included due to its geographic centrality within this cluster. Holon, Bat Yam, and Rishon LeZion fall into Canton 1 (RIGHT South), reflecting their more right-leaning voting profiles. This split separates the secular-center belt from the right-leaning southern suburbs, consistent with the distinct voting profiles of these areas.
+**Analysis:** The whole metropolitan area -- the center-leaning core (Tel Aviv, Ramat Gan, Givatayim, Herzliya, Ra'anana, Kfar Saba) and the right-leaning cities around it (Holon, Bat Yam, Petah Tikva, Rishon LeZion, Netanya) -- forms Canton 0 (METRO Tel Aviv), where Right and Center are almost level (41.1% and 39.0%). Bnei Brak, in the middle of the metropolis, belongs to Canton 4 (HAREDI Cities) with the other predominantly Haredi cities.
 
 ### 8.3 Jerusalem Region
 
@@ -443,13 +478,37 @@ The Greater Tel Aviv metropolitan area is concentrated in **Canton 0** (CENTER M
 | Jerusalem | 1 | Haredi |
 | Beit Shemesh | 1 | Haredi |
 | Mevasseret Zion | 1 | Right |
-| Modi'in-Maccabim-Re'ut | 1 | Center |
+| Ma'ale Adumim | 1 | Right |
+| Givat Ze'ev | 1 | Right |
+| Modi'in-Maccabim-Re'ut | 0 | Center |
+| Beitar Illit | 4 | Haredi |
+| Modi'in Illit | 4 | Haredi |
 
-**Analysis:** Jerusalem is placed in **Canton 1** (RIGHT South), grouped with Beit Shemesh (both Haredi-dominant), the southern periphery development towns (Dimona, Netivot, Ofakim), and major southern cities (Ashdod, Ashkelon, Beer Sheva). This canton captures Israel's right-wing and Haredi heartland (49.5% Right, 17.4% Haredi). Modi'in is also in Canton 1, connected through the Jerusalem corridor.
+**Analysis:** Jerusalem is placed in **Canton 1** (RIGHT Jerusalem & South) with Beit Shemesh, Mevasseret Zion, Ma'ale Adumim, Givat Ze'ev, the regional councils of Judea and Samaria, the southern periphery towns and the major southern cities (Ashdod, Ashkelon, Beer Sheva). This canton captures Israel's right-wing and Haredi heartland (53.1% Right, 22.1% Haredi). Modi'in joins the metropolitan canton, and the two large Haredi cities beyond the Green Line, Beitar Illit and Modi'in Illit, join Canton 4.
 
-### 8.4 Arab Towns
+### 8.4 Judea and Samaria
 
-**Table 9:** Arab-majority municipality canton assignments.
+**Table 9:** Judea and Samaria authorities (Right = average Right-bloc vote share).
+
+| Authority | Canton | Dominant Bloc | Right % |
+|-----------|--------|---------------|---------|
+| Elkana | 1 | Right | 91.8 |
+| Kiryat Arba | 1 | Right | 91.1 |
+| Har Hevron | 1 | Right | 88.0 |
+| Efrat | 1 | Right | 87.9 |
+| Karnei Shomron | 1 | Right | 87.4 |
+| Shomron | 1 | Right | 83.5 |
+| Ariel | 1 | Right | 77.9 |
+| Arvot HaYarden | 1 | Right | 68.6 |
+| Megilot | 1 | Right | 44.8 |
+| Oranit | 0 | Right | 46.0 |
+| Immanuel | 4 | Haredi | 22.6 |
+
+**Analysis:** Most of the 23 Judea and Samaria authorities join Canton 1, with some of the highest Right-bloc shares in the country (above 85% in Elkana, Kiryat Arba, Har Hevron, Efrat and Karnei Shomron). Oranit and Alfei Menashe, on the Green Line next to the Sharon, join the metropolitan canton, and the Haredi cities Beitar Illit, Modi'in Illit and Immanuel join Canton 4. Because the regional councils' jurisdictions are fragmented and Ariel and Elkana are linked to their nearest authority (Section 5.3), contiguity here is looser than inside the Green Line.
+
+### 8.5 Arab Towns
+
+**Table 10:** Arab-majority municipality canton assignments.
 
 | Municipality | Canton | Dominant Bloc |
 |-------------|--------|---------------|
@@ -460,14 +519,30 @@ The Greater Tel Aviv metropolitan area is concentrated in **Canton 0** (CENTER M
 | Sakhnin | 3 | Arab |
 | Tamra | 3 | Arab |
 | Baqa al-Gharbiyye | 3 | Arab |
-| Rahat | 4 | Arab |
-| Kafr Qasem | 4 | Arab |
+| Rahat | 3 | Arab |
+| Kafr Qasem | 3 | Arab |
 
-**Analysis:** The NMF_5/Louvain partition produces two distinct Arab cantons: **Canton 3** (ARAB Galilee, 90.6% Arab) captures the concentrated Galilee and Triangle Arab municipalities (Nazareth, Umm al-Fahm, Shfar'am, Tayibe, Sakhnin, Tamra), while **Canton 4** (ARAB Periphery, 86.1% Arab) captures the southern Bedouin towns (Rahat, Hura, Tel Sheva, Laqiye) and scattered Arab municipalities outside the Galilee core (Kafr Qasem, Jaljulia, Kafr Bara). This geographic split is politically meaningful: northern Arab municipalities tend to vote for the Joint List, while Bedouin towns have distinct political patterns with stronger support for Ra'am [25]. Both cantons are highly cohesive (>86% Arab vote share).
+**Analysis:** All Arab-majority municipalities, in the Galilee, the Triangle and the Negev, form **Canton 3** (ARAB, 89.6% Arab vote share). Earlier versions of the analysis split them into a Galilee canton and a southern one; with the Haredi cities forming their own canton, K=5 leaves room for one Arab canton. The split reappears in the November 2022 election taken alone (Section 7.4), where the Bedouin towns of the Negev and towns in the southern Triangle, where Ra'am is strongest [25], form a separate canton.
 
-### 8.5 Haifa and the Krayot
+### 8.6 The Haredi Cities
 
-**Table 10:** Haifa metropolitan area canton assignments.
+**Table 11:** Canton 4 (HAREDI Cities).
+
+| Municipality | Haredi % | Area |
+|-------------|----------|----------|
+| Bnei Brak | 89.2 | Greater Tel Aviv |
+| El'ad | 84.8 | Central Israel |
+| Rekhasim | 88.1 | Haifa district |
+| Kiryat Ye'arim | 87.8 | Jerusalem hills |
+| Modi'in Illit | 97.6 | Judea and Samaria |
+| Beitar Illit | 90.7 | Judea and Samaria |
+| Immanuel | 76.8 | Judea and Samaria |
+
+**Analysis:** Canton 4 is the set of municipalities where Haredi parties receive more than 70% of the vote (90.0% Haredi overall). None of the seven borders another: the canton is held together by the graph's enclave edges, which connect municipalities dominated by the same bloc (Section 5.3). It is therefore a political archipelago rather than a geographic region, and it should be read as "the Haredi cities vote as a bloc of their own" rather than as a contiguous territory.
+
+### 8.7 Haifa and the Krayot
+
+**Table 12:** Haifa metropolitan area canton assignments.
 
 | Municipality | Canton | Dominant Bloc |
 |-------------|--------|---------------|
@@ -479,11 +554,11 @@ The Greater Tel Aviv metropolitan area is concentrated in **Canton 0** (CENTER M
 | Nesher | 2 | Right |
 | Akko | 2 | Right |
 
-**Analysis:** Haifa and all the Krayot are assigned to **Canton 2** (RIGHT North, 44.6% Right), a large northern canton that encompasses the Jewish towns of the Galilee, Golan Heights, and upper Galilee alongside the Haifa metropolitan area. Louvain's modularity-based approach groups these right-leaning Jewish cities together based on their political similarity, keeping Haifa in a politically compatible canton despite its geographic proximity to Arab municipalities in the Galilee.
+**Analysis:** Haifa and all the Krayot are assigned to **Canton 2** (RIGHT North, 44.8% Right), a large northern canton that encompasses the Jewish towns of the Galilee, Golan Heights, and upper Galilee alongside the Haifa metropolitan area. Louvain's modularity-based approach groups these right-leaning Jewish cities together based on their political similarity, keeping Haifa in a politically compatible canton despite its geographic proximity to Arab municipalities in the Galilee.
 
-### 8.6 Southern Periphery
+### 8.8 Southern Periphery
 
-**Table 11:** Southern periphery canton assignments.
+**Table 13:** Southern periphery canton assignments.
 
 | Municipality | Canton | Dominant Bloc |
 |-------------|--------|---------------|
@@ -496,15 +571,16 @@ The Greater Tel Aviv metropolitan area is concentrated in **Canton 0** (CENTER M
 | Yeruham | 1 | Right |
 | Mitzpe Ramon | 1 | Right |
 
-**Analysis:** All southern periphery towns, including Beer Sheva, are grouped in **Canton 1** (RIGHT South, 49.5% Right, 17.4% Haredi), forming a contiguous arc from Jerusalem through the Negev to Eilat. This aligns with the well-documented "periphery vote" phenomenon [10, 25]. Beer Sheva (65.0% Right) is grouped with the right-wing southern arc, consistent with its voting patterns, despite its geographic proximity to Bedouin municipalities.
+**Analysis:** All southern periphery towns, including Beer Sheva, are grouped in **Canton 1** (RIGHT Jerusalem & South), forming a contiguous arc from Jerusalem through the Negev to Eilat. This aligns with the well-documented "periphery vote" phenomenon [10, 25]. Beer Sheva (65.0% Right) is grouped with the right-wing southern arc, consistent with its voting patterns, despite its geographic proximity to Bedouin municipalities.
 
-### 8.7 Comparison to Administrative Districts
+### 8.9 Comparison to Administrative Districts
 
-We compared our K=5 political cantons to Israel's official administrative districts (based on CBS locality data). The Adjusted Rand Index [14] between the canton partition and the administrative district partition is 0.286 (low; computed over the 149 municipalities that could be matched to a district), confirming that political cantons only partially coincide with administrative districts and diverge significantly in key ways:
+We compared our K=5 political cantons to Israel's official administrative districts, assigning each municipality the most common district among its localities in the CBS locality file. The Adjusted Rand Index [14] between the canton partition and the administrative district partition is 0.360 over all 255 municipalities (low to moderate; earlier versions reported 0.286 over the 149 cities and local councils that a name-based lookup could match, which left out every regional council). Political cantons only partially coincide with administrative districts and diverge in key ways:
 
 - Administrative districts follow geographic boundaries (north, center, south), while political cantons follow ideological lines (Arab vs. Jewish, religious vs. secular, periphery vs. core).
-- Arab municipalities are split into two cantons (north and south), cutting across multiple administrative districts.
-- Jerusalem is administratively its own district but politically groups with the southern periphery and metropolitan core.
+- The Arab canton spans the Northern, Haifa, Central and Southern districts.
+- The Judea and Samaria district is split three ways: most authorities join the Jerusalem and southern canton, Oranit and Alfei Menashe the metropolitan canton, and Beitar Illit, Modi'in Illit and Immanuel the Haredi canton.
+- Jerusalem is administratively its own district but politically groups with the southern periphery and Judea and Samaria.
 
 This confirms that **political cantons more closely reflect ideological geography than administrative geography, though partial overlap exists**.
 
@@ -514,19 +590,19 @@ This confirms that **political cantons more closely reflect ideological geograph
 
 ### 9.1 Limitations
 
-**Population Imbalance:** The K=5 NMF_5/Louvain partition has a municipality count range of 16--75 (Pop CV = 0.69). The two Arab cantons are smaller (16 and 43 municipalities) than the Jewish cantons (34, 61, 75), reflecting the demographic reality that Arab municipalities are fewer in number. Louvain optimizes modularity rather than balance; the SA alternative achieves better balance (CV = 0.28) but with lower silhouette (-0.035), as its contiguity constraints can override political similarity.
+**Population Imbalance:** The K=5 NMF_5/Louvain partition has a municipality count range of 7--75 (Pop CV = 0.66). The Haredi canton (7 municipalities, 157,000 voters) is far smaller than the others (53--75 municipalities). Louvain optimizes modularity rather than balance; the SA alternative achieves better balance (CV = 0.29) but with lower silhouette (0.136), as its contiguity constraints can override political similarity.
 
 **SA Single-Run Results:** Simulated Annealing is a stochastic algorithm, and the results reported for each SA configuration are from a single run with a fixed random seed (42), which makes each run exactly reproducible. While the fixed seed provides a consistent starting point, different random seeds or initialization strategies could yield different partitions. Ideally, each SA configuration would be run multiple times to report mean and variance of evaluation metrics. Our stability analysis (Section 7) partially addresses this by evaluating SA on five different election datasets, revealing the sensitivity of SA results to input data variation.
 
-**SA Seed Sensitivity:** To quantify SA's stochastic variance, we ran the primary SA configuration (NMF_5/Cosine/K=5) with 30 different random seeds (following the recommendation of at least 30 runs for reliable variance estimation [9]). Results showed silhouette scores ranging from -0.147 to 0.058 (mean: -0.035, std: 0.060, 95% CI: [-0.057, -0.013]) and Pop CV ranging from 0.23 to 0.46 (mean: 0.28, std: 0.06, 95% CI: [0.26, 0.30]). This variance is smaller than the gap between SA and Louvain (silhouette difference of ~0.17), confirming that algorithmic choice dominates over seed variance.
+**SA Seed Sensitivity:** To quantify SA's stochastic variance, we ran the primary SA configuration (NMF_5/Cosine/K=5) with 30 different random seeds (following the recommendation of at least 30 runs for reliable variance estimation [9]). Results showed silhouette scores ranging from 0.120 to 0.140 (mean: 0.136, std: 0.003, 95% CI: [0.135, 0.137]) and Pop CV ranging from 0.23 to 0.29 (mean: 0.29, std: 0.01, 95% CI: [0.287, 0.295]). This variance is much smaller than the gap between SA and Louvain (silhouette difference of ~0.04), confirming that algorithmic choice dominates over seed variance.
 
 **Ecological Fallacy:** Our analysis operates at the municipality level, aggregating individual votes. This means we cannot infer individual-level political preferences from municipality-level patterns - a well-known limitation in spatial analysis called the ecological fallacy [19]. For example, a right-leaning municipality may contain left-leaning neighborhoods, but our municipality-level data cannot capture such within-municipality variation. Our partition describes municipal-level political geography, not individual voter preferences.
 
 **Static Analysis:** We analyze election results as fixed snapshots without modeling voter migration, demographic shifts, or political realignment over time. Our stability analysis shows structural persistence across five elections, but longer-term changes (such as growth of specific religious or ethnic communities) are not captured.
 
-**Data Coverage:** We include only the 229 municipalities that are consistently matchable across all five elections and geographic databases. Small localities, kibbutzim, and moshavim that are part of regional councils (administrative units encompassing multiple small localities) are aggregated at the regional council level, potentially masking within-council political heterogeneity. Municipalities in Judea and Samaria (the West Bank), including Ariel, Ma'ale Adumim, Beitar Illit and Modi'in Illit, are not part of the analysis set.
+**Data Coverage:** We include the 255 municipalities that have votes in all five elections, including the 23 Israeli local authorities in Judea and Samaria. Small localities, kibbutzim, and moshavim that are part of regional councils (administrative units encompassing multiple small localities) are aggregated at the regional council level, potentially masking within-council political heterogeneity. The Judea and Samaria boundaries combine two sources (CBS and the Civil Administration), neither of which states terms of use; the regional councils' jurisdictions are fragmented, and Palestinian areas, which do not vote in Knesset elections, are outside the analysis.
 
-**Contiguity Approximation:** The augmented graph includes virtual edges for isolate municipalities and enclaves, which means some "contiguous" cantons are not strictly geographically connected but rather connected through feature-space proximity. For example, Kiryat Shmona, in the far north, is assigned to Canton 1 (RIGHT South) through enclave edges that link it to right-wing enclaves such as Sderot and Dimona. This is a pragmatic compromise to handle Israel's complex municipal geography.
+**Contiguity Approximation:** The augmented graph includes virtual edges for isolate municipalities and enclaves, which means some "contiguous" cantons are not strictly geographically connected but rather connected through feature-space proximity. For example, Kiryat Shmona, in the far north, is assigned to Canton 1 (RIGHT Jerusalem & South) through enclave edges that link it to right-wing enclaves such as Sderot and Dimona, and the Haredi canton consists of seven municipalities none of which borders another (Section 8.6). Ariel and Elkana, which touch no other polygon within 100 m, are linked to their nearest authority. These are pragmatic compromises to handle Israel's complex municipal geography; removing the enclave edges would change the method and is left for future work.
 
 **KMeans Baseline Contiguity:** The KMeans baseline operates purely in feature space without geographic constraints, meaning its cantons may be geographically disconnected. It is included as a reference point to quantify the trade-off between clustering quality and contiguity enforcement.
 
@@ -550,15 +626,17 @@ This confirms that **political cantons more closely reflect ideological geograph
 
 This project successfully demonstrates that constrained spatial clustering can partition Israeli municipalities into politically coherent, geographically contiguous cantons that align with known political-demographic divisions. Our systematic experimental framework - evaluating 264 configurations across four representations, three distance metrics, four algorithms, and six values of K - provides comprehensive evidence that:
 
-1. **Israel's political geography is structurally robust.** BlocShares achieves the highest silhouette scores for unconstrained algorithms, while NMF_5 with Louvain produces the most interpretable partition with positive silhouette (0.138) and stable boundaries across elections (ARI = 0.795) -- demonstrating that representation and algorithm choice critically interact. SA achieves better population balance (CV = 0.28) but lower silhouette (-0.035); Louvain's modularity-based approach yields politically coherent assignments with positive silhouette.
+1. **Israel's political geography is structurally robust.** BlocShares achieves the highest silhouette scores for unconstrained algorithms, while NMF_5 with Louvain produces the most interpretable partition with positive silhouette (0.180) and stable boundaries across elections (ARI = 0.909) -- demonstrating that representation and algorithm choice critically interact. SA achieves better population balance (CV = 0.29) but lower silhouette (0.136); Louvain's modularity-based approach yields politically coherent assignments with positive silhouette.
 
-2. **The Arab-Jewish divide is the dominant political-geographic cleavage.** In virtually all configurations, Arab-majority municipalities form a distinct, cohesive cluster, reflecting the unique Arab voting pattern that is quantitatively dissimilar from all Jewish-majority voting patterns.
+2. **The Arab-Jewish divide is the dominant political-geographic cleavage, with the Haredi cities a second bloc of their own.** In virtually all configurations, Arab-majority municipalities form a distinct, cohesive cluster, reflecting the unique Arab voting pattern that is quantitatively dissimilar from all Jewish-majority voting patterns. With the Judea and Samaria authorities included, the seven predominantly Haredi cities also form their own canton, although they share no borders.
 
-3. **Political cantons differ from administrative districts.** With ARI = 0.286 [14] between our K=5 cantons and Israel's administrative districts, we confirm that political geography follows ideological lines (religious vs. secular, periphery vs. core, Arab vs. Jewish) rather than administrative boundaries.
+3. **Political cantons differ from administrative districts.** With ARI = 0.360 [14] between our K=5 cantons and Israel's administrative districts, we confirm that political geography follows ideological lines (religious vs. secular, periphery vs. core, Arab vs. Jewish) rather than administrative boundaries.
 
-4. **Multi-objective optimization is essential.** The trade-off between political homogeneity, population balance, and geographic compactness requires careful algorithm selection. Louvain produces the most interpretable partitions with the best silhouette among graph-based methods, while SA achieves the best population balance through its explicit multi-objective cost function -- each algorithm has distinct strengths depending on priorities.
+4. **The cantons are real differences, not artifacts of clustering.** Built from the 2019--2021 elections only, the cantons differ significantly in all five blocs' vote shares in the held-out 2022 election (44 of 50 canton pairs, effect sizes $\epsilon^2$ 0.34--0.62).
 
-5. **Distance metric choice matters.** Cosine distance with BlocShares/Agglomerative at K=3 achieves the highest silhouette score (0.987), ahead of Euclidean (0.905) and Jensen-Shannon (0.798) for the same configuration, while KMeans partitions that score well under Euclidean distance score poorly under Cosine and Jensen-Shannon. The choice of metric interacts with both the representation and the algorithm's objective.
+5. **Multi-objective optimization is essential.** The trade-off between political homogeneity, population balance, and geographic compactness requires careful algorithm selection. Louvain produces the most interpretable partitions with the best silhouette among graph-based methods, while SA achieves the best population balance through its explicit multi-objective cost function -- each algorithm has distinct strengths depending on priorities.
+
+6. **Distance metric choice matters.** Cosine distance with BlocShares/Agglomerative at K=3 achieves the highest silhouette score (0.987), ahead of Euclidean (0.910) and Jensen-Shannon (0.793) for the same configuration, while KMeans partitions that score well under Euclidean distance score poorly under Cosine and Jensen-Shannon. The choice of metric interacts with both the representation and the algorithm's objective.
 
 This project bridges computer science, data science, geographic information systems, and political analysis, providing both a methodological contribution to constrained spatial clustering and an analytical tool for exploring Israel's political geography. The open-source codebase, modular architecture, and comprehensive experiment logs enable full reproducibility and extension.
 
@@ -634,20 +712,20 @@ This project bridges computer science, data science, geographic information syst
 
 ### A. Canton Member Lists (K=5 NMF_5/Cosine/Louvain Partition)
 
-**Canton 0 - CENTER Metro (34 municipalities):**
-Even Yehuda, Or Yehuda, El'ad, Bnei Brak, Givat Shmuel, Givatayim, Ganei Tikva, Daliyat al-Karmel, Drom HaSharon, Hod HaSharon, Herzliya, Hof HaSharon, Yehud-Monosson, Kokhav Ya'ir, Kfar Yona, Kfar Saba, Kfar Shemaryahu, Lev HaSharon, Netanya, Savyon, Isfiya, Emek Hefer, Pardesiya, Petah Tikva, Kadima-Zoran, Kiryat Ono, Kiryat Ye'arim, Rekhesim, Rosh HaAyin, Ramat Gan, Ramat HaSharon, Ra'anana, Tel Aviv-Yafo, Tel Mond
+**Canton 0 - METRO Tel Aviv (53 municipalities):**
+Alfei Menashe, Azor, Bat Yam, Be'er Ya'akov, Beit Dagan, Brenner, Daliyat al-Karmel, Drom HaSharon, Emek Hefer, Even Yehuda, Gan Raveh, Ganei Tikva, Gezer, Givat Shmuel, Givatayim, Herzliya, Hevel Modi'in, Hod HaSharon, Hof HaSharon, Holon, Isfiya, Kadima-Zoran, Kfar Saba, Kfar Shemaryahu, Kfar Yona, Kiryat Ekron, Kiryat Ono, Kokhav Ya'ir, Lev HaSharon, Lod, Mazkeret Batya, Modi'in-Maccabim-Re'ut, Nahal Sorek, Nes Tziona, Netanya, Or Yehuda, Oranit, Pardesiya, Petah Tikva, Ra'anana, Ramat Gan, Ramat HaSharon, Ramla, Rehovot, Rishon LeZion, Rosh HaAyin, Savyon, Sdot Dan, Shoham, Tel Aviv-Yafo, Tel Mond, Yavne, Yehud-Monosson
 
-**Canton 1 - RIGHT South (61 municipalities):**
-Ofakim, Azor, Eilat, Ashdod, Eshkol, Ashkelon, Be'er Tuvia, Be'er Ya'akov, Beer Sheva, Beit Jann, Beit Dagan, Beit Shemesh, Bnei Ayish, Bnei Shimon, Brenner, Bat Yam, Gedera, Gedarot, Gezer, Gan Yavne, Gan Raveh, Dimona, HaArava HaTikhona, Hevel Eilot, Hevel Yavne, Hevel Modi'in, Holon, Hof Ashkelon, Yavne, Yoav, Yeruham, Jerusalem, Lehavim, Lod, Lakhish, Mevasseret Zion, Modi'in-Maccabim-Re'ut, Mazkeret Batya, Mateh Yehuda, Meitar, Mitzpe Ramon, Merhavim, Nahal Sorek, Nes Tziona, Netivot, Omer, Arad, Kiryat Gat, Kiryat Malakhi, Kiryat Ekron, Kiryat Shmona, Rishon LeZion, Rehovot, Ramla, Ramat Negev, Sdot Negev, Sderot, Shoham, Sha'ar HaNegev, Shafir, Tamar
+**Canton 1 - RIGHT Jerusalem & South (60 municipalities):**
+Arad, Ariel, Arvot HaYarden, Ashdod, Ashkelon, Be'er Tuvia, Beer Sheva, Beit Aryeh-Ofarim, Beit El, Beit Jann, Beit Shemesh, Bnei Ayish, Bnei Shimon, Dimona, Efrat, Eilat, Elkana, Eshkol, Gan Yavne, Gedarot, Gedera, Givat Ze'ev, Gush Etzion, HaArava HaTikhona, Har Adar, Har Hevron, Harish, Hevel Eilot, Hevel Yavne, Hof Ashkelon, Jerusalem, Karnei Shomron, Kedumim, Kiryat Arba, Kiryat Gat, Kiryat Malakhi, Kiryat Shmona, Lakhish, Lehavim, Ma'ale Adumim, Ma'ale Efraim, Mateh Binyamin, Mateh Yehuda, Megilot, Meitar, Merhavim, Mevasseret Zion, Mitzpe Ramon, Netivot, Ofakim, Omer, Ramat Negev, Sderot, Sdot Negev, Sha'ar HaNegev, Shafir, Shomron, Tamar, Yeruham, Yoav
 
 **Canton 2 - RIGHT North (75 municipalities):**
-Abu Snan, Or Akiva, Alona, Elyakhin, Buq'ata, Beit She'an, Binyamina-Giv'at Ada, Julis, Golan, Gush Halav (Jish), HaGilboa, HaGalil HaElyon, HaGalil HaTahton, Zvulun, Zikhron Ya'akov, Zarziir, Hadera, Hof HaCarmel, Hurfeish, Haifa, Hatzor HaGlilit, Harish, Tiberias, Tuba-Zangariyye, Tirat Carmel, Yanouh-Jat, Yavne'el, Yesod HaMa'ala, Yokne'am Illit, Yirka, Kisra-Sumei, Ka'abiyye-Tabbash-Hajajre, Kfar Vradim, Kafr Kama, Kfar Tavor, Karmi'el, Mevo'ot HaHermon, Magar, Majdal Shams, Migdal, Migdal HaEmek, Megiddo, Mateh Asher, Metula, Menashe, Mas'ada, Ma'ale Yosef, Ma'alot-Tarshiha, Merom HaGalil, Misgav, Nahariya, Nesher, Sa'ur, Ghajar, Ilabun, Ein Kinya, Akko, Emek HaYarden, Emek HaMa'ayanot, Emek Yizre'el, Afula, Fassuta, Peqi'in (Buqei'a), Pardes Hanna-Karkur, Safed, Katzrin, Kiryat Ata, Kiryat Bialik, Kiryat Tiv'on, Kiryat Yam, Kiryat Motzkin, Rama, Rosh Pinna, Ramat Yishai, Shlomi
+Abu Snan, Afula, Akko, Alona, Beit She'an, Binyamina-Giv'at Ada, Buq'ata, Ein Kinya, Elyakhin, Emek HaMa'ayanot, Emek HaYarden, Emek Yizre'el, Fassuta, Ghajar, Golan, Gush Halav (Jish), HaGalil HaElyon, HaGalil HaTahton, HaGilboa, Hadera, Haifa, Hatzor HaGlilit, Hof HaCarmel, Hurfeish, Ilabun, Julis, Ka'abiyye-Tabbash-Hajajre, Kafr Kama, Karmi'el, Katzrin, Kfar Tavor, Kfar Vradim, Kiryat Ata, Kiryat Bialik, Kiryat Motzkin, Kiryat Tiv'on, Kiryat Yam, Kisra-Sumei, Ma'ale Yosef, Ma'alot-Tarshiha, Magar, Majdal Shams, Mas'ada, Mateh Asher, Megiddo, Menashe, Merom HaGalil, Metula, Mevo'ot HaHermon, Migdal, Migdal HaEmek, Misgav, Nahariya, Nesher, Nof HaGalil, Or Akiva, Pardes Hanna-Karkur, Peqi'in (Buqei'a), Rama, Ramat Yishai, Rosh Pinna, Sa'ur, Safed, Shlomi, Tiberias, Tirat Carmel, Tuba-Zangariyye, Yanouh-Jat, Yavne'el, Yesod HaMa'ala, Yirka, Yokne'am Illit, Zarziir, Zikhron Ya'akov, Zvulun
 
-**Canton 3 - ARAB Galilee (43 municipalities):**
-Abu Ghosh, Umm al-Fahm, Iksal, I'billin, Baqa al-Gharbiyye, Bustan al-Marj, Basma, Bi'ina, Jadeidi-Makr, Jisr az-Zarqa, Jatt, Dabburiyya, Dir al-Asad, Dir Hanna, Zemer, Tur'an, Tayibe, Tira, Tamra, Yafi', Kabul, Kaukab Abu al-Hija, Kafr Yasif, Kafr Kanna, Kafr Manda, Kafr Qara, Majd al-Krum, Mazra'a, Ma'ilya, Ma'ale Iron, Mashhad, Nahf, Nazareth, Sakhnin, Ilut, Ein Mahil, Arraba, Ar'ara, Fureidis, Qalansuwa, Reina, Sha'ab, Shfar'am
+**Canton 3 - ARAB (60 municipalities):**
+Abu Ghosh, Al-Batuf, Al-Qasam, Ar'ara, Ar'ara BaNegev, Arraba, Baqa al-Gharbiyye, Basma, Basmat Tab'un, Bi'ina, Bir al-Maksur, Bu'eine Nujeidat, Bustan al-Marj, Dabburiyya, Dir Hanna, Dir al-Asad, Ein Mahil, Fureidis, Hura, I'billin, Iksal, Ilut, Jadeidi-Makr, Jaljulia, Jatt, Jisr az-Zarqa, Kabul, Kafr Bara, Kafr Kanna, Kafr Manda, Kafr Qara, Kafr Qasem, Kafr Yasif, Kaukab Abu al-Hija, Kuseife, Laqiye, Ma'ale Iron, Ma'ilya, Majd al-Krum, Mashhad, Mazra'a, Nahf, Nazareth, Neve Midbar, Qalansuwa, Rahat, Reina, Sakhnin, Segev Shalom, Sha'ab, Shfar'am, Shibli-Umm al-Ghanam, Tamra, Tayibe, Tel Sheva, Tira, Tur'an, Umm al-Fahm, Yafi', Zemer
 
-**Canton 4 - ARAB Periphery (16 municipalities):**
-Al-Qasam, Al-Batuf, Bu'eine Nujeidat, Bir al-Maksur, Basmat Tab'un, Jaljulia, Hura, Kuseife, Kafr Bara, Kafr Qasem, Laqiye, Neve Midbar, Ar'ara BaNegev, Rahat, Segev Shalom, Tel Sheva
+**Canton 4 - HAREDI Cities (7 municipalities):**
+Beitar Illit, Bnei Brak, El'ad, Immanuel, Kiryat Ye'arim, Modi'in Illit, Rekhasim
 
 ### B. Software Architecture
 

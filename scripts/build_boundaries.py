@@ -39,15 +39,19 @@ REGIONAL_COUNCILS = {
     600: ("מגילות ים המלח", "Megilot"),
 }
 
+# English names in common use (the CBS layer has transliterations such as "QIRYAT ARBA")
+ENGLISH_NAMES = {
+    "אורנית": "Oranit", "אלפי מנשה": "Alfei Menashe", "אלקנה": "Elkana", "אפרת": "Efrat", "אריאל": "Ariel",
+    "בית אל": "Beit El", "בית אריה-עופרים": "Beit Aryeh-Ofarim", "ביתר עילית": "Beitar Illit",
+    "גבעת זאב": "Givat Ze'ev", "הר אדר": "Har Adar", "מודיעין עילית": "Modi'in Illit",
+    "מעלה אדומים": "Ma'ale Adumim", "מעלה אפרים": "Ma'ale Efraim", "עמנואל": "Immanuel",
+    "קדומים": "Kedumim", "קריית ארבע": "Kiryat Arba", "קרני שומרון": "Karnei Shomron",
+}
+
 PALESTINIAN_CITIES = {  # (lat, lon); none may fall inside an Israeli authority polygon
     "Ramallah": (31.9038, 35.2034), "Al-Bireh": (31.9100, 35.2167), "Nablus": (32.2211, 35.2544),
     "Jericho": (31.8667, 35.4500), "Bethlehem": (31.7054, 35.2024), "Hebron old city": (31.5247, 35.1101),
 }
-
-
-def english(name: str) -> str:
-    """CBS upper-case transliteration → title case ("MA'ALE ADUMMIM" → "Ma'ale Adummim")."""
-    return " ".join("-".join(p.capitalize() for p in w.split("-")) for w in name.split())
 
 
 def target_authorities() -> list[str]:
@@ -67,7 +71,7 @@ def main() -> None:
     source_of = match_names(cbs["name"], cities, {})
     city_gdf = gpd.GeoDataFrame([{
         "MUN_HEB": target,
-        "MUN_ENG": english(cbs.loc[cbs["name"] == source_of[target], "MAX_MUNC_NAME_ENG"].iloc[0]),
+        "MUN_ENG": ENGLISH_NAMES[target],
         "geometry": unary_union([make_valid(g) for g in cbs.loc[cbs["name"] == source_of[target], "geometry"]]),
     } for target in cities], crs=ITM)
 
