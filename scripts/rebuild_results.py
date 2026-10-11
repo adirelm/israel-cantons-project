@@ -7,8 +7,8 @@ Run after changing BLOC_MAPPING in src/config.py:
 
 Mirrors notebooks/04_political_features.ipynb and notebooks/06_experiments.ipynb,
 then derives the primary K=5 map (NMF_5 / Cosine / Louvain, as reported in the
-paper) from the experiment grid. Canton names are carried over from the previous
-cantons_labeled.csv by largest overlap.
+paper) from the experiment grid. Canton IDs and names are fixed by anchor municipalities
+(PRIMARY_CANTON_ANCHORS).
 """
 
 import sys
@@ -18,7 +18,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import json
 import logging
-from collections import Counter
 
 import geopandas as gpd
 import networkx as nx
@@ -37,9 +36,18 @@ from src.clustering.baseline import KMeansBaselineClusterer
 from src.clustering.base import CantonAssignment
 from src.evaluation.experiment import ExperimentRunner
 from src.evaluation.stability import run_stability_analysis
+from src.evaluation.canton_names import name_cantons
 from src.evaluation.metrics import canton_profiles
 
 PRIMARY_CONFIG = "nmf_5__cosine__louvain__k5"
+# (anchor municipality, canton ID, name): one anchor per canton of the primary map
+PRIMARY_CANTON_ANCHORS = [
+    ("תל אביב -יפו", 0, "METRO Tel Aviv"),
+    ("ירושלים", 1, "RIGHT Jerusalem & South"),
+    ("חיפה", 2, "RIGHT North"),
+    ("נצרת", 3, "ARAB"),
+    ("בני ברק", 4, "HAREDI Cities"),
+]
 EXPERIMENTS_DIR = DATA_PROCESSED / "experiments"
 
 
@@ -68,6 +76,26 @@ def build_graph(bloc_features: pd.DataFrame, feature_cols: list[str]) -> nx.Grap
             G_raw.add_edge(node, n)
     G = G_raw.subgraph(set(bloc_features["municipality"]) & set(G_raw.nodes())).copy()
     return preprocess_graph(G, bloc_features.set_index("municipality"), feature_cols)
+
+
+def save_matched_elections(elections: dict[int, pd.DataFrame]) -> None:
+    """Municipality-level results per election (notebook 02's election_knesset_*_matched.csv)."""
+    for k, df in elections.items():
+        df.to_csv(DATA_PROCESSED / f"election_knesset_{k}_matched.csv", index=False, encoding="utf-8")
+
+
+def save_elections_summary(elections: dict[int, pd.DataFrame]) -> None:
+    """Per-election totals (notebook 02's elections_summary.csv)."""
+    common = set.intersection(*(set(df["municipality"]) for df in elections.values()))
+    rows = [{
+        "knesset": k,
+        "n_municipalities": len(df),
+        "n_common": len(common),
+        "total_eligible": int(df["eligible"].sum()),
+        "total_voters": int(df["voters"].sum()),
+        "avg_turnout": round(float(df["turnout_pct"].mean()), 2),
+    } for k, df in sorted(elections.items())]
+    pd.DataFrame(rows).to_csv(DATA_PROCESSED / "elections_summary.csv", index=False)
 
 
 def save_augmented_graph(G_aug: nx.Graph) -> None:
@@ -132,30 +160,20 @@ def run_stability(elections, G_aug) -> None:
 def save_primary_map(bloc_features: pd.DataFrame, weights: dict[str, float]) -> None:
     """cantons_final.* and cantons_labeled.csv from the primary grid configuration.
 
-    Canton IDs and names are matched to the previous cantons_labeled.csv by largest
-    overlap, so "Canton 1" keeps meaning the same region across rebuilds.
+    Canton IDs and names come from PRIMARY_CANTON_ANCHORS, so the same region keeps
+    the same ID and name across rebuilds; the run fails if the anchors no longer
+    fall one per canton (the map changed shape and needs new names).
     """
-    old_labels = pd.read_csv(DATA_PROCESSED / "cantons_labeled.csv")
-    old_canton = dict(zip(old_labels["municipality"], old_labels["canton"]))
-    name_of = dict(zip(old_labels["canton"], old_labels["label"]))
-
     final = pd.read_csv(EXPERIMENTS_DIR / f"{PRIMARY_CONFIG}.csv")
-    raw = dict(zip(final["municipality"], final["canton"]))
-    match = {}
-    for cid in set(raw.values()):
-        overlap = Counter(old_canton[m] for m, c in raw.items() if c == cid and m in old_canton)
-        match[cid] = overlap.most_common(1)[0][0]
-    if len(set(match.values())) != len(match):
-        raise ValueError(f"Cantons no longer match the previous map one-to-one: {match}")
-
-    assignment = CantonAssignment({m: match[c] for m, c in raw.items()})
+    assigned, names = name_cantons(dict(zip(final["municipality"], final["canton"])), PRIMARY_CANTON_ANCHORS)
+    assignment = CantonAssignment(assigned)
     assignment.to_dataframe().to_csv(DATA_PROCESSED / "cantons_final.csv", index=False, encoding="utf-8")
     canton_profiles(assignment, bloc_features, weights).to_csv(
         DATA_PROCESSED / "cantons_final_stats.csv", index=False, encoding="utf-8"
     )
 
     labeled = assignment.to_dataframe()
-    labeled["label"] = labeled["canton"].map(name_of)
+    labeled["label"] = labeled["canton"].map(names)
     labeled.to_csv(DATA_PROCESSED / "cantons_labeled.csv", index=False, encoding="utf-8")
 
     geo = gpd.read_file(DATA_PROCESSED / "municipalities_dissolved.geojson")
@@ -176,6 +194,8 @@ def main() -> None:
 
     save_bloc_mappings()
     save_political_features(bloc_features)
+    save_matched_elections(elections)
+    save_elections_summary(elections)
     save_augmented_graph(G_aug)
     run_grid(elections, G_aug, weights)
     run_stability(elections, G_aug)
