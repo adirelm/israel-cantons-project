@@ -29,7 +29,7 @@ Key results show that the BlocShares representation produces the highest cluster
 
 ### 1.1 Motivation
 
-Over the past four years, Israel held five Knesset elections (April 2019, September 2019, March 2020, March 2021, and November 2022), an unprecedented frequency that reflects deep political divisions across multiple dimensions: secular versus religious, left versus right on the ideological spectrum, Arab versus Jewish communal politics, and attitudes toward judicial reform and governance. Throughout this period, public and media discourse repeatedly invoked the notion of dividing Israel into separate "cantons" along political lines - contrasting, for example, Tel Aviv's liberal-secular majority with Jerusalem's religious-conservative population, or the Arab-majority towns of northern Israel with predominantly Jewish communities elsewhere.
+Over the past four years, Israel held five Knesset elections (April 2019, September 2019, March 2020, March 2021, and November 2022), an unprecedented frequency that reflects deep political divisions across multiple dimensions: secular versus religious, left versus right on the ideological spectrum, Arab versus Jewish communal politics, and attitudes toward judicial reform and governance. Throughout this period, public and media discourse repeatedly invoked the notion of dividing Israel into separate "cantons" along political lines - contrasting, for example, Tel Aviv's liberal-secular majority with Jerusalem's religious-conservative population, or the Arab-majority towns of northern Israel with predominantly Jewish communities elsewhere. The proposal was first set out in the Israeli press by Strenger and Yadid, who argued that Israel could be divided into autonomous cantons along these lines [31].
 
 While such discourse is largely rhetorical, it raises a compelling computational question: if Israel were to be divided into politically coherent regions based purely on voting patterns, what form would those regions take, and how stable would they be across election cycles? This project applies data-driven computational methods to answer this question rigorously.
 
@@ -625,6 +625,8 @@ This project bridges computer science, data science, geographic information syst
 [29] Duque, J. C., Anselin, L., & Rey, S. J. (2012). The MAX-P-REGIONS problem. *Journal of Regional Science*, 52(3), 397-419.
 
 [30] Anselin, L. (1995). Local indicators of spatial association -- LISA. *Geographical Analysis*, 27(2), 93-115.
+
+[31] Strenger, C., & Yadid, J. (2014, October 8). Lama rak shtei medinot? Gam Israel yekhola lehitchalek le'otonomiot [Why only two states? Israel, too, can be divided into autonomies]. *Haaretz*, The Edge. English edition: Yadid, J., & Strenger, C. (2014, October 7). How cantonization can save Israel. *Haaretz*.
 
 ---
 
