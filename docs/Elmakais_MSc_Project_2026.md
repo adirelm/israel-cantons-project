@@ -345,8 +345,10 @@ We select K=5 with NMF_5/Cosine/Louvain as the primary result for interpretive a
 |-----------|--------|------------|-------------|--------|
 | Silhouette (higher = better) | 0.25 | 0.987 | 0.180 | K=3 |
 | Population Balance CV (lower = better) | 0.25 | 1.41 | 0.66 | K=5 |
-| Temporal Stability ARI (higher = better) | 0.25 | 0.954 | 0.909 | K=3 |
+| Temporal Stability ARI (higher = better) | 0.25 | 0.954* | 0.909 | K=3 |
 | Political Granularity (5 > 3 cantons) | 0.25 | 3 cantons | 5 cantons | K=5 |
+
+*\*Stability is measured at K=5 for every configuration; this is BlocShares/Cosine/Agglomerative at K=5, the nearest tested configuration.*
 
 The criteria split 2--2: K=3 Agglomerative has the higher silhouette and stability, K=5 Louvain the better population balance and political resolution. We select K=5 because the K=3 configuration's superior silhouette reflects its coarser granularity (fewer, larger clusters naturally have higher cohesion), while its severe population imbalance (CV=1.41) and limited political resolution (only 3 regions) make it unsuitable for detailed political analysis. The K=5 partition's positive silhouette (0.180) indicates weak but above-chance cluster structure (below the 0.25 threshold for substantial structure per Rousseeuw [13]), while providing the granularity needed to distinguish the metropolitan core, two right-leaning regions, the Arab canton and the Haredi cities. K=6 was also examined: it splits off a two-town canton (Abu Snan and Kafr Yasif) and is worse on every criterion (silhouette 0.070, CV 0.85, ARI 0.801). NMF_5 provides a good balance of dimensionality reduction and interpretability: its five non-negative additive components capture finer-grained political distinctions than BlocShares' five coarse features, producing well-balanced partitions across all algorithms. Louvain's modularity-based optimization yields a positive silhouette (0.180), politically coherent assignments (all major cities land in ideologically compatible cantons), and stable boundaries across elections (mean ARI = 0.909, Section 7).
 
