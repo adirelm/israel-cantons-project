@@ -65,3 +65,54 @@ def get_graph_stats(G: nx.Graph) -> dict:
         "largest_component": max(len(c) for c in components) if components else 0,
         "isolated_nodes": sum(1 for d in degrees if d == 0),
     }
+
+
+def add_tolerance_edges(
+    G: nx.Graph,
+    geo_dissolved: gpd.GeoDataFrame,
+    nodes: set[str],
+    tolerance_m: float = 100.0,
+    name_col: str = "MUN_HEB",
+    metric_crs: str = "EPSG:2039",
+) -> nx.Graph:
+    """Add edges between each of ``nodes`` and municipalities within ``tolerance_m``.
+
+    For polygons from different sources, whose shared borders do not coincide exactly.
+    Two polygons are adjacent when their ``tolerance_m`` buffers overlap by at least
+    (2 × tolerance_m)² m², i.e. they run alongside each other for roughly 2 × tolerance_m
+    or more; touching at a corner is not enough. Existing edges are kept.
+    """
+    G = G.copy()
+    geo = geo_dissolved.to_crs(metric_crs).set_index(name_col)
+    buffered = geo.geometry.buffer(tolerance_m)
+    min_overlap = (2 * tolerance_m) ** 2
+    for node in nodes:
+        if node not in buffered.index:
+            continue
+        G.add_node(node)
+        candidates = buffered.index[buffered.intersects(buffered[node])]
+        for other in candidates:
+            if other != node and buffered[node].intersection(buffered[other]).area >= min_overlap:
+                G.add_edge(node, other)
+    return G
+
+
+def connect_isolated_to_nearest(
+    G: nx.Graph,
+    geo_dissolved: gpd.GeoDataFrame,
+    nodes: set[str],
+    name_col: str = "MUN_HEB",
+    metric_crs: str = "EPSG:2039",
+) -> nx.Graph:
+    """Give each of ``nodes`` that has no neighbour an edge to its geographically nearest polygon.
+
+    A geographic fallback for authorities separated from every neighbour by land outside
+    the analysis (e.g. Ariel); without it they would only get feature-similarity edges.
+    """
+    G = G.copy()
+    geo = geo_dissolved.to_crs(metric_crs).set_index(name_col)
+    for node in nodes:
+        if node in geo.index and (node not in G or G.degree(node) == 0):
+            distances = geo.geometry.distance(geo.loc[node, "geometry"]).drop(node)
+            G.add_edge(node, distances.idxmin())
+    return G

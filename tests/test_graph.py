@@ -1,11 +1,13 @@
 """Tests for src.graph.adjacency and src.graph.preprocessing modules."""
 
+import geopandas as gpd
 import networkx as nx
 import numpy as np
 import pandas as pd
 import pytest
+from shapely.geometry import box
 
-from src.graph.adjacency import get_graph_stats
+from src.graph.adjacency import add_tolerance_edges, connect_isolated_to_nearest, get_graph_stats
 from src.graph.preprocessing import preprocess_graph
 from src.data.distance_metrics import EuclideanDistance
 
@@ -82,3 +84,38 @@ class TestPreprocessGraph:
         G_aug = preprocess_graph(G, features, ["f1"], metric=EuclideanDistance())
         assert isinstance(G_aug, nx.Graph)
         assert G_aug.number_of_nodes() >= 3
+
+
+
+def _squares(*rects):
+    return gpd.GeoDataFrame({"MUN_HEB": [n for n, _ in rects]},
+                            geometry=[box(*r) for _, r in rects], crs="EPSG:2039")
+
+
+class TestToleranceEdges:
+    def test_near_shared_side_is_adjacent(self):
+        geo = _squares(("A", (0, 0, 1000, 1000)), ("B", (1050, 0, 2000, 1000)))
+        G = add_tolerance_edges(nx.Graph([("X", "Y")]), geo, {"B"}, tolerance_m=100)
+        assert G.has_edge("A", "B") and G.has_edge("X", "Y")
+
+    def test_corner_contact_and_far_polygons_are_not_adjacent(self):
+        geo = _squares(("A", (0, 0, 1000, 1000)), ("B", (1000, 1000, 2000, 2000)), ("C", (3000, 0, 4000, 1000)))
+        G = add_tolerance_edges(nx.Graph(), geo, {"B", "C"}, tolerance_m=100)
+        assert not G.has_edge("A", "B") and not G.has_edge("A", "C")
+
+    def test_only_listed_nodes_get_tolerance_edges(self):
+        geo = _squares(("A", (0, 0, 1000, 1000)), ("B", (1050, 0, 2000, 1000)))
+        G = add_tolerance_edges(nx.Graph(), geo, set(), tolerance_m=100)
+        assert G.number_of_edges() == 0
+
+
+class TestConnectIsolated:
+    def test_isolated_node_joins_its_nearest_polygon(self):
+        geo = _squares(("A", (0, 0, 1000, 1000)), ("B", (1500, 0, 2500, 1000)), ("C", (5000, 0, 6000, 1000)))
+        G = connect_isolated_to_nearest(nx.Graph([("A", "C")]), geo, {"B"})
+        assert G.has_edge("B", "A") and not G.has_edge("B", "C")
+
+    def test_nodes_with_neighbours_are_untouched(self):
+        geo = _squares(("A", (0, 0, 1000, 1000)), ("B", (1500, 0, 2500, 1000)), ("C", (2600, 0, 3000, 1000)))
+        G = connect_isolated_to_nearest(nx.Graph([("B", "C")]), geo, {"B"})
+        assert set(G.edges()) == {("B", "C")}
