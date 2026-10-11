@@ -164,9 +164,9 @@ else:
     )
     knesset = st.selectbox("Election", list(ELECTION_LABELS), format_func=ELECTION_LABELS.get,
                            index=len(ELECTION_LABELS) - 1)
-    st_folium(build_canton_map(load_geojson(), load_per_election(knesset), load_political_features()),
-              width=900, height=550, returned_objects=[])
     names = dict(load_cantons_labeled()[["canton", "label"]].drop_duplicates().values)
+    st_folium(build_canton_map(load_geojson(), load_per_election(knesset), load_political_features(), names=names),
+              width=900, height=550, returned_objects=[])
     moved = changes[changes["n_differ"] > 0].copy()
     for col in [c for c in moved.columns if c == "primary" or c.startswith("knesset_")]:
         moved[col] = moved[col].map(lambda c: names.get(c, "no counterpart in the primary map"))

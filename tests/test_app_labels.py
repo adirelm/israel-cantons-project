@@ -19,7 +19,9 @@ def test_featured_cantons_carry_their_own_names(page):
     table = _canton_table(page)
     assert table.loc["HAREDI Cities", "Municipalities"] == 7
     assert table.loc["ARAB", "Municipalities"] == 60
-    assert str(table.loc["HAREDI Cities", "Dominant Bloc"]).lower() == "haredi"
+    assert str(table.loc["HAREDI Cities", "Largest Bloc"]).startswith("Haredi")
+    # Voter-weighted, as in the report: Right 41.1% vs Center 39.0% (towns counted equally give Center)
+    assert str(table.loc["METRO Tel Aviv", "Largest Bloc"]).startswith("Right")
 
 
 def test_stability_page_quotes_the_current_ari_values():
@@ -58,3 +60,47 @@ def test_app_election_labels_match_the_pipeline():
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "app"))
     import utils
     assert utils.ELECTION_LABELS == ELECTION_LABELS
+
+
+def _app_utils():
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "app"))
+    import utils
+    return utils
+
+
+def test_canton_profiles_are_voter_weighted_like_the_report():
+    import pandas as pd
+    from src.config import DATA_PROCESSED
+
+    utils = _app_utils()
+    profiles = utils.canton_profiles(utils.load_primary_assignment(), utils.load_political_features())
+    stats = pd.read_csv(DATA_PROCESSED / "cantons_final_stats.csv").set_index("canton")
+    for bloc in utils.BLOCS:
+        assert (profiles[bloc] - stats[f"{bloc}_pct"]).abs().max() < 0.06, bloc
+    assert profiles["dominant"].to_dict() == stats["dominant_bloc"].to_dict()
+    assert profiles["n_munis"].to_dict() == stats["n_municipalities"].to_dict()
+
+
+def test_featured_map_names_its_cantons_and_needs_no_basemap_key():
+    utils = _app_utils()
+    names = dict(utils.load_cantons_labeled()[["canton", "label"]].drop_duplicates().values)
+    m = utils.build_canton_map(utils.load_geojson(), utils.load_primary_assignment(),
+                               utils.load_political_features(), names=names)
+    html = m.get_root().render()
+    for name in names.values():
+        assert name.replace("&", "&amp;") in html or name in html, name
+    assert "Canton 0 (CENTER)" not in html
+    assert "cartocdn" not in html  # CARTO basemaps now need an API key and show watermarks
+
+
+def test_primary_cantons_get_distinct_colours_and_a_mixed_canton_blends_its_two_blocs():
+    utils = _app_utils()
+    profiles = utils.canton_profiles(utils.load_primary_assignment(), utils.load_political_features())
+    colours = utils.canton_colors(profiles)
+    assert len(set(colours.values())) == len(profiles)
+    # METRO Tel Aviv: Right 41.1% vs Center 39.0% — neither the Right nor the Center shade family
+    assert colours[0] not in utils.BLOC_SHADES["right"] + utils.BLOC_SHADES["center"]
+    assert colours[1] in utils.BLOC_SHADES["right"] and colours[3] in utils.BLOC_SHADES["arab"]

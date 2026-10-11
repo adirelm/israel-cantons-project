@@ -299,15 +299,76 @@ def config_label(repr_name: str, metric: str, algo: str, k: int) -> str:
 # Map builder
 # ---------------------------------------------------------------------------
 
+def canton_profiles(assignment: pd.DataFrame, features: pd.DataFrame) -> pd.DataFrame:
+    """Per canton: bloc shares (%) of all its voters, towns, voters and the largest bloc.
+
+    Towns are weighted by their average number of voters, as in the report's canton table.
+    """
+    merged = assignment.merge(features, on="municipality", how="left")
+    rows = []
+    for cid, g in merged.groupby("canton"):
+        known = g.dropna(subset=["avg_votes"])
+        row = {"canton": int(cid), "n_munis": len(g), "voters": float(known["avg_votes"].sum())}
+        for bloc in BLOCS:
+            row[bloc] = float((known[f"{bloc}_avg"] * known["avg_votes"]).sum() / known["avg_votes"].sum())
+        row["dominant"] = max(BLOCS, key=row.get)
+        rows.append(row)
+    return pd.DataFrame(rows).set_index("canton")
+
+
+# Bloc-based color shades — each shade is visually distinct within the family
+BLOC_SHADES = {
+    "right":  ["#3b82f6", "#1d4ed8", "#93c5fd", "#2563eb"],
+    "arab":   ["#22c55e", "#15803d", "#4ade80", "#16a34a"],
+    "center": ["#a855f7", "#7c3aed", "#c084fc", "#6d28d9"],
+    "left":   ["#ef4444", "#b91c1c", "#f87171", "#dc2626"],
+    "haredi": ["#6b7280", "#374151", "#9ca3af", "#4b5563"],
+}
+MIXED_MARGIN = 5.0  # points between the two largest blocs below which a canton counts as mixed
+
+
+def _blend(a: str, b: str) -> str:
+    rgb = [(int(a[i:i + 2], 16) + int(b[i:i + 2], 16)) // 2 for i in (1, 3, 5)]
+    return "#" + "".join(f"{v:02x}" for v in rgb)
+
+
+def canton_colors(profiles: pd.DataFrame) -> dict[int, str]:
+    """A color per canton from its largest bloc's shade family.
+
+    A mixed canton (two largest blocs within MIXED_MARGIN points) gets a blend of both
+    families, so it neither reads as one bloc nor looks like its neighbours.
+    """
+    colors, used = {}, {}
+    for cid, p in profiles.iterrows():
+        top, second = sorted(BLOCS, key=p.get, reverse=True)[:2]
+        key = (top, second) if p[top] - p[second] < MIXED_MARGIN else (top,)
+        idx = used.get(key, 0)
+        used[key] = idx + 1
+        shade = lambda bloc: BLOC_SHADES[bloc][idx % len(BLOC_SHADES[bloc])]  # noqa: E731
+        colors[cid] = shade(top) if len(key) == 1 else _blend(shade(top), shade(second))
+    return colors
+
+
+def largest_bloc(profile: pd.Series) -> str:
+    """'Right (41%)' — the canton's largest bloc and its share of voters."""
+    return f"{profile['dominant'].capitalize()} ({profile[profile['dominant']]:.0f}%)"
+
+
 def build_canton_map(
     geo: gpd.GeoDataFrame,
     assignment: pd.DataFrame,
     features: pd.DataFrame,
+    names: dict[int, str] | None = None,
 ) -> "folium.Map":
-    """Build a Folium map with dissolved canton polygons and municipality outlines."""
+    """Build a Folium map with dissolved canton polygons and municipality outlines.
+
+    With ``names`` (the primary map's canton names), the legend and tooltips use them;
+    a canton missing from ``names`` has no counterpart in the primary map.
+    """
     import folium
 
-    m = folium.Map(location=[31.5, 35.0], zoom_start=8, tiles="cartodbpositron")
+    # OpenStreetMap needs no API key (CARTO basemaps now show "API key required" watermarks)
+    m = folium.Map(location=[31.5, 35.0], zoom_start=8, tiles="OpenStreetMap")
 
     # Merge assignment into geo
     geo_merged = geo.merge(assignment, left_on="MUN_HEB", right_on="municipality", how="left")
@@ -316,37 +377,19 @@ def build_canton_map(
     # Merge political features
     feat_merged = geo_merged.merge(features, on="municipality", how="left")
 
-    # Compute canton profiles for coloring
-    merged_data = assignment.merge(features, on="municipality", how="left")
-    canton_colors = {}
+    profiles = canton_profiles(assignment, features)
+    colors = canton_colors(profiles)
     canton_labels = {}
-
-    # Bloc-based color shades — each shade is visually distinct within the family
-    _BLOC_SHADES = {
-        "right":  ["#3b82f6", "#1d4ed8", "#93c5fd", "#2563eb"],
-        "arab":   ["#22c55e", "#15803d", "#4ade80", "#16a34a"],
-        "center": ["#a855f7", "#7c3aed", "#c084fc", "#6d28d9"],
-        "left":   ["#ef4444", "#b91c1c", "#f87171", "#dc2626"],
-        "haredi": ["#6b7280", "#374151", "#9ca3af", "#4b5563"],
-    }
-
-    # Assign colors per canton from its dominant bloc's shade family
-    bloc_usage_count = {}
-    for cid in sorted(merged_data["canton"].unique()):
-        cdata = merged_data[merged_data["canton"] == cid]
-        bloc_avgs = {b: cdata[f"{b}_avg"].mean() for b in BLOCS}
-        dominant = max(bloc_avgs, key=bloc_avgs.get)
-        canton_labels[cid] = dominant.upper()
-
-        idx = bloc_usage_count.get(dominant, 0)
-        shades = _BLOC_SHADES[dominant]
-        canton_colors[cid] = shades[idx % len(shades)]
-        bloc_usage_count[dominant] = idx + 1
+    for cid, profile in profiles.iterrows():
+        if names is None:
+            canton_labels[cid] = f"Canton {cid} ({profile['dominant'].upper()})"
+        else:
+            canton_labels[cid] = names.get(cid, f"Canton {cid}: no counterpart in the primary map")
 
     # Draw each municipality individually (for tooltips) but color by canton
     for _, row in feat_merged.iterrows():
         canton = int(row["canton"]) if row["canton"] >= 0 else -1
-        color = canton_colors.get(canton, "#cccccc")
+        color = colors.get(canton, "#cccccc")
 
         heb_name = row.get("MUN_HEB", "")
         eng_name = row.get("MUN_ENG", "")
@@ -356,7 +399,7 @@ def build_canton_map(
 
         tooltip_parts = [
             f"<b>{heb_name}</b> ({eng_name})" if eng_name else f"<b>{heb_name}</b>",
-            f"<b>Canton {canton}</b> ({label})",
+            f"<b>{label}</b>",
             f"Dominant: {dominant}",
             f"Avg voters: {voters:,.0f}" if pd.notna(voters) else "",
         ]
@@ -384,14 +427,14 @@ def build_canton_map(
     from branca.element import MacroElement, Template
 
     legend_items = ""
-    for cid in sorted(canton_colors.keys()):
-        color = canton_colors[cid]
+    for cid in sorted(colors.keys()):
+        color = colors[cid]
         label = canton_labels.get(cid, "")
         legend_items += (
             f'<li><span style="background:{color};width:14px;height:14px;'
             f"display:inline-block;margin-right:6px;border-radius:3px;"
             f'border:1px solid #999"></span>'
-            f" Canton {cid} ({label})</li>"
+            f" {label}</li>"
         )
 
     legend_macro = MacroElement()

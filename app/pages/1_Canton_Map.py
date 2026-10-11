@@ -17,6 +17,8 @@ from utils import (
     load_political_features,
     load_cantons_labeled,
     build_canton_map,
+    canton_profiles,
+    largest_bloc,
     inject_custom_css,
     REPR_LABELS,
     METRIC_LABELS,
@@ -147,7 +149,7 @@ map_col, info_col = st.columns([3, 2])
 with map_col:
     st.subheader(config_label(sel_repr, sel_metric, sel_algo, sel_k))
     with st.spinner("Rendering canton map..."):
-        m = build_canton_map(geo, assignment, features)
+        m = build_canton_map(geo, assignment, features, names=canton_label_map if _is_featured else None)
         st_folium(m, width=700, height=550, returned_objects=[])
 
 # ---------------------------------------------------------------------------
@@ -157,33 +159,17 @@ with map_col:
 with info_col:
     st.subheader("Canton Profiles")
 
-    merged = assignment.merge(features, on="municipality", how="left")
-
-    # Political composition stacked bar
-    canton_ids = sorted(merged["canton"].unique())
-    bloc_data = {bloc: [] for bloc in BLOCS}
-    labels = []
-
-    for cid in canton_ids:
-        cdata = merged[merged["canton"] == cid]
-        bloc_avgs = {}
-        for bloc in BLOCS:
-            col_name = f"{bloc}_avg"
-            val = cdata[col_name].mean() if col_name in cdata.columns else 0
-            bloc_data[bloc].append(val)
-            bloc_avgs[bloc] = val
-        dominant = max(bloc_avgs, key=bloc_avgs.get)
-        if _is_featured and cid in canton_label_map:
-            labels.append(canton_label_map[cid])
-        else:
-            labels.append(f"Canton {cid}\n({dominant.upper()})")
+    # Political composition stacked bar (bloc shares of each canton's voters)
+    profiles = canton_profiles(assignment, features)
+    labels = [canton_label_map[cid] if _is_featured and cid in canton_label_map
+              else f"Canton {cid}\n({p['dominant'].upper()})" for cid, p in profiles.iterrows()]
 
     fig = go.Figure()
     for bloc in BLOCS:
         fig.add_trace(go.Bar(
             name=bloc.capitalize(),
             x=labels,
-            y=bloc_data[bloc],
+            y=profiles[bloc],
             marker_color=BLOC_COLORS[bloc],
         ))
 
@@ -200,16 +186,12 @@ with info_col:
     st.plotly_chart(fig, width="stretch")
 
     # Population distribution
-    pop_data = []
-    for cid in canton_ids:
-        cdata = merged[merged["canton"] == cid]
-        lbl = canton_label_map.get(cid, f"Canton {cid}") if _is_featured else f"Canton {cid}"
-        pop_data.append({
-            "Canton": lbl,
-            "Municipalities": len(cdata),
-            "Total Voters": f"{cdata['avg_votes'].sum():,.0f}" if "avg_votes" in cdata.columns else "0",
-            "Dominant Bloc": cdata["dominant_bloc"].mode().iloc[0].capitalize() if len(cdata) > 0 else "N/A",
-        })
+    pop_data = [{
+        "Canton": canton_label_map.get(cid, f"Canton {cid}") if _is_featured else f"Canton {cid}",
+        "Municipalities": p["n_munis"],
+        "Total Voters": f"{p['voters']:,.0f}",
+        "Largest Bloc": largest_bloc(p),
+    } for cid, p in profiles.iterrows()]
 
     pop_df = pd.DataFrame(pop_data)
     st.dataframe(pop_df, width="stretch", hide_index=True)
@@ -308,8 +290,7 @@ with st.expander("Compare with another configuration", expanded=False):
         # Side-by-side bar charts
         bar_a, bar_b = st.columns(2)
 
-        cmp_merged_feat = cmp_assignment.merge(features, on="municipality", how="left")
-        cmp_canton_ids = sorted(cmp_merged_feat["canton"].unique())
+        cmp_profiles = canton_profiles(cmp_assignment, features)
 
         with bar_a:
             st.caption(f"**Config A** -- {ALGO_LABELS.get(sel_algo, sel_algo)}")
@@ -318,25 +299,14 @@ with st.expander("Compare with another configuration", expanded=False):
 
         with bar_b:
             st.caption(f"**Config B** -- {ALGO_LABELS.get(cmp_algo, cmp_algo)}")
-            cmp_bloc_data = {bloc: [] for bloc in BLOCS}
-            cmp_labels = []
-            for cid in cmp_canton_ids:
-                cdata = cmp_merged_feat[cmp_merged_feat["canton"] == cid]
-                bloc_avgs_b = {}
-                for bloc in BLOCS:
-                    col_name = f"{bloc}_avg"
-                    val = cdata[col_name].mean() if col_name in cdata.columns else 0
-                    cmp_bloc_data[bloc].append(val)
-                    bloc_avgs_b[bloc] = val
-                dominant_b = max(bloc_avgs_b, key=bloc_avgs_b.get)
-                cmp_labels.append(f"Canton {cid}\n({dominant_b.upper()})")
+            cmp_labels = [f"Canton {cid}\n({p['dominant'].upper()})" for cid, p in cmp_profiles.iterrows()]
 
             fig_b = go.Figure()
             for bloc in BLOCS:
                 fig_b.add_trace(go.Bar(
                     name=bloc.capitalize(),
                     x=cmp_labels,
-                    y=cmp_bloc_data[bloc],
+                    y=cmp_profiles[bloc],
                     marker_color=BLOC_COLORS[bloc],
                     showlegend=False,
                 ))

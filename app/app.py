@@ -20,6 +20,8 @@ from utils import (
     PLOTLY_LAYOUT,
     FIGURES_DIR,
     build_canton_map,
+    canton_profiles,
+    largest_bloc,
 )
 
 # ---------------------------------------------------------------------------
@@ -91,49 +93,27 @@ _canton_label_map = (
 assignment = load_primary_assignment()
 
 if assignment is not None:
-    merged = assignment.merge(features, on="municipality", how="left")
-
-    # Compute canton profiles for coloring
-    canton_profiles = {}
-    for cid in sorted(merged["canton"].unique()):
-        cdata = merged[merged["canton"] == cid]
-        bloc_avgs = {b: cdata[f"{b}_avg"].mean() for b in BLOCS}
-        dominant = max(bloc_avgs, key=bloc_avgs.get)
-        canton_profiles[cid] = {
-            "dominant": dominant,
-            "blocs": bloc_avgs,
-            "n_munis": len(cdata),
-            "voters": cdata["avg_votes"].sum(),
-            "label": _canton_label_map.get(cid, f"Canton {cid}"),
-        }
+    # Bloc shares of each canton's voters (weighted by town size, as in the report)
+    profiles = canton_profiles(assignment, features)
+    profiles["label"] = [_canton_label_map.get(cid, f"Canton {cid}") for cid in profiles.index]
 
     map_col, profile_col = st.columns([3, 2])
 
     with map_col:
         with st.spinner("Rendering map..."):
-            m = build_canton_map(geo, assignment, features)
+            m = build_canton_map(geo, assignment, features, names=_canton_label_map)
             st_folium(m, width=700, height=550, returned_objects=[])
 
     with profile_col:
         st.markdown("#### Canton Political Profiles")
 
         # Stacked bar chart
-        canton_ids = sorted(canton_profiles.keys())
-        bloc_data = {bloc: [] for bloc in BLOCS}
-        labels = []
-
-        for cid in canton_ids:
-            p = canton_profiles[cid]
-            labels.append(p["label"])
-            for bloc in BLOCS:
-                bloc_data[bloc].append(p["blocs"][bloc])
-
         fig = go.Figure()
         for bloc in BLOCS:
             fig.add_trace(go.Bar(
                 name=bloc.capitalize(),
-                x=labels,
-                y=bloc_data[bloc],
+                x=profiles["label"],
+                y=profiles[bloc],
                 marker_color=BLOC_COLORS[bloc],
             ))
 
@@ -149,15 +129,12 @@ if assignment is not None:
         st.plotly_chart(fig, width="stretch")
 
         # Summary table
-        pop_data = []
-        for cid in canton_ids:
-            p = canton_profiles[cid]
-            pop_data.append({
-                "Canton": p["label"],
-                "Dominant Bloc": p["dominant"].capitalize(),
-                "Municipalities": p["n_munis"],
-                "Avg Voters": f"{p['voters']:,.0f}",
-            })
+        pop_data = [{
+            "Canton": p["label"],
+            "Largest Bloc": largest_bloc(p),
+            "Municipalities": p["n_munis"],
+            "Avg Voters": f"{p['voters']:,.0f}",
+        } for _, p in profiles.iterrows()]
 
         st.dataframe(pd.DataFrame(pop_data), width="stretch", hide_index=True)
 

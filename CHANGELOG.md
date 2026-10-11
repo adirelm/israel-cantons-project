@@ -33,6 +33,7 @@ Silhouette 0.138 → 0.180; cross-election stability (ARI) 0.795 → 0.909; SA 3
 - **Citation:** Strenger & Yadid (2014), the first proposal of cantonization in the Israeli press, is cited in the report.
 - **Administrative districts:** the comparison now assigns every municipality its most common district by locality code; the earlier name-based lookup matched only cities and local councils (149). ARI 0.360 over all 255.
 - **Report:** new sections on Judea and Samaria data (4.2), per-election maps (7.4) and held-out tests (7.5), and case studies for Judea and Samaria and the Haredi cities.
+- **App maps and canton profiles:** canton profiles, colors and the "Largest Bloc" column are now voter-weighted, as in the report (towns counted equally made METRO Tel Aviv look Center-led: 41.7 vs 39.4; by voters it is Right 41.1 vs Center 39.0). A canton whose two largest blocs are within 5 points is drawn in a blend of both colors. The primary and per-election maps label cantons by name. The basemap is OpenStreetMap: CARTO basemaps now need an API key and showed "API key required" over the map.
 
 ## October 2026 — corrected results
 
