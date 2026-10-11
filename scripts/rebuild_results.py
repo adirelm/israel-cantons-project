@@ -24,7 +24,7 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 
-from src.config import BLOC_COLS, BLOC_MAPPING, DATA_PROCESSED
+from src.config import BLOC_COLS, BLOC_MAPPING, DATA_PROCESSED, KNESSET_IDS
 from src.data.processing import process_all_elections
 from src.data.representations import BlocShares, RawPartyShares, PCARepresentation, NMFRepresentation
 from src.data.distance_metrics import EuclideanDistance, CosineDistance, JensenShannonDistance
@@ -38,6 +38,7 @@ from src.evaluation.experiment import ExperimentRunner
 from src.evaluation.stability import run_stability_analysis
 from src.evaluation.canton_names import name_cantons
 from src.evaluation.metrics import canton_profiles
+from src.evaluation.per_election import changes_table, per_election_maps
 
 PRIMARY_CONFIG = "nmf_5__cosine__louvain__k5"
 # (anchor municipality, canton ID, name): one anchor per canton of the primary map
@@ -183,6 +184,18 @@ def save_primary_map(bloc_features: pd.DataFrame, weights: dict[str, float]) -> 
     geo.dissolve(by="canton").reset_index().to_file(DATA_PROCESSED / "cantons_final.geojson", driver="GeoJSON")
 
 
+def save_per_election_maps(elections, G_aug) -> None:
+    """Primary configuration per election, aligned to cantons_final.csv."""
+    out_dir = DATA_PROCESSED / "per_election"
+    out_dir.mkdir(exist_ok=True)
+    reference = dict(pd.read_csv(DATA_PROCESSED / "cantons_final.csv").values)
+    maps = per_election_maps(elections, G_aug, reference, KNESSET_IDS)
+    for k, assignment in maps.items():
+        pd.DataFrame(sorted(assignment.items()), columns=["municipality", "canton"]).to_csv(
+            out_dir / f"knesset_{k}.csv", index=False, encoding="utf-8")
+    changes_table(maps, reference).to_csv(out_dir / "per_election_changes.csv", index=False, encoding="utf-8")
+
+
 def main() -> None:
     logging.basicConfig(level=logging.WARNING)
     elections = process_all_elections()
@@ -200,6 +213,7 @@ def main() -> None:
     run_grid(elections, G_aug, weights)
     run_stability(elections, G_aug)
     save_primary_map(bloc_features, weights)
+    save_per_election_maps(elections, G_aug)
     print("Done.")
 
 

@@ -11,11 +11,20 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from streamlit_folium import st_folium
+
 from utils import (
     load_stability_results,
     load_sa_sensitivity,
     inject_custom_css,
     PLOTLY_LAYOUT,
+    ELECTION_LABELS,
+    build_canton_map,
+    load_cantons_labeled,
+    load_geojson,
+    load_per_election,
+    load_per_election_changes,
+    load_political_features,
 )
 
 st.set_page_config(page_title="Stability Analysis", page_icon=":chart_with_upwards_trend:", layout="wide")
@@ -135,6 +144,33 @@ st.info(
     "Overall, this confirms that Israel's political geography is structurally "
     "persistent despite electoral volatility."
 )
+
+# ---------------------------------------------------------------------------
+# Cantons in each election
+# ---------------------------------------------------------------------------
+
+st.divider()
+st.subheader("Cantons in Each Election")
+changes = load_per_election_changes()
+if changes is None:
+    st.info("Per-election maps are not available in this build.")
+else:
+    st.markdown(
+        "The primary configuration (**NMF_5 / Cosine / Louvain**, K=5) run on each election alone. "
+        "Canton numbers are matched to the primary map, so the same region keeps the same number."
+    )
+    knesset = st.selectbox("Election", list(ELECTION_LABELS), format_func=ELECTION_LABELS.get,
+                           index=len(ELECTION_LABELS) - 1)
+    st_folium(build_canton_map(load_geojson(), load_per_election(knesset), load_political_features()),
+              width=900, height=550, returned_objects=[])
+    names = dict(load_cantons_labeled()[["canton", "label"]].drop_duplicates().values)
+    moved = changes[changes["n_differ"] > 0].copy()
+    for col in [c for c in moved.columns if c == "primary" or c.startswith("knesset_")]:
+        moved[col] = moved[col].map(lambda c: names.get(c, "no counterpart in the primary map"))
+    moved = moved.rename(columns={f"knesset_{k}": v for k, v in ELECTION_LABELS.items()})
+    st.markdown(f"**{len(moved)} of {len(changes)} municipalities** are in a different canton "
+                "in at least one election:")
+    st.dataframe(moved.sort_values("n_differ", ascending=False), hide_index=True, width="stretch")
 
 # ---------------------------------------------------------------------------
 # SA Seed Sensitivity

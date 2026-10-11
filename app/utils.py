@@ -18,6 +18,7 @@ import streamlit as st
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = PROJECT_ROOT / "data" / "processed"
 EXPERIMENTS_DIR = DATA_DIR / "experiments"
+PER_ELECTION_DIR = DATA_DIR / "per_election"
 FIGURES_DIR = PROJECT_ROOT / "docs" / "figures"
 
 
@@ -248,6 +249,30 @@ def load_sa_sensitivity() -> pd.DataFrame:
 def load_cantons_labeled() -> pd.DataFrame:
     """Load canton assignments with human-readable labels."""
     return pd.read_csv(DATA_DIR / "cantons_labeled.csv")
+
+
+ELECTION_LABELS = {21: "April 2019", 22: "September 2019", 23: "March 2020", 24: "March 2021", 25: "November 2022"}
+
+
+@st.cache_data
+def load_per_election(knesset: int) -> pd.DataFrame | None:
+    """Primary-configuration cantons computed from one election alone (None if not built)."""
+    path = PER_ELECTION_DIR / f"knesset_{knesset}.csv"
+    return pd.read_csv(path) if path.exists() else None
+
+
+@st.cache_data
+def load_per_election_changes() -> pd.DataFrame | None:
+    """Municipalities' canton in each election vs the primary map (None if not built)."""
+    path = PER_ELECTION_DIR / "per_election_changes.csv"
+    return pd.read_csv(path) if path.exists() else None
+
+
+@st.cache_data
+def load_canton_tests() -> pd.DataFrame | None:
+    """Held-out tests of differences between cantons (None if not built)."""
+    path = DATA_DIR / "canton_tests.csv"
+    return pd.read_csv(path) if path.exists() else None
 
 
 def config_label(repr_name: str, metric: str, algo: str, k: int) -> str:

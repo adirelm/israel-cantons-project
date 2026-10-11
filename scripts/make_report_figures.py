@@ -36,6 +36,8 @@ ALGOS = {  # grid name -> (label, colour)
 REPRS = {"bloc_shares": "BlocShares", "nmf_5": "NMF_5", "pca_5": "PCA_5", "raw_party_shares": "RawParty"}
 BLOC_COLORS = {"right": "#5794f7", "haredi": "#808590", "center": "#b36ff5", "left": "#f06060", "arab": "#44cc77"}
 CANTON_COLORS = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00"]
+NO_COUNTERPART_COLOR = "#9e9e9e"
+ELECTION_LABELS = {21: "April 2019", 22: "September 2019", 23: "March 2020", 24: "March 2021", 25: "November 2022"}
 STABILITY_SHORT = {
     "BlocShares / Euclidean / SA": "Bloc / Euc / SA",
     "BlocShares / Cosine / Agglom": "Bloc / Cos / Agglom",
@@ -97,6 +99,29 @@ def canton_map(labeled: pd.DataFrame, geo: gpd.GeoDataFrame) -> None:
     plt.close(fig)
 
 
+def per_election_maps(labeled: pd.DataFrame, geo: gpd.GeoDataFrame) -> None:
+    names = dict(zip(labeled["canton"], labeled["label"]))
+    color = lambda c: CANTON_COLORS[c] if c in names else NO_COUNTERPART_COLOR  # noqa: E731
+    fig, axes = plt.subplots(1, 5, figsize=(15, 8.5))
+    unmatched = False
+    for ax, (k, title) in zip(axes, ELECTION_LABELS.items()):
+        canton = dict(pd.read_csv(DATA_PROCESSED / "per_election" / f"knesset_{k}.csv").values)
+        g = geo.assign(canton=geo["MUN_HEB"].map(canton)).dropna(subset=["canton"])
+        for cid in sorted(set(canton.values())):
+            g[g["canton"] == cid].plot(ax=ax, color=color(cid), edgecolor="black", linewidth=0.15)
+            unmatched |= cid not in names
+        ax.set_title(title, fontsize=11)
+        ax.set_axis_off()
+    patches = [mpatches.Patch(color=color(c), label=f"{c}: {n}") for c, n in sorted(names.items())]
+    if unmatched:
+        patches.append(mpatches.Patch(color=NO_COUNTERPART_COLOR, label="No counterpart in the primary map"))
+    fig.legend(handles=patches, loc="lower center", ncol=len(patches), fontsize=9, frameon=False)
+    fig.suptitle("K=5 cantons computed from each election separately (NMF_5 / Cosine / Louvain)", fontsize=13)
+    fig.tight_layout(rect=(0, 0.05, 1, 0.97))
+    fig.savefig(FIG_DIR / "per_election_maps.png", dpi=DPI)
+    plt.close(fig)
+
+
 def political_composition(stats: pd.DataFrame) -> None:
     stats = stats.sort_values("canton")
     labels = [f"Canton {c}\n({b.upper()})" for c, b in zip(stats["canton"], stats["dominant_bloc"])]
@@ -132,8 +157,10 @@ def main() -> None:
     results = pd.read_csv(DATA_PROCESSED / "experiments" / "experiment_results.csv")
     silhouette_vs_k(results)
     heatmap_silhouette(results)
-    canton_map(pd.read_csv(DATA_PROCESSED / "cantons_labeled.csv"),
-               gpd.read_file(DATA_PROCESSED / "municipalities_dissolved.geojson"))
+    labeled = pd.read_csv(DATA_PROCESSED / "cantons_labeled.csv")
+    geo = gpd.read_file(DATA_PROCESSED / "municipalities_dissolved.geojson")
+    canton_map(labeled, geo)
+    per_election_maps(labeled, geo)
     political_composition(pd.read_csv(DATA_PROCESSED / "cantons_final_stats.csv"))
     stability_ari(pd.read_csv(DATA_PROCESSED / "stability_results.csv"))
     print(f"Figures written to {FIG_DIR}")
