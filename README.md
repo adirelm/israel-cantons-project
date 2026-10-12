@@ -2,7 +2,9 @@
 
 Dividing Israel into politically homogeneous cantons based on Knesset election results using spatially-constrained clustering.
 
-**Live Demo:** https://israel-cantons-project-5j7kgq8acxrbiflraqnhgb.streamlit.app/
+**Public map (Hebrew/English):** https://adirelm.github.io/israel-cantons-project/
+
+**Research app:** https://israel-cantons-project-5j7kgq8acxrbiflraqnhgb.streamlit.app/
 
 ## Project Overview
 
@@ -28,7 +30,8 @@ israel-cantons-project/
 │   ├── evaluation/          # Metrics, stability analysis, experiments
 │   └── visualization/       # Maps and charts
 ├── notebooks/               # Jupyter notebooks (01-06)
-├── app/                     # Streamlit web application
+├── app/                     # Streamlit research application
+├── site/                    # Public map page (static; deployed to GitHub Pages)
 ├── scripts/                 # Standalone analysis scripts
 ├── tests/                   # Unit tests
 ├── docs/                    # Final report and documentation
@@ -97,9 +100,10 @@ python scripts/rebuild_results.py      # grid, stability, primary map, per-elect
 python scripts/make_report_figures.py  # docs/figures/*.png
 python scripts/sa_sensitivity.py       # 30-seed SA sensitivity (~50 min)
 python scripts/report_numbers.py       # every number the report and app quote
+python scripts/build_site_data.py      # site/data/*.json and site/og.png for the public map page
 ```
 
-Party classification lives in `data/reference/parties.csv`; run `rebuild_results.py` after changing it. The first two steps are needed only when boundaries change. The notebooks document the original exploratory analysis; notebooks 05 and 06 save their outputs under separate names so they do not overwrite the published results.
+Party classification lives in `data/reference/parties.csv`; run `rebuild_results.py` after changing it. The first two steps are needed only when boundaries change. Pushing `site/` to `main` deploys the public page (`.github/workflows/pages.yml`); to preview it locally, run `python -m http.server --directory site` and open http://localhost:8000. The notebooks document the original exploratory analysis; notebooks 05 and 06 save their outputs under separate names so they do not overwrite the published results.
 
 ## Key Results
 
