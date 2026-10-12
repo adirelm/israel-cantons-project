@@ -19,7 +19,6 @@ from utils import (
     PLOTLY_LAYOUT,
 )
 
-st.set_page_config(page_title="Experiment Results", page_icon=":bar_chart:", layout="wide")
 inject_custom_css()
 
 st.title(":bar_chart: Experiment Results")

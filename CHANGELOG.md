@@ -9,6 +9,8 @@ Following the advisor's suggestion, the party-level representation no longer ave
 - Per-election maps: 219 of 255 municipalities never change canton. In 2022 the southern metropolitan area and the coastal plain south of it (28 municipalities) form a separate canton, and the Arab canton stays whole.
 - Held-out tests: still 44 of 50 canton pairs differ; effect sizes ε² 0.35–0.62.
 - SA (NMF_5/Cosine, 30 seeds): silhouette -0.104 ± 0.026, CV 0.16. K=6 Louvain: silhouette 0.149, CV 0.90, ARI 0.847 (K=5 kept).
+- **Public map page** (`site/`, deployed to GitHub Pages): Hebrew and English, map of the five cantons, canton cards, town search, a view per election with the towns that moved, links that open a town or canton, and a map image to download. `scripts/build_site_data.py` writes its data from the results.
+- **Research app:** pages grouped into Explore and Research with a link to the public map; maps drawn as one simplified layer (the page dropped from about 30 MB to under 3 MB); per-election maps outline the towns that moved; canton profile charts are horizontal so names fit; the Compare Cantons page states each difference in words and charts every pair.
 - The app, the README and the report no longer describe every canton as geographically contiguous: the ARAB canton and HAREDI Cities join towns that share no borders through the enclave edges. The app's home page reads its headline numbers from the data.
 
 ## October 2026 — Judea and Samaria, per-election maps, held-out tests

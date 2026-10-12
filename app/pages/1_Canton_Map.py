@@ -33,7 +33,6 @@ from utils import (
     config_label,
 )
 
-st.set_page_config(page_title="Canton Map Explorer", page_icon=":world_map:", layout="wide")
 inject_custom_css()
 
 st.title(":world_map: Canton Map Explorer")
@@ -150,7 +149,7 @@ with map_col:
     st.subheader(config_label(sel_repr, sel_metric, sel_algo, sel_k))
     with st.spinner("Rendering canton map..."):
         m = build_canton_map(geo, assignment, features, names=canton_label_map if _is_featured else None)
-        st_folium(m, width=700, height=550, returned_objects=[])
+        st_folium(m, use_container_width=True, height=550, returned_objects=[])
 
 # ---------------------------------------------------------------------------
 # Canton profiles
@@ -162,27 +161,28 @@ with info_col:
     # Political composition stacked bar (bloc shares of each canton's voters)
     profiles = canton_profiles(assignment, features)
     labels = [canton_label_map[cid] if _is_featured and cid in canton_label_map
-              else f"Canton {cid}\n({p['dominant'].upper()})" for cid, p in profiles.iterrows()]
+              else f"Canton {cid} ({p['dominant'].upper()})" for cid, p in profiles.iterrows()]
 
     fig = go.Figure()
     for bloc in BLOCS:
         fig.add_trace(go.Bar(
             name=bloc.capitalize(),
-            x=labels,
-            y=profiles[bloc],
+            y=labels,
+            x=profiles[bloc],
+            orientation="h",
             marker_color=BLOC_COLORS[bloc],
         ))
 
     fig.update_layout(
         **PLOTLY_LAYOUT,
         barmode="stack",
-        yaxis_title="Vote Share (%)",
-        yaxis_range=[0, 105],
-        xaxis_title="",
+        xaxis_title="Share of the canton's votes (%)",
+        xaxis_range=[0, 100],
         height=350,
         margin=dict(l=40, r=20, t=30, b=60),
         legend=dict(orientation="h", yanchor="bottom", y=1.05),
     )
+    fig.update_yaxes(autorange="reversed")
     st.plotly_chart(fig, width="stretch")
 
     # Population distribution
@@ -299,25 +299,27 @@ with st.expander("Compare with another configuration", expanded=False):
 
         with bar_b:
             st.caption(f"**Config B** -- {ALGO_LABELS.get(cmp_algo, cmp_algo)}")
-            cmp_labels = [f"Canton {cid}\n({p['dominant'].upper()})" for cid, p in cmp_profiles.iterrows()]
+            cmp_labels = [f"Canton {cid} ({p['dominant'].upper()})" for cid, p in cmp_profiles.iterrows()]
 
             fig_b = go.Figure()
             for bloc in BLOCS:
                 fig_b.add_trace(go.Bar(
                     name=bloc.capitalize(),
-                    x=cmp_labels,
-                    y=cmp_profiles[bloc],
+                    y=cmp_labels,
+                    x=cmp_profiles[bloc],
+                    orientation="h",
                     marker_color=BLOC_COLORS[bloc],
                     showlegend=False,
                 ))
             fig_b.update_layout(
                 **PLOTLY_LAYOUT,
                 barmode="stack",
-                yaxis_title="Vote Share (%)",
-                yaxis_range=[0, 105],
+                xaxis_title="Share of the canton's votes (%)",
+                xaxis_range=[0, 100],
                 height=300,
                 margin=dict(l=40, r=20, t=10, b=60),
             )
+            fig_b.update_yaxes(autorange="reversed")
             st.plotly_chart(fig_b, width="stretch", key="comparison_b")
     else:
         st.warning("Comparison assignment not found.")

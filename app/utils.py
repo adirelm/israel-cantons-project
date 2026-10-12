@@ -20,6 +20,9 @@ DATA_DIR = PROJECT_ROOT / "data" / "processed"
 EXPERIMENTS_DIR = DATA_DIR / "experiments"
 PER_ELECTION_DIR = DATA_DIR / "per_election"
 FIGURES_DIR = PROJECT_ROOT / "docs" / "figures"
+PUBLIC_MAP_URL = "https://adirelm.github.io/israel-cantons-project/"
+MAP_SIMPLIFY_M = 60.0  # display only: invisible at country zoom, cuts the map page from ~30 MB to ~2 MB
+MOVED_COLOR = "#dc2626"  # outline of towns whose canton differs from the primary map
 
 
 # ---------------------------------------------------------------------------
@@ -227,8 +230,15 @@ def load_primary_assignment() -> pd.DataFrame:
 
 @st.cache_data
 def load_geojson() -> gpd.GeoDataFrame:
-    """Load municipality boundaries GeoJSON."""
-    return gpd.read_file(DATA_DIR / "municipalities_dissolved.geojson")
+    """Municipality boundaries, simplified for display (shared borders stay shared)."""
+    import shapely
+
+    geo = gpd.read_file(DATA_DIR / "municipalities_dissolved.geojson").to_crs(2039)
+    geo["geometry"] = gpd.GeoSeries(shapely.coverage_simplify(geo.geometry.values, MAP_SIMPLIFY_M), crs=2039)
+    geo = geo.to_crs(4326)
+    # About 1 m: plenty for display and halves the map page
+    geo["geometry"] = shapely.set_precision(geo.geometry.values, 1e-5, mode="pointwise")
+    return geo
 
 
 @st.cache_data
@@ -359,23 +369,18 @@ def build_canton_map(
     assignment: pd.DataFrame,
     features: pd.DataFrame,
     names: dict[int, str] | None = None,
+    outlined: set[str] | None = None,
 ) -> "folium.Map":
-    """Build a Folium map with dissolved canton polygons and municipality outlines.
+    """Folium map of municipalities colored by canton, drawn as one GeoJSON layer.
 
     With ``names`` (the primary map's canton names), the legend and tooltips use them;
-    a canton missing from ``names`` has no counterpart in the primary map.
+    a canton missing from ``names`` has no counterpart in the primary map. Municipalities
+    in ``outlined`` get a red outline (towns whose canton differs from the primary map).
     """
     import folium
 
     # OpenStreetMap needs no API key (CARTO basemaps now show "API key required" watermarks)
     m = folium.Map(location=[31.5, 35.0], zoom_start=8, tiles="OpenStreetMap")
-
-    # Merge assignment into geo
-    geo_merged = geo.merge(assignment, left_on="MUN_HEB", right_on="municipality", how="left")
-    geo_merged["canton"] = geo_merged["canton"].fillna(-1).astype(int)
-
-    # Merge political features
-    feat_merged = geo_merged.merge(features, on="municipality", how="left")
 
     profiles = canton_profiles(assignment, features)
     colors = canton_colors(profiles)
@@ -386,55 +391,48 @@ def build_canton_map(
         else:
             canton_labels[cid] = names.get(cid, f"Canton {cid}: no counterpart in the primary map")
 
-    # Draw each municipality individually (for tooltips) but color by canton
-    for _, row in feat_merged.iterrows():
-        canton = int(row["canton"]) if row["canton"] >= 0 else -1
-        color = colors.get(canton, "#cccccc")
+    outlined = outlined or set()
+    layer = (
+        geo[["MUN_HEB", "MUN_ENG", "geometry"]]
+        .merge(assignment, left_on="MUN_HEB", right_on="municipality", how="inner")
+        .merge(features, on="municipality", how="left")
+    )
+    layer["canton_label"] = layer["canton"].map(canton_labels)
+    layer["fill"] = layer["canton"].map(colors).fillna("#cccccc")
+    layer["moved"] = layer["MUN_HEB"].isin(outlined)
+    layer["votes"] = layer["avg_votes"].map(lambda v: f"{v:,.0f}" if pd.notna(v) else "")
+    for bloc in BLOCS:
+        layer[bloc] = layer[f"{bloc}_avg"].map(lambda v: f"{v:.1f}%" if pd.notna(v) else "")
+    fields = ["MUN_HEB", "MUN_ENG", "canton_label", "votes", *BLOCS]
+    aliases = ["", "", "Canton", "Valid votes (avg.)", *[b.capitalize() for b in BLOCS]]
 
-        heb_name = row.get("MUN_HEB", "")
-        eng_name = row.get("MUN_ENG", "")
-        dominant = row.get("dominant_bloc", "N/A")
-        voters = row.get("avg_votes", 0)
-        label = canton_labels.get(canton, "N/A")
-
-        tooltip_parts = [
-            f"<b>{heb_name}</b> ({eng_name})" if eng_name else f"<b>{heb_name}</b>",
-            f"<b>{label}</b>",
-            f"Dominant: {dominant}",
-            f"Avg voters: {voters:,.0f}" if pd.notna(voters) else "",
-        ]
-        # Add bloc breakdown
-        for bloc in BLOCS:
-            col = f"{bloc}_avg"
-            if col in row.index and pd.notna(row[col]):
-                tooltip_parts.append(f"{bloc.capitalize()}: {row[col]:.1f}%")
-
-        tooltip_text = "<br>".join(p for p in tooltip_parts if p)
-
-        if row.geometry is not None:
-            folium.GeoJson(
-                row.geometry.__geo_interface__,
-                style_function=lambda x, c=color: {
-                    "fillColor": c,
-                    "color": "#555",
-                    "weight": 0.8,
-                    "fillOpacity": 0.7,
-                },
-                tooltip=folium.Tooltip(tooltip_text),
-            ).add_to(m)
+    folium.GeoJson(
+        layer[[*fields, "fill", "moved", "geometry"]].to_json(),
+        style_function=lambda f: {
+            "fillColor": f["properties"]["fill"],
+            "color": MOVED_COLOR if f["properties"]["moved"] else "#555",
+            "weight": 2.2 if f["properties"]["moved"] else 0.6,
+            "fillOpacity": 0.7,
+        },
+        highlight_function=lambda f: {"weight": 2.5, "color": "#111", "fillOpacity": 0.85},
+        tooltip=folium.GeoJsonTooltip(fields=fields, aliases=aliases, sticky=True),
+    ).add_to(m)
 
     # Add legend using Folium's built-in macro approach for iframe compatibility
     from branca.element import MacroElement, Template
 
     legend_items = ""
     for cid in sorted(colors.keys()):
-        color = colors[cid]
-        label = canton_labels.get(cid, "")
         legend_items += (
-            f'<li><span style="background:{color};width:14px;height:14px;'
+            f'<li><span style="background:{colors[cid]};width:14px;height:14px;'
             f"display:inline-block;margin-right:6px;border-radius:3px;"
             f'border:1px solid #999"></span>'
-            f" {label}</li>"
+            f" {canton_labels.get(cid, '')}</li>"
+        )
+    if outlined:
+        legend_items += (
+            f'<li><span style="width:12px;height:12px;display:inline-block;margin-right:6px;'
+            f'border:2px solid {MOVED_COLOR}"></span> Different canton from the primary map</li>'
         )
 
     legend_macro = MacroElement()

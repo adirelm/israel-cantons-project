@@ -14,6 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from streamlit_folium import st_folium
 
 from utils import (
+    FIGURES_DIR,
     load_stability_results,
     load_sa_sensitivity,
     inject_custom_css,
@@ -27,7 +28,6 @@ from utils import (
     load_political_features,
 )
 
-st.set_page_config(page_title="Stability Analysis", page_icon=":chart_with_upwards_trend:", layout="wide")
 inject_custom_css()
 
 st.title(":chart_with_upwards_trend: Cross-Election Stability Analysis")
@@ -165,8 +165,16 @@ else:
     knesset = st.selectbox("Election", list(ELECTION_LABELS), format_func=ELECTION_LABELS.get,
                            index=len(ELECTION_LABELS) - 1)
     names = dict(load_cantons_labeled()[["canton", "label"]].drop_duplicates().values)
-    st_folium(build_canton_map(load_geojson(), load_per_election(knesset), load_political_features(), names=names),
-              width=900, height=550, returned_objects=[])
+    moved_here = set(changes.loc[changes[f"knesset_{knesset}"] != changes["primary"], "municipality"])
+    st.caption(f"{len(moved_here)} municipalities are in a different canton from the primary map in this "
+               "election (outlined in red).")
+    st_folium(build_canton_map(load_geojson(), load_per_election(knesset), load_political_features(),
+                               names=names, outlined=moved_here),
+              use_container_width=True, height=550, returned_objects=[])
+    figure = FIGURES_DIR / "per_election_maps.png"
+    if figure.exists():
+        with st.expander("All five elections side by side"):
+            st.image(str(figure), width="stretch")
     moved = changes[changes["n_differ"] > 0].copy()
     for col in [c for c in moved.columns if c == "primary" or c.startswith("knesset_")]:
         moved[col] = moved[col].map(lambda c: names.get(c, "no counterpart in the primary map"))

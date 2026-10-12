@@ -117,3 +117,31 @@ def test_home_page_quotes_the_current_primary_numbers():
     assert not at.exception
     text = " ".join(m.value for m in at.markdown)
     assert f"{primary['silhouette'].iloc[0]:.3f}" in text and f"{ari:.3f}" in text
+
+
+def test_canton_map_page_is_light_enough_to_load_quickly():
+    """One simplified layer instead of 255 full-resolution ones (the old map sent ~30 MB)."""
+    utils = _app_utils()
+    m = utils.build_canton_map(utils.load_geojson(), utils.load_primary_assignment(), utils.load_political_features())
+    assert len(m.get_root().render()) < 3_000_000
+
+
+def test_per_election_map_outlines_the_towns_that_moved():
+    utils = _app_utils()
+    args = (utils.load_geojson(), utils.load_primary_assignment(), utils.load_political_features())
+    assert utils.MOVED_COLOR not in utils.build_canton_map(*args).get_root().render()
+    assert utils.MOVED_COLOR in utils.build_canton_map(*args, outlined={"נחל שורק"}).get_root().render()
+
+
+def test_router_opens_the_home_page_with_explore_and_research_sections():
+    at = AppTest.from_file("../app/app.py", default_timeout=180).run()
+    assert not at.exception, [e.message for e in at.exception]
+    assert any("Largest Bloc" in df.value.columns for df in at.dataframe)
+
+
+def test_compare_page_states_the_difference_in_words():
+    at = AppTest.from_file("../app/pages/5_Compare_Cantons.py", default_timeout=180).run()
+    assert not at.exception
+    text = " ".join(m.value for m in at.markdown)
+    assert "points" in text and "METRO Tel Aviv" in text
+    assert len(at.get("plotly_chart")) >= 1

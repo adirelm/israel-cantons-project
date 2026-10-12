@@ -14,7 +14,6 @@ from utils import (
     PLOTLY_LAYOUT,
 )
 
-st.set_page_config(page_title="About", page_icon=":information_source:", layout="wide")
 inject_custom_css()
 
 st.title(":information_source: About This Project")
