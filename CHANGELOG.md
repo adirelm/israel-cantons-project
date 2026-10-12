@@ -1,5 +1,16 @@
 # Changelog
 
+## October 2026 — party-by-election representation
+
+Following the advisor's suggestion, the party-level representation no longer averages each ballot letter over the five elections (a letter can belong to different parties: "פה" was Blue and White in 2019-2020 and Yesh Atid in 2021-2022). `RawPartyShares` now has one feature per list and election, for the lists that passed the 3.25% threshold (51 features; the 11, 9, 8, 13 and 10 lists that won seats). NMF_5 and PCA_5 are built on it, so the primary map uses no party-to-bloc grouping; blocs describe the cantons and still define the graph's enclave edges.
+
+- Primary map: only Nahal Sorek moves (METRO Tel Aviv → RIGHT Jerusalem & South); METRO has 52 municipalities, RIGHT Jerusalem & South 61.
+- Cross-election stability (ARI) 0.909 → 0.927; silhouette 0.180 → 0.142 (measured in the new feature space, so not directly comparable); administrative-district ARI 0.360 → 0.354.
+- Per-election maps: 219 of 255 municipalities never change canton. In 2022 the southern metropolitan area and the coastal plain south of it (28 municipalities) form a separate canton, and the Arab canton stays whole.
+- Held-out tests: still 44 of 50 canton pairs differ; effect sizes ε² 0.35–0.62.
+- SA (NMF_5/Cosine, 30 seeds): silhouette -0.104 ± 0.026, CV 0.16. K=6 Louvain: silhouette 0.149, CV 0.90, ARI 0.847 (K=5 kept).
+- The app, the README and the report no longer describe every canton as geographically contiguous: the ARAB canton and HAREDI Cities join towns that share no borders through the enclave edges. The app's home page reads its headline numbers from the data.
+
 ## October 2026 — Judea and Samaria, per-election maps, held-out tests
 
 ### Coverage

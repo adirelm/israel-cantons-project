@@ -33,6 +33,9 @@ ELECTION_LABELS: dict[int, str] = {
     21: "April 2019", 22: "September 2019", 23: "March 2020", 24: "March 2021", 25: "November 2022",
 }
 
+# Share of valid votes (%) a list needs to win seats; RawPartyShares keeps the lists above it
+ELECTORAL_THRESHOLD: float = 3.25
+
 # Columns that are NOT party vote columns
 NON_PARTY_COLS: list[str] = [
     "municipality", "locality_name", "locality_code",

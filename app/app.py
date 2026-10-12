@@ -9,6 +9,7 @@ import plotly.graph_objects as go
 from streamlit_folium import st_folium
 
 from utils import (
+    load_stability_results,
     load_primary_assignment,
     load_experiment_results,
     load_geojson,
@@ -70,12 +71,15 @@ st.divider()
 # ---------------------------------------------------------------------------
 
 st.subheader("Featured Result: K=5 Canton Partition")
+_ex = load_experiment_results()
+_primary = _ex[(_ex["repr"] == "nmf_5") & (_ex["metric"] == "cosine") & (_ex["algo"] == "louvain") & (_ex["k_target"] == 5)]
+_ari = load_stability_results().set_index("config").loc["NMF_5 / Cosine / Louvain", "mean_ari"]
 st.markdown(
     "The map below shows the K=5 partition using "
     "**NMF_5 / Cosine / Louvain**, which produces five politically coherent "
-    "cantons with a positive silhouette (0.180) and stable boundaries across the five elections "
-    "(mean ARI = 0.909). "
-    "Explore all 264 configurations in the **Canton Map Explorer** page."
+    f"cantons with a positive silhouette ({_primary['silhouette'].iloc[0]:.3f}) and stable boundaries "
+    f"across the five elections (mean ARI = {_ari:.3f}). "
+    f"Explore all {len(_ex)} configurations in the **Canton Map Explorer** page."
 )
 
 geo = load_geojson()
@@ -139,12 +143,12 @@ if assignment is not None:
         st.dataframe(pd.DataFrame(pop_data), width="stretch", hide_index=True)
 
     st.info(
-        "**Why several right-leaning cantons?** Cantons are *geographically contiguous* regions, "
-        "not political blocs. The right bloc leads in most municipalities across the country, "
-        "but these municipalities are spread across different geographic areas that cannot form "
-        "a single contiguous canton. Each has a distinct political mix -- see the stacked bar chart above. "
-        "The exception is **HAREDI Cities**: its seven municipalities share no borders and are joined "
-        "by political similarity."
+        "**Why several right-leaning cantons?** Cantons are built from neighbouring municipalities, "
+        "not from political blocs. The right bloc leads in most municipalities, but they lie in regions "
+        "with different political mixes -- see the stacked bar chart above. "
+        "Not every canton is one piece on the map: towns where a single bloc has over 70% of the vote "
+        "are also linked to each other, so **ARAB** joins Arab towns from the Galilee to the Negev and "
+        "**HAREDI Cities** joins seven cities that share no borders."
     )
 
 else:

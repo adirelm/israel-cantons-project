@@ -58,7 +58,7 @@ with tab_method:
 | Representation | Dimensions | Description |
 |---|---|---|
 | **BlocShares** | 11 | Average + std of 5 political blocs across elections |
-| **RawParty** | ~79 | Raw party vote percentages |
+| **RawParty** | 51 | Vote share of each list that won seats, per election |
 | **PCA (5)** | 5 | Principal component analysis on raw party shares |
 | **NMF (5)** | 5 | Non-negative matrix factorization on raw party shares |
 """)
@@ -88,7 +88,7 @@ and JSD requires non-negative inputs. This excludes 24 configurations (288 - 24 
 - **Silhouette score** -- Cluster separation quality (-1 to 1, higher is better)
 - **WCSS** -- Within-cluster sum of squares (lower = more homogeneous)
 - **Population balance** -- Coefficient of variation of canton populations
-- **Contiguity** -- Number of disconnected cantons (0 = fully contiguous)
+- **Contiguity** -- Cantons split on the analysis graph (which also links isolated towns and same-bloc enclaves)
 - **Temporal stability** -- ARI/NMI across independent per-election clusterings
 """)
 

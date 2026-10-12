@@ -1,256 +1,256 @@
 municipality,canton,label
+קלנסווה,3,ARAB
+סח'נין,3,ARAB
+כאבול,3,ARAB
+נווה מדבר,3,ARAB
+בועיינה-נוג'ידאת,3,ARAB
+מעיליא,3,ARAB
+שפרעם,3,ARAB
+אעבלין,3,ARAB
+ג'לג'וליה,3,ARAB
+שגב שלום,3,ARAB
+נחף,3,ARAB
+כפר מנדא,3,ARAB
+עראבה,3,ARAB
+ערערה בנגב,3,ARAB
+ביר אל-מכסור,3,ARAB
+דיר אל-אסד,3,ARAB
+באקה אל גרבייה,3,ARAB
+ערערה,3,ARAB
+כפר כנא,3,ARAB
+בענה,3,ARAB
+כפר קרע,3,ARAB
+מזרעה,3,ARAB
+ג'ת,3,ARAB
+טמרה,3,ARAB
+פוריידיס,3,ARAB
+כפר קאסם,3,ARAB
+כאוכב אבו אל-היג'א,3,ARAB
+דיר חנא,3,ARAB
+לקיה,3,ARAB
+אכסאל,3,ARAB
+"בסמ""ה",3,ARAB
+מעלה עירון,3,ARAB
+זמר,3,ARAB
+משהד,3,ARAB
+ג'דיידה-מכר,3,ARAB
+כפר יאסיף,3,ARAB
+ג'סר א-זרקא,3,ARAB
+עין מאהל,3,ARAB
+טייבה,3,ARAB
+בסמת טבעון,3,ARAB
+ריינה,3,ARAB
+אל קסום,3,ARAB
+דבוריה,3,ARAB
+שבלי - אום אל-ג'נם,3,ARAB
+מג'ד אל-כרום,3,ARAB
+כפר ברא,3,ARAB
+יפיע,3,ARAB
+כסייפה,3,ARAB
+בוסתאן אל-מרג',3,ARAB
+טורעאן,3,ARAB
+שעב,3,ARAB
+תל שבע,3,ARAB
+עילוט,3,ARAB
+נצרת,3,ARAB
+רהט,3,ARAB
+אום אל-פחם,3,ARAB
+אל-בטוף,3,ARAB
+אבו גוש,3,ARAB
+חורה,3,ARAB
+טירה,3,ARAB
 רכסים,4,HAREDI Cities
-עמנואל,4,HAREDI Cities
-מודיעין עילית,4,HAREDI Cities
 אלעד,4,HAREDI Cities
-בני ברק,4,HAREDI Cities
 קרית יערים,4,HAREDI Cities
+עמנואל,4,HAREDI Cities
+בני ברק,4,HAREDI Cities
+מודיעין עילית,4,HAREDI Cities
 ביתר עילית,4,HAREDI Cities
-אלונה,2,RIGHT North
-מטה אשר,2,RIGHT North
-יאנוח - ג'ת,2,RIGHT North
-צפת,2,RIGHT North
-בית שאן,2,RIGHT North
-חורפיש,2,RIGHT North
-ע'ג'ר,2,RIGHT North
-טירת כרמל,2,RIGHT North
-כפר ורדים,2,RIGHT North
-יבנאל,2,RIGHT North
-ג'וליס,2,RIGHT North
-קרית אתא,2,RIGHT North
-בוקעאתא,2,RIGHT North
-סאג'ור,2,RIGHT North
-מג'אר,2,RIGHT North
-זרזיר,2,RIGHT North
-מגדל,2,RIGHT North
-מסעדה,2,RIGHT North
-קרית ים,2,RIGHT North
-אליכין,2,RIGHT North
-חצור הגלילית,2,RIGHT North
-טובא-זנגריה,2,RIGHT North
-רמת ישי,2,RIGHT North
-עילבון,2,RIGHT North
-מעלות-תרשיחא,2,RIGHT North
-מטולה,2,RIGHT North
-ירכא,2,RIGHT North
-כפר תבור,2,RIGHT North
-קרית מוצקין,2,RIGHT North
-כסרא - סמיע,2,RIGHT North
-אור עקיבא,2,RIGHT North
-פרדס חנה - כרכור,2,RIGHT North
-קרית טבעון,2,RIGHT North
-פקיעין (בוקייעה),2,RIGHT North
-הגליל התחתון,2,RIGHT North
-עמק הירדן,2,RIGHT North
-מגדל העמק,2,RIGHT North
-משגב,2,RIGHT North
-אבו סנאן,2,RIGHT North
-חיפה,2,RIGHT North
-ראמה,2,RIGHT North
-הגלבוע,2,RIGHT North
-יקנעם עילית,2,RIGHT North
-עין קיניה,2,RIGHT North
-ראש פינה,2,RIGHT North
-זבולון,2,RIGHT North
-עמק יזרעאל,2,RIGHT North
-פסוטה,2,RIGHT North
-גולן,2,RIGHT North
-זכרון יעקב,2,RIGHT North
-מבואות החרמון,2,RIGHT North
-עמק המעיינות,2,RIGHT North
-מרום הגליל,2,RIGHT North
-כפר כמא,2,RIGHT North
-נהריה,2,RIGHT North
-כרמיאל,2,RIGHT North
-חוף הכרמל,2,RIGHT North
-בנימינה - גבעת עדה,2,RIGHT North
-יסוד המעלה,2,RIGHT North
-עכו,2,RIGHT North
-קצרין,2,RIGHT North
-נשר,2,RIGHT North
-מגידו,2,RIGHT North
-שלומי,2,RIGHT North
-הגליל העליון,2,RIGHT North
-מג'דל שמס,2,RIGHT North
-מנשה,2,RIGHT North
-טבריה,2,RIGHT North
-חדרה,2,RIGHT North
-עפולה,2,RIGHT North
-נוף הגליל,2,RIGHT North
-גוש חלב (ג'יש),2,RIGHT North
-כעביה - טבאש - חג'אג'רה,2,RIGHT North
-קרית ביאליק,2,RIGHT North
-מעלה יוסף,2,RIGHT North
-רמת השרון,0,METRO Tel Aviv
-עוספייא,0,METRO Tel Aviv
-דאלית אל-כרמל,0,METRO Tel Aviv
-גבעת שמואל,0,METRO Tel Aviv
-גן רוה,0,METRO Tel Aviv
-נחל שורק,0,METRO Tel Aviv
-אורנית,0,METRO Tel Aviv
-גזר,0,METRO Tel Aviv
-יהוד -מונסון,0,METRO Tel Aviv
-מודיעין-מכבים-רעות,0,METRO Tel Aviv
-ראש העין,0,METRO Tel Aviv
-גבעתיים,0,METRO Tel Aviv
-רמלה,0,METRO Tel Aviv
-כפר שמריהו,0,METRO Tel Aviv
-ראשון לציון,0,METRO Tel Aviv
 שדות דן,0,METRO Tel Aviv
+רמלה,0,METRO Tel Aviv
+רחובות,0,METRO Tel Aviv
+פתח תקווה,0,METRO Tel Aviv
+ברנר,0,METRO Tel Aviv
+שהם,0,METRO Tel Aviv
 בת ים,0,METRO Tel Aviv
+יבנה,0,METRO Tel Aviv
 תל אביב -יפו,0,METRO Tel Aviv
-לב השרון,0,METRO Tel Aviv
-מזכרת בתיה,0,METRO Tel Aviv
-כפר יונה,0,METRO Tel Aviv
+מודיעין-מכבים-רעות,0,METRO Tel Aviv
+גזר,0,METRO Tel Aviv
+עמק חפר,0,METRO Tel Aviv
+רעננה,0,METRO Tel Aviv
+כפר סבא,0,METRO Tel Aviv
+דרום השרון,0,METRO Tel Aviv
+סביון,0,METRO Tel Aviv
+אלפי מנשה,0,METRO Tel Aviv
+גבעת שמואל,0,METRO Tel Aviv
+ראשון לציון,0,METRO Tel Aviv
+יהוד -מונסון,0,METRO Tel Aviv
+רמת גן,0,METRO Tel Aviv
+חבל מודיעין,0,METRO Tel Aviv
+גן רוה,0,METRO Tel Aviv
+אורנית,0,METRO Tel Aviv
+חוף השרון,0,METRO Tel Aviv
 הרצליה,0,METRO Tel Aviv
+גבעתיים,0,METRO Tel Aviv
+חולון,0,METRO Tel Aviv
+אור יהודה,0,METRO Tel Aviv
+רמת השרון,0,METRO Tel Aviv
+תל מונד,0,METRO Tel Aviv
+קדימה - צורן,0,METRO Tel Aviv
+קרית אונו,0,METRO Tel Aviv
+דאלית אל-כרמל,0,METRO Tel Aviv
+לב השרון,0,METRO Tel Aviv
+אבן יהודה,0,METRO Tel Aviv
+כוכב יאיר,0,METRO Tel Aviv
+מזכרת בתיה,0,METRO Tel Aviv
+עוספייא,0,METRO Tel Aviv
+ראש העין,0,METRO Tel Aviv
+באר יעקב,0,METRO Tel Aviv
+כפר יונה,0,METRO Tel Aviv
+כפר שמריהו,0,METRO Tel Aviv
+פרדסיה,0,METRO Tel Aviv
+נתניה,0,METRO Tel Aviv
+בית דגן,0,METRO Tel Aviv
+נס ציונה,0,METRO Tel Aviv
+לוד,0,METRO Tel Aviv
 גני תקווה,0,METRO Tel Aviv
 קרית עקרון,0,METRO Tel Aviv
-חוף השרון,0,METRO Tel Aviv
-תל מונד,0,METRO Tel Aviv
-נס ציונה,0,METRO Tel Aviv
-יבנה,0,METRO Tel Aviv
-פתח תקווה,0,METRO Tel Aviv
-אבן יהודה,0,METRO Tel Aviv
-לוד,0,METRO Tel Aviv
-חבל מודיעין,0,METRO Tel Aviv
-רעננה,0,METRO Tel Aviv
-קרית אונו,0,METRO Tel Aviv
-כוכב יאיר,0,METRO Tel Aviv
-סביון,0,METRO Tel Aviv
-בית דגן,0,METRO Tel Aviv
-פרדסיה,0,METRO Tel Aviv
-קדימה - צורן,0,METRO Tel Aviv
-רמת גן,0,METRO Tel Aviv
-אור יהודה,0,METRO Tel Aviv
-נתניה,0,METRO Tel Aviv
-חולון,0,METRO Tel Aviv
-שהם,0,METRO Tel Aviv
-דרום השרון,0,METRO Tel Aviv
-ברנר,0,METRO Tel Aviv
-רחובות,0,METRO Tel Aviv
-באר יעקב,0,METRO Tel Aviv
-עמק חפר,0,METRO Tel Aviv
-כפר סבא,0,METRO Tel Aviv
-אזור,0,METRO Tel Aviv
-אלפי מנשה,0,METRO Tel Aviv
 הוד השרון,0,METRO Tel Aviv
-קריית ארבע,1,RIGHT Jerusalem & South
+אזור,0,METRO Tel Aviv
+חוף אשקלון,1,RIGHT Jerusalem & South
+להבים,1,RIGHT Jerusalem & South
+באר טוביה,1,RIGHT Jerusalem & South
+אפרת,1,RIGHT Jerusalem & South
+אשכול,1,RIGHT Jerusalem & South
+מטה בנימין,1,RIGHT Jerusalem & South
+גבעת זאב,1,RIGHT Jerusalem & South
 לכיש,1,RIGHT Jerusalem & South
+קרית מלאכי,1,RIGHT Jerusalem & South
+יואב,1,RIGHT Jerusalem & South
+גדרות,1,RIGHT Jerusalem & South
+אריאל,1,RIGHT Jerusalem & South
+שומרון,1,RIGHT Jerusalem & South
+בית ג'ן,1,RIGHT Jerusalem & South
+ערד,1,RIGHT Jerusalem & South
+ירושלים,1,RIGHT Jerusalem & South
+הר חברון,1,RIGHT Jerusalem & South
 שדרות,1,RIGHT Jerusalem & South
-תמר,1,RIGHT Jerusalem & South
+מגילות ים המלח,1,RIGHT Jerusalem & South
+בני שמעון,1,RIGHT Jerusalem & South
+באר שבע,1,RIGHT Jerusalem & South
+נתיבות,1,RIGHT Jerusalem & South
+קריית ארבע,1,RIGHT Jerusalem & South
+אלקנה,1,RIGHT Jerusalem & South
+מבשרת ציון,1,RIGHT Jerusalem & South
+חריש,1,RIGHT Jerusalem & South
+גדרה,1,RIGHT Jerusalem & South
+שדות נגב,1,RIGHT Jerusalem & South
+שער הנגב,1,RIGHT Jerusalem & South
+קרני שומרון,1,RIGHT Jerusalem & South
+שפיר,1,RIGHT Jerusalem & South
+מעלה אדומים,1,RIGHT Jerusalem & South
+גן יבנה,1,RIGHT Jerusalem & South
+חבל אילות,1,RIGHT Jerusalem & South
+מעלה אפרים,1,RIGHT Jerusalem & South
 דימונה,1,RIGHT Jerusalem & South
+נחל שורק,1,RIGHT Jerusalem & South
+ירוחם,1,RIGHT Jerusalem & South
+בית אריה-עופרים,1,RIGHT Jerusalem & South
+בית שמש,1,RIGHT Jerusalem & South
+קרית גת,1,RIGHT Jerusalem & South
+אילת,1,RIGHT Jerusalem & South
+אשדוד,1,RIGHT Jerusalem & South
+בית אל,1,RIGHT Jerusalem & South
+חבל יבנה,1,RIGHT Jerusalem & South
+מיתר,1,RIGHT Jerusalem & South
+ערבות הירדן,1,RIGHT Jerusalem & South
+קדומים,1,RIGHT Jerusalem & South
+עומר,1,RIGHT Jerusalem & South
+"בני עי""ש",1,RIGHT Jerusalem & South
 אשקלון,1,RIGHT Jerusalem & South
+מרחבים,1,RIGHT Jerusalem & South
+מצפה רמון,1,RIGHT Jerusalem & South
+מטה יהודה,1,RIGHT Jerusalem & South
 גוש עציון,1,RIGHT Jerusalem & South
 הערבה התיכונה,1,RIGHT Jerusalem & South
-שפיר,1,RIGHT Jerusalem & South
-"בני עי""ש",1,RIGHT Jerusalem & South
-גן יבנה,1,RIGHT Jerusalem & South
-הר חברון,1,RIGHT Jerusalem & South
-ערבות הירדן,1,RIGHT Jerusalem & South
-קרני שומרון,1,RIGHT Jerusalem & South
-קרית שמונה,1,RIGHT Jerusalem & South
-בית אריה-עופרים,1,RIGHT Jerusalem & South
-בני שמעון,1,RIGHT Jerusalem & South
-גבעת זאב,1,RIGHT Jerusalem & South
-אילת,1,RIGHT Jerusalem & South
-אשכול,1,RIGHT Jerusalem & South
-מיתר,1,RIGHT Jerusalem & South
-שומרון,1,RIGHT Jerusalem & South
-מעלה אפרים,1,RIGHT Jerusalem & South
-מעלה אדומים,1,RIGHT Jerusalem & South
-מבשרת ציון,1,RIGHT Jerusalem & South
-בית אל,1,RIGHT Jerusalem & South
-להבים,1,RIGHT Jerusalem & South
-קרית מלאכי,1,RIGHT Jerusalem & South
-אלקנה,1,RIGHT Jerusalem & South
-נתיבות,1,RIGHT Jerusalem & South
-שער הנגב,1,RIGHT Jerusalem & South
-אשדוד,1,RIGHT Jerusalem & South
-הר אדר,1,RIGHT Jerusalem & South
-מרחבים,1,RIGHT Jerusalem & South
-ערד,1,RIGHT Jerusalem & South
-חבל אילות,1,RIGHT Jerusalem & South
-גדרות,1,RIGHT Jerusalem & South
-קרית גת,1,RIGHT Jerusalem & South
-עומר,1,RIGHT Jerusalem & South
-אריאל,1,RIGHT Jerusalem & South
-מגילות ים המלח,1,RIGHT Jerusalem & South
-יואב,1,RIGHT Jerusalem & South
-מטה יהודה,1,RIGHT Jerusalem & South
-ירושלים,1,RIGHT Jerusalem & South
-מטה בנימין,1,RIGHT Jerusalem & South
-שדות נגב,1,RIGHT Jerusalem & South
-בית ג'ן,1,RIGHT Jerusalem & South
 אופקים,1,RIGHT Jerusalem & South
-בית שמש,1,RIGHT Jerusalem & South
-קדומים,1,RIGHT Jerusalem & South
-חבל יבנה,1,RIGHT Jerusalem & South
-באר שבע,1,RIGHT Jerusalem & South
 רמת נגב,1,RIGHT Jerusalem & South
-גדרה,1,RIGHT Jerusalem & South
-ירוחם,1,RIGHT Jerusalem & South
-חוף אשקלון,1,RIGHT Jerusalem & South
-מצפה רמון,1,RIGHT Jerusalem & South
-אפרת,1,RIGHT Jerusalem & South
-חריש,1,RIGHT Jerusalem & South
-באר טוביה,1,RIGHT Jerusalem & South
-בענה,3,ARAB
-כסייפה,3,ARAB
-מעלה עירון,3,ARAB
-נווה מדבר,3,ARAB
-כפר קאסם,3,ARAB
-טייבה,3,ARAB
-טירה,3,ARAB
-ריינה,3,ARAB
-דבוריה,3,ARAB
-טורעאן,3,ARAB
-ג'לג'וליה,3,ARAB
-בוסתאן אל-מרג',3,ARAB
-מעיליא,3,ARAB
-רהט,3,ARAB
-לקיה,3,ARAB
-"בסמ""ה",3,ARAB
-ג'ת,3,ARAB
-שגב שלום,3,ARAB
-נצרת,3,ARAB
-ביר אל-מכסור,3,ARAB
-כפר קרע,3,ARAB
-דיר חנא,3,ARAB
-ערערה בנגב,3,ARAB
-כפר מנדא,3,ARAB
-שעב,3,ARAB
-בסמת טבעון,3,ARAB
-עראבה,3,ARAB
-טמרה,3,ARAB
-שפרעם,3,ARAB
-ערערה,3,ARAB
-דיר אל-אסד,3,ARAB
-שבלי - אום אל-ג'נם,3,ARAB
-כפר יאסיף,3,ARAB
-יפיע,3,ARAB
-עילוט,3,ARAB
-תל שבע,3,ARAB
-עין מאהל,3,ARAB
-נחף,3,ARAB
-כפר כנא,3,ARAB
-באקה אל גרבייה,3,ARAB
-כאוכב אבו אל-היג'א,3,ARAB
-אל קסום,3,ARAB
-כפר ברא,3,ARAB
-אכסאל,3,ARAB
-פוריידיס,3,ARAB
-זמר,3,ARAB
-מזרעה,3,ARAB
-ג'סר א-זרקא,3,ARAB
-חורה,3,ARAB
-אעבלין,3,ARAB
-משהד,3,ARAB
-בועיינה-נוג'ידאת,3,ARAB
-אום אל-פחם,3,ARAB
-סח'נין,3,ARAB
-אל-בטוף,3,ARAB
-קלנסווה,3,ARAB
-כאבול,3,ARAB
-ג'דיידה-מכר,3,ARAB
-מג'ד אל-כרום,3,ARAB
-אבו גוש,3,ARAB
+קרית שמונה,1,RIGHT Jerusalem & South
+תמר,1,RIGHT Jerusalem & South
+הר אדר,1,RIGHT Jerusalem & South
+בוקעאתא,2,RIGHT North
+פקיעין (בוקייעה),2,RIGHT North
+יבנאל,2,RIGHT North
+מגדל העמק,2,RIGHT North
+צפת,2,RIGHT North
+טבריה,2,RIGHT North
+מבואות החרמון,2,RIGHT North
+זבולון,2,RIGHT North
+נוף הגליל,2,RIGHT North
+מרום הגליל,2,RIGHT North
+טובא-זנגריה,2,RIGHT North
+אור עקיבא,2,RIGHT North
+מג'דל שמס,2,RIGHT North
+גולן,2,RIGHT North
+עפולה,2,RIGHT North
+חורפיש,2,RIGHT North
+ירכא,2,RIGHT North
+אליכין,2,RIGHT North
+ראש פינה,2,RIGHT North
+מגדל,2,RIGHT North
+כפר כמא,2,RIGHT North
+מטולה,2,RIGHT North
+ג'וליס,2,RIGHT North
+מטה אשר,2,RIGHT North
+רמת ישי,2,RIGHT North
+כרמיאל,2,RIGHT North
+מגידו,2,RIGHT North
+יקנעם עילית,2,RIGHT North
+מסעדה,2,RIGHT North
+נשר,2,RIGHT North
+אלונה,2,RIGHT North
+חצור הגלילית,2,RIGHT North
+טירת כרמל,2,RIGHT North
+עין קיניה,2,RIGHT North
+זרזיר,2,RIGHT North
+זכרון יעקב,2,RIGHT North
+הגליל העליון,2,RIGHT North
+מעלה יוסף,2,RIGHT North
+קצרין,2,RIGHT North
+מג'אר,2,RIGHT North
+קרית מוצקין,2,RIGHT North
+קרית טבעון,2,RIGHT North
+סאג'ור,2,RIGHT North
+שלומי,2,RIGHT North
+כעביה - טבאש - חג'אג'רה,2,RIGHT North
+עילבון,2,RIGHT North
+מעלות-תרשיחא,2,RIGHT North
+משגב,2,RIGHT North
+חדרה,2,RIGHT North
+אבו סנאן,2,RIGHT North
+ע'ג'ר,2,RIGHT North
+חוף הכרמל,2,RIGHT North
+פרדס חנה - כרכור,2,RIGHT North
+קרית ביאליק,2,RIGHT North
+מנשה,2,RIGHT North
+כסרא - סמיע,2,RIGHT North
+נהריה,2,RIGHT North
+חיפה,2,RIGHT North
+הגלבוע,2,RIGHT North
+ראמה,2,RIGHT North
+עמק יזרעאל,2,RIGHT North
+הגליל התחתון,2,RIGHT North
+בית שאן,2,RIGHT North
+קרית אתא,2,RIGHT North
+פסוטה,2,RIGHT North
+בנימינה - גבעת עדה,2,RIGHT North
+קרית ים,2,RIGHT North
+גוש חלב (ג'יש),2,RIGHT North
+עמק הירדן,2,RIGHT North
+כפר תבור,2,RIGHT North
+כפר ורדים,2,RIGHT North
+עמק המעיינות,2,RIGHT North
+עכו,2,RIGHT North
+יסוד המעלה,2,RIGHT North
+יאנוח - ג'ת,2,RIGHT North

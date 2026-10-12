@@ -104,3 +104,16 @@ def test_primary_cantons_get_distinct_colours_and_a_mixed_canton_blends_its_two_
     # METRO Tel Aviv: Right 41.1% vs Center 39.0% — neither the Right nor the Center shade family
     assert colours[0] not in utils.BLOC_SHADES["right"] + utils.BLOC_SHADES["center"]
     assert colours[1] in utils.BLOC_SHADES["right"] and colours[3] in utils.BLOC_SHADES["arab"]
+
+
+def test_home_page_quotes_the_current_primary_numbers():
+    import pandas as pd
+    from src.config import DATA_PROCESSED
+
+    ex = pd.read_csv(DATA_PROCESSED / "experiments" / "experiment_results.csv")
+    primary = ex[(ex["repr"] == "nmf_5") & (ex["metric"] == "cosine") & (ex["algo"] == "louvain") & (ex["k_target"] == 5)]
+    ari = pd.read_csv(DATA_PROCESSED / "stability_results.csv").set_index("config").loc["NMF_5 / Cosine / Louvain", "mean_ari"]
+    at = AppTest.from_file("../app/app.py", default_timeout=180).run()
+    assert not at.exception
+    text = " ".join(m.value for m in at.markdown)
+    assert f"{primary['silhouette'].iloc[0]:.3f}" in text and f"{ari:.3f}" in text

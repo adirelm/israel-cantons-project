@@ -6,7 +6,7 @@ Dividing Israel into politically homogeneous cantons based on Knesset election r
 
 ## Project Overview
 
-This M.Sc. project develops a data-driven algorithmic approach to partition Israeli municipalities into geographically contiguous "cantons" that maximize internal political similarity. The system uses town-level election results from the five most recent Knesset elections (2019-2022) combined with municipal boundary data.
+This M.Sc. project develops a data-driven algorithmic approach to partition Israeli municipalities into "cantons" of neighbouring municipalities that maximize internal political similarity. The system uses town-level election results from the five most recent Knesset elections (2019-2022) combined with municipal boundary data.
 
 **Author:** Adir Elmakais — M.Sc. Computer Science, Bar-Ilan University
 **Advisor:** Dr. Oren Glickman
@@ -104,8 +104,8 @@ Party classification lives in `data/reference/parties.csv`; run `rebuild_results
 ## Key Results
 
 - **255 municipalities**, including the 23 Israeli local authorities in Judea and Samaria, partitioned into **5 cantons** (primary result: NMF_5 / Cosine / Louvain)
-- Best silhouette score: **0.987** (BlocShares / Cosine / Agglomerative, K=3); primary K=5 partition: **0.180**
-- Temporal stability: ARI **0.992** (BlocShares Louvain), **0.954** (Agglomerative), **0.909** (primary partition)
+- Best silhouette score: **0.987** (BlocShares / Cosine / Agglomerative, K=3); primary K=5 partition: **0.142**
+- Temporal stability: ARI **0.992** (BlocShares Louvain), **0.954** (Agglomerative), **0.927** (primary partition)
 - Held-out test: cantons built from 2019-2021 differ in every bloc's vote share in the 2022 election (44 of 50 canton pairs)
 - 264 experiment configurations, 0 failures
 - Cantons: METRO Tel Aviv, RIGHT Jerusalem & South, RIGHT North, ARAB, and HAREDI Cities (seven non-contiguous cities)

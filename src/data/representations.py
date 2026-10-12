@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 from sklearn.decomposition import PCA, NMF
 
-from src.config import BLOC_MAPPING, BLOC_COLS, KNESSET_IDS, NON_PARTY_COLS
+from src.config import BLOC_MAPPING, BLOC_COLS, ELECTORAL_THRESHOLD, KNESSET_IDS, NON_PARTY_COLS
 
 
 # ---------------------------------------------------------------------------
@@ -63,15 +63,18 @@ def _common_municipalities(elections: dict[int, pd.DataFrame]) -> list[str]:
 # ---------------------------------------------------------------------------
 
 class RawPartyShares:
-    """Average raw party vote percentages across elections.
+    """Vote share (%) of every list in every election: one feature per (list, election) pair.
 
-    The union of all party codes across all elections is used.  Parties
-    absent from a given election receive 0 %.  This is the highest-dimensional
-    representation (~100+ features).
+    Elections are kept apart rather than averaged, because a ballot letter can stand for
+    different parties in different elections ("פה" was Blue and White in 2019-2020 and
+    Yesh Atid in 2021-2022). Lists below ``min_share`` percent of all valid votes in the
+    analysed municipalities are dropped; the default, the 3.25% electoral threshold,
+    keeps exactly the lists that won seats (51 features over the five elections).
     """
 
-    def __init__(self, elections_to_use: list[int] | None = None) -> None:
+    def __init__(self, elections_to_use: list[int] | None = None, min_share: float = ELECTORAL_THRESHOLD) -> None:
         self._elections_to_use = elections_to_use or KNESSET_IDS
+        self._min_share = min_share
         self._feature_names: list[str] = []
 
     @property
@@ -84,29 +87,17 @@ class RawPartyShares:
 
     def fit_transform(self, elections: dict[int, pd.DataFrame]) -> pd.DataFrame:
         munis = _common_municipalities(elections)
-        # Collect all unique party codes
-        all_parties: set[str] = set()
-        for k_id in self._elections_to_use:
-            all_parties.update(_get_party_columns(elections[k_id]))
-        all_parties_sorted = sorted(all_parties)
-
-        # Build per-election percentage matrices
-        pct_matrices: list[pd.DataFrame] = []
-        for k_id in self._elections_to_use:
+        columns: dict[str, np.ndarray] = {}
+        for k_id in sorted(self._elections_to_use):
             df = elections[k_id].set_index("municipality").loc[munis]
-            valid = df["valid"]
-            pct = pd.DataFrame(0.0, index=munis, columns=all_parties_sorted)
-            for p in _get_party_columns(elections[k_id]):
-                if p in df.columns:
-                    pct[p] = (df[p].div(valid.replace(0, np.nan)).mul(100).fillna(0.0)).values
-            pct_matrices.append(pct)
+            parties = _get_party_columns(elections[k_id])
+            share = df[parties].sum() / df["valid"].sum() * 100
+            for p in sorted(share[share >= self._min_share].index):
+                columns[f"{p}_{k_id}"] = df[p].div(df["valid"].replace(0, np.nan)).mul(100).fillna(0.0).to_numpy()
 
-        # Average across elections
-        avg = sum(pct_matrices) / len(pct_matrices)  # type: ignore[arg-type]
-        avg.index.name = "municipality"
-
-        self._feature_names = all_parties_sorted
-        return avg.reset_index()
+        self._feature_names = list(columns)
+        out = pd.DataFrame(columns, index=pd.Index(munis, name="municipality"))
+        return out.reset_index()
 
 
 # ---------------------------------------------------------------------------

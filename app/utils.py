@@ -168,7 +168,7 @@ BLOCS = ["right", "haredi", "center", "left", "arab"]
 
 REPR_DESCRIPTIONS = {
     "bloc_shares": "11 features: average + std of 5 political blocs across elections, plus avg voter turnout. Most interpretable representation.",
-    "raw_party_shares": "Vote share for each individual party. High-dimensional but captures fine-grained differences between municipalities.",
+    "raw_party_shares": "Vote share of each list that won seats, kept separately for each election (51 features). Uses no grouping of parties into blocs.",
     "pca_5": "PCA dimensionality reduction to 5 components from raw party shares. Captures the main axes of political variance.",
     "nmf_5": "Non-negative Matrix Factorization to 5 components. Similar to PCA but preserves non-negativity of vote shares.",
 }
@@ -190,7 +190,7 @@ EVAL_METRIC_DESCRIPTIONS = {
     "silhouette": "How well-separated cantons are (-1 to 1). Higher = more distinct. Negative means municipalities are closer to other cantons than their own.",
     "wcss": "Within-Cluster Sum of Squares. Lower = more politically homogeneous cantons.",
     "pop_cv": "Coefficient of variation of canton populations. Lower = more balanced sizes (0 = perfectly equal).",
-    "n_disconnected": "Municipalities not connected to their canton's main territory. 0 = fully contiguous.",
+    "n_disconnected": "Cantons split on the analysis graph. The graph also links isolated towns and towns where one bloc has over 70%, so 0 does not mean every canton is one piece on the map.",
     "elapsed_s": "Algorithm runtime in seconds.",
 }
 
