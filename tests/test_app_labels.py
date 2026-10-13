@@ -191,3 +191,11 @@ def test_about_page_quotes_the_current_canton_shares():
     text = " ".join(m.value for m in at.markdown)
     assert f"{stats.loc[0, 'right_pct']:.1f}% Right, {stats.loc[0, 'center_pct']:.1f}% Center" in text
     assert f"{stats.loc[4, 'haredi_pct']:.1f}% Haredi" in text
+
+
+def test_app_links_to_the_public_map_only_once_it_is_published():
+    utils = _app_utils()
+    at = AppTest.from_file("../app/app.py", default_timeout=180).run()
+    assert not at.exception
+    shown = any(utils.PUBLIC_MAP_URL in (m.value or "") for m in [*at.markdown, *at.info])
+    assert shown == utils.PUBLIC_MAP_LIVE

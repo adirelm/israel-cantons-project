@@ -2,7 +2,7 @@
 
 Dividing Israel into politically homogeneous cantons based on Knesset election results using spatially-constrained clustering.
 
-**Public map (Hebrew/English):** https://adirelm.github.io/israel-cantons-project/
+**Public map (Hebrew/English):** in `site/`, to be published at https://adirelm.github.io/israel-cantons-project/
 
 **Research app:** https://israel-cantons-project-5j7kgq8acxrbiflraqnhgb.streamlit.app/
 
@@ -103,7 +103,7 @@ python scripts/report_numbers.py       # every number the report and app quote
 python scripts/build_site_data.py      # site/data/*.json and site/og.png for the public map page
 ```
 
-Party classification lives in `data/reference/parties.csv`; run `rebuild_results.py` after changing it. The first two steps are needed only when boundaries change. Pushing `site/` to `main` deploys the public page (`.github/workflows/pages.yml`); to preview it locally, run `python -m http.server --directory site` and open http://localhost:8000. The notebooks document the original exploratory analysis; notebooks 05 and 06 save their outputs under separate names so they do not overwrite the published results.
+Party classification lives in `data/reference/parties.csv`; run `rebuild_results.py` after changing it. The first two steps are needed only when boundaries change. The public page is deployed by `.github/workflows/pages.yml` (run manually until GitHub Pages is enabled); to preview it locally, run `python -m http.server --directory site` and open http://localhost:8000. The notebooks document the original exploratory analysis; notebooks 05 and 06 save their outputs under separate names so they do not overwrite the published results.
 
 ## Key Results
 

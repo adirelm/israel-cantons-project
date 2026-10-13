@@ -21,6 +21,7 @@ EXPERIMENTS_DIR = DATA_DIR / "experiments"
 PER_ELECTION_DIR = DATA_DIR / "per_election"
 FIGURES_DIR = PROJECT_ROOT / "docs" / "figures"
 PUBLIC_MAP_URL = "https://adirelm.github.io/israel-cantons-project/"
+PUBLIC_MAP_LIVE = False  # set True once GitHub Pages serves site/; until then the app does not link to it
 MAP_SIMPLIFY_M = 60.0  # display only: invisible at country zoom, cuts the map page from ~30 MB to ~2 MB
 MOVED_COLOR = "#dc2626"  # outline of towns whose canton differs from the primary map (drawn dashed)
 OUTSIDE_COLOR = "#cccccc"  # municipalities without votes in every election (not in the analysis)

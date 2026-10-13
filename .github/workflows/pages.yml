@@ -1,11 +1,10 @@
-# Publishes site/ (the public map page) to GitHub Pages on every push to main that changes it.
+# Publishes site/ (the public map page) to GitHub Pages.
+# Manual until Pages is enabled (Settings > Pages > Source: GitHub Actions); then add back:
+#   push: {branches: [main], paths: ["site/**", ".github/workflows/pages.yml"]}
 # Actions are pinned to commit SHAs so a moved tag cannot change what runs.
 name: Deploy public map
 
 on:
-  push:
-    branches: [main]
-    paths: ["site/**", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:

@@ -20,6 +20,7 @@ from utils import (
     BLOCS,
     PLOTLY_LAYOUT,
     FIGURES_DIR,
+    PUBLIC_MAP_LIVE,
     PUBLIC_MAP_URL,
     build_canton_map,
     canton_profiles,
@@ -44,11 +45,12 @@ st.markdown(
     "_M.Sc. Computer Science Project -- Adir Elmakais, Bar-Ilan University "
     "(Advisor: Dr. Oren Glickman)_"
 )
-st.info(
-    f"**Looking for the map for readers?** The [public map]({PUBLIC_MAP_URL}) shows the five cantons in "
-    "Hebrew and English, with town search and a view per election. This app holds the research behind it.",
-    icon=":material/public:",
-)
+if PUBLIC_MAP_LIVE:
+    st.info(
+        f"**Looking for the map for readers?** The [public map]({PUBLIC_MAP_URL}) shows the five cantons in "
+        "Hebrew and English, with town search and a view per election. This app holds the research behind it.",
+        icon=":material/public:",
+    )
 
 st.divider()
 

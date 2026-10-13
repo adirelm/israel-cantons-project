@@ -2,7 +2,7 @@
 
 import streamlit as st
 
-from utils import PUBLIC_MAP_URL
+from utils import PUBLIC_MAP_LIVE, PUBLIC_MAP_URL
 
 st.set_page_config(
     page_title="Israel Cantons Explorer",
@@ -24,5 +24,6 @@ pages = {
     ],
 }
 page = st.navigation(pages)
-st.sidebar.link_button("Public map (Hebrew / English)", PUBLIC_MAP_URL, icon=":material/public:", width="stretch")
+if PUBLIC_MAP_LIVE:
+    st.sidebar.link_button("Public map (Hebrew / English)", PUBLIC_MAP_URL, icon=":material/public:", width="stretch")
 page.run()
