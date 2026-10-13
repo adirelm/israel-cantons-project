@@ -8,7 +8,9 @@ import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from utils import ELECTION_LABELS, PLOTLY_LAYOUT, inject_custom_css, load_canton_tests, load_cantons_labeled
+from utils import (
+    ELECTION_LABELS, PLOTLY_LAYOUT, compare_verdict, inject_custom_css, load_canton_tests, load_cantons_labeled,
+)
 
 inject_custom_css()
 st.title(":bar_chart: Compare Cantons")
@@ -40,30 +42,33 @@ sign = 1 if a == lo else -1
 diff = sign * row["diff"]
 ci = sorted((sign * row["ci_low"], sign * row["ci_high"]))
 share_a, share_b = (row["mean_a"], row["mean_b"]) if sign == 1 else (row["mean_b"], row["mean_a"])
-clear_share = ci[0] > 0 or ci[1] < 0
-clear_town = row["p_holm"] < 0.05
-if clear_share and clear_town:
-    verdict = "The difference is clear both in voters' terms and for the typical town."
-elif clear_share:
-    verdict = (f"It is clear in voters' terms, but the typical town does not differ (p = {row['p_holm']:.2f}), "
-               "so a few large towns drive it.")
-elif clear_town:
-    verdict = "The typical town differs, but the share of all voters does not differ clearly (the interval includes 0)."
-else:
-    verdict = "There is no clear difference."
+verdict = compare_verdict(diff, ci[0], ci[1], row["p_holm"], int(row["n_a"] if sign == 1 else row["n_b"]),
+                          int(row["n_b"] if sign == 1 else row["n_a"]))
+gap = round(share_a, 1) - round(share_b, 1)  # stated from the rounded shares so the sentence adds up
+
+
+def _bound(x: float) -> str:
+    return f"{x:+.2f}" if abs(x) < 0.05 else f"{x:+.1f}"
+
+
 st.markdown(
     f"#### {names[a]} vs {names[b]}\n"
     f"In {_label(_test)}, the **{bloc.capitalize()}** bloc got **{share_a:.1f}%** of the vote in **{names[a]}** "
-    f"and **{share_b:.1f}%** in **{names[b]}**: {abs(diff):.1f} points {'more' if diff > 0 else 'less'} "
-    f"(95% interval for A minus B: {ci[0]:+.1f} to {ci[1]:+.1f} points). "
+    f"and **{share_b:.1f}%** in **{names[b]}**: "
+    f"{f'{abs(gap):.1f} points ' + ('more' if gap > 0 else 'less') if abs(gap) >= 0.05 else 'about the same share'} "
+    f"(95% interval for A minus B: {_bound(ci[0])} to {_bound(ci[1])} points). "
     f"{verdict}"
 )
 
 pairs = tests[tests.bloc == bloc].copy()
+# Show the selected pair as A minus B, the same direction as the sentence above
+flip = (pairs.canton_a == lo) & (pairs.canton_b == hi) & (sign == -1)
+pairs.loc[flip, ["canton_a", "canton_b"]] = pairs.loc[flip, ["canton_b", "canton_a"]].to_numpy()
+pairs.loc[flip, ["diff", "ci_low", "ci_high"]] = -pairs.loc[flip, ["diff", "ci_high", "ci_low"]].to_numpy()
 pairs["pair"] = pairs.canton_a.map(names) + "  vs  " + pairs.canton_b.map(names)
 pairs["clear"] = ((pairs.ci_low > 0) | (pairs.ci_high < 0)) & (pairs.p_holm < 0.05)
 pairs = pairs.sort_values("diff")
-selected = (pairs.canton_a == lo) & (pairs.canton_b == hi)
+selected = pairs.canton_a.isin([lo, hi]) & pairs.canton_b.isin([lo, hi])
 fig = go.Figure(go.Scatter(
     x=pairs["diff"], y=pairs["pair"], mode="markers",
     marker=dict(size=selected.map({True: 16, False: 11}),
@@ -82,8 +87,8 @@ fig.update_layout(
 )
 st.plotly_chart(fig, width="stretch")
 st.caption("Dark: clear difference (interval excludes 0 and the typical-town test is significant). "
-           "Grey: not clear on at least one of the two. The diamond is the pair selected above "
-           "(shown as first canton minus second, in the order of the pair's label).")
+           "Grey: not clear on at least one of the two. Each row is the first canton minus the second; "
+           "the diamond is the pair selected above, shown as A minus B.")
 
 with st.expander("How to read the tests, and the full table"):
     st.markdown(

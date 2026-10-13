@@ -138,7 +138,7 @@ if assignment is not None:
             "Canton": p["label"],
             "Largest Bloc": largest_bloc(p),
             "Municipalities": p["n_munis"],
-            "Avg Voters": f"{p['voters']:,.0f}",
+            "Valid votes per election (avg.)": f"{p['voters']:,.0f}",
         } for _, p in profiles.iterrows()]
         st.dataframe(pd.DataFrame(pop_data), width="stretch", hide_index=True)
 
@@ -171,13 +171,13 @@ st.divider()
 
 st.subheader("Explore the Project")
 
-link_col1, link_col2, link_col3 = st.columns(3)
+link_col1, link_col2, link_col3, link_col4 = st.columns(4)
 
 with link_col1:
     with st.container(border=True):
         st.markdown(
             ":world_map: **Canton Map Explorer**\n\n"
-            "Interactively explore all 264 experiment configurations. "
+            f"Interactively explore all {len(_ex)} experiment configurations. "
             "Select K, algorithm, representation, and distance metric."
         )
         st.page_link("pages/1_Canton_Map.py", label="Open Map Explorer", icon=":material/map:")
@@ -198,6 +198,15 @@ with link_col3:
             "See how canton boundaries persist across five Knesset elections "
             "(2019-2022)."
         )
-        st.page_link("pages/3_Stability.py", label="Open Stability", icon=":material/trending_up:")
+        st.page_link("pages/3_Stability.py", label="Open Stability", icon=":material/timeline:")
+
+with link_col4:
+    with st.container(border=True):
+        st.markdown(
+            ":bar_chart: **Compare Cantons**\n\n"
+            "Do the cantons really differ? Each difference in words, tested on an election "
+            "the map did not use."
+        )
+        st.page_link("pages/5_Compare_Cantons.py", label="Open Compare Cantons", icon=":material/compare_arrows:")
 
 st.caption("Use the sidebar to move between pages: Explore for the map and comparisons, Research for the method and its checks.")

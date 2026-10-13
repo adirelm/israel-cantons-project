@@ -58,7 +58,7 @@ const TEXT = {
     howTitle: "איך זה עובד",
     steps: (m) => [
       ["הנתונים", `תוצאות הבחירות לכנסת בכל רשות מקומית בחמש מערכות הבחירות ${m.first}–${m.last}, וגבולות הרשויות מהלשכה המרכזית לסטטיסטיקה ומהמנהל האזרחי.`],
-      ["החלוקה", "כל רשות מיוצגת באחוזי ההצבעה לכל רשימה שנכנסה לכנסת, בכל מערכת בחירות בנפרד. אלגוריתם לזיהוי קהילות ברשת (Louvain) מאחד רשויות שכנות שמצביעות באופן דומה לחמישה קנטונים. רשויות שבהן אותו גוש מקבל יותר מ־70% מהקולות מקושרות זו לזו גם כשאינן גובלות, ולכן הקנטון הערבי והקנטון של הערים החרדיות אינם רצף אחד במפה."],
+      ["החלוקה", "כל רשות מיוצגת באחוזי ההצבעה לכל רשימה שנכנסה לכנסת, בכל מערכת בחירות בנפרד. אלגוריתם לזיהוי קהילות ברשת (Louvain) מאחד רשויות שכנות שמצביעות באופן דומה לחמישה קנטונים. רשויות שבהן אותו גוש מקבל יותר מ־70% מהקולות מקושרות זו לזו גם כשאינן גובלות, ולכן רוב הקנטונים אינם רצף אחד במפה: בעיקר הקנטון הערבי והערים החרדיות, וגם כמה רשויות בודדות, כמו קריית שמונה, שמשויכות לקנטון רחוק."],
       ["הבדיקה", `המפה כמעט לא זזה כשמריצים את השיטה על כל מערכת בחירות לבד: ${m.towns_never_moved} מתוך ${m.towns} הרשויות נשארות במקומן. וקנטונים שנבנו מבחירות ${m.trainFirst}–${m.trainLast} בלבד נבדלים זה מזה באופן מובהק סטטיסטית גם בבחירות ${m.testYear}, ב־${m.heldout.significant} מתוך ${m.heldout.pairs} ההשוואות.`],
     ],
     caveat: "הגושים (ימין, חרדים, מרכז, שמאל, ערבים) משמשים לתיאור הקנטונים ולקישור בין רשויות שבהן גוש אחד דומיננטי, לא לסיווג המפלגות לפני החלוקה. שמות הקנטונים נקבעו לפי הרשויות הבולטות בהם והגוש הגדול בהם. זהו ניתוח נתונים, לא הצעה מדינית.",
@@ -118,7 +118,7 @@ const TEXT = {
     howTitle: "How it works",
     steps: (m) => [
       ["The data", `Knesset election results for every local authority in the five elections from ${m.first} to ${m.last}, and municipal boundaries from the Central Bureau of Statistics and the Civil Administration.`],
-      ["The division", "Each municipality is described by the vote share of every list that won seats, in each election separately. A network community-detection algorithm (Louvain) groups neighbouring municipalities that vote alike into five cantons. Municipalities where one bloc wins over 70% of the vote are linked to each other even when they share no border, so the Arab canton and the Haredi cities are not single pieces on the map."],
+      ["The division", "Each municipality is described by the vote share of every list that won seats, in each election separately. A network community-detection algorithm (Louvain) groups neighbouring municipalities that vote alike into five cantons. Municipalities where one bloc wins over 70% of the vote are linked to each other even when they share no border, so most cantons are not single pieces on the map: mainly the Arab canton and the Haredi cities, and a few single towns, such as Kiryat Shmona, that belong to a distant canton."],
       ["The checks", `The map barely moves when the method is run on each election alone: ${m.towns_never_moved} of ${m.towns} municipalities stay put. Cantons built from the ${m.trainFirst}–${m.trainLast} elections only still differ significantly in ${m.testYear}, in ${m.heldout.significant} of ${m.heldout.pairs} comparisons.`],
     ],
     caveat: "Blocs (Right, Haredi, Center, Left, Arab) describe the cantons and link municipalities dominated by one bloc; parties are not grouped before the division. Canton names come from their best-known municipalities and their largest bloc. This is a data analysis, not a policy proposal.",

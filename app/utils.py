@@ -22,7 +22,8 @@ PER_ELECTION_DIR = DATA_DIR / "per_election"
 FIGURES_DIR = PROJECT_ROOT / "docs" / "figures"
 PUBLIC_MAP_URL = "https://adirelm.github.io/israel-cantons-project/"
 MAP_SIMPLIFY_M = 60.0  # display only: invisible at country zoom, cuts the map page from ~30 MB to ~2 MB
-MOVED_COLOR = "#dc2626"  # outline of towns whose canton differs from the primary map
+MOVED_COLOR = "#dc2626"  # outline of towns whose canton differs from the primary map (drawn dashed)
+OUTSIDE_COLOR = "#cccccc"  # municipalities without votes in every election (not in the analysis)
 
 
 # ---------------------------------------------------------------------------
@@ -230,7 +231,12 @@ def load_primary_assignment() -> pd.DataFrame:
 
 @st.cache_data
 def load_geojson() -> gpd.GeoDataFrame:
-    """Municipality boundaries, simplified for display (shared borders stay shared)."""
+    """Municipality boundaries, simplified for display only.
+
+    Coverage simplification keeps most shared borders shared; where the source polygons overlap
+    (some Judea and Samaria councils) small gaps can appear. The result is for drawing, not for
+    geometry operations (rounding leaves a few invalid shapes).
+    """
     import shapely
 
     geo = gpd.read_file(DATA_DIR / "municipalities_dissolved.geojson").to_crs(2039)
@@ -359,9 +365,73 @@ def canton_colors(profiles: pd.DataFrame) -> dict[int, str]:
     return colors
 
 
+def compare_verdict(diff: float, ci_low: float, ci_high: float, p_holm: float, n_a: int, n_b: int) -> str:
+    """Plain-language verdict for a canton pair: voters' share (interval) and typical town (test)."""
+    clear_share = ci_low > 0 or ci_high < 0
+    clear_town = p_holm < 0.05
+    if clear_share and clear_town:
+        return "The difference is clear both in voters' terms and for the typical town."
+    if clear_share:
+        return (f"It is clear in voters' terms; the typical-town test does not confirm it (p = {p_holm:.2f}, "
+                f"with {n_a} and {n_b} towns). That can happen when a few large towns drive the share "
+                "or when a canton has few towns.")
+    if clear_town:
+        return "The typical town differs, but the difference in the share of all voters is not clear (the interval includes 0)."
+    return "There is no clear difference."
+
+
 def largest_bloc(profile: pd.Series) -> str:
     """'Right (41%)' — the canton's largest bloc and its share of voters."""
     return f"{profile['dominant'].capitalize()} ({profile[profile['dominant']]:.0f}%)"
+
+
+def canton_map_layer(
+    geo: gpd.GeoDataFrame,
+    assignment: pd.DataFrame,
+    features: pd.DataFrame,
+    names: dict[int, str] | None = None,
+    outlined: set[str] | None = None,
+) -> gpd.GeoDataFrame:
+    """One row per municipality with its canton label, fill color and tooltip fields.
+
+    Municipalities outside the analysis (no votes in every election) stay, drawn grey.
+    Towns in ``outlined`` come last so their outline is drawn over their neighbours'.
+    """
+    profiles = canton_profiles(assignment, features)
+    colors = canton_colors(profiles)
+    labels = {}
+    for cid, profile in profiles.iterrows():
+        if names is None:
+            labels[cid] = f"Canton {cid} ({profile['dominant'].upper()})"
+        else:
+            labels[cid] = names.get(cid, f"Canton {cid}: no counterpart in the primary map")
+
+    layer = (
+        geo[["MUN_HEB", "MUN_ENG", "geometry"]]
+        .merge(assignment, left_on="MUN_HEB", right_on="municipality", how="left")
+        .merge(features, on="municipality", how="left")
+    )
+    layer["canton_label"] = layer["canton"].map(labels).fillna("Not in the analysis (no votes in every election)")
+    layer["fill"] = layer["canton"].map(colors).fillna(OUTSIDE_COLOR)
+    layer["moved"] = layer["MUN_HEB"].isin(outlined or set())
+    layer["votes"] = layer["avg_votes"].map(lambda v: f"{v:,.0f}" if pd.notna(v) else "")
+    for bloc in BLOCS:
+        layer[bloc] = layer[f"{bloc}_avg"].map(lambda v: f"{v:.1f}%" if pd.notna(v) else "")
+    layer = layer.sort_values("moved", kind="stable").reset_index(drop=True)
+    layer.attrs["colors"], layer.attrs["labels"] = colors, labels
+    return layer
+
+
+def town_style(props) -> dict:
+    """Leaflet style of one municipality: canton fill, dashed red outline if it moved."""
+    moved = bool(props["moved"])
+    return {
+        "fillColor": props["fill"],
+        "color": MOVED_COLOR if moved else "#555",
+        "weight": 2.4 if moved else 0.6,
+        "dashArray": "5 3" if moved else None,
+        "fillOpacity": 0.7,
+    }
 
 
 def build_canton_map(
@@ -375,45 +445,21 @@ def build_canton_map(
 
     With ``names`` (the primary map's canton names), the legend and tooltips use them;
     a canton missing from ``names`` has no counterpart in the primary map. Municipalities
-    in ``outlined`` get a red outline (towns whose canton differs from the primary map).
+    in ``outlined`` get a dashed red outline (towns whose canton differs from the primary map).
     """
     import folium
 
     # OpenStreetMap needs no API key (CARTO basemaps now show "API key required" watermarks)
     m = folium.Map(location=[31.5, 35.0], zoom_start=8, tiles="OpenStreetMap")
 
-    profiles = canton_profiles(assignment, features)
-    colors = canton_colors(profiles)
-    canton_labels = {}
-    for cid, profile in profiles.iterrows():
-        if names is None:
-            canton_labels[cid] = f"Canton {cid} ({profile['dominant'].upper()})"
-        else:
-            canton_labels[cid] = names.get(cid, f"Canton {cid}: no counterpart in the primary map")
-
-    outlined = outlined or set()
-    layer = (
-        geo[["MUN_HEB", "MUN_ENG", "geometry"]]
-        .merge(assignment, left_on="MUN_HEB", right_on="municipality", how="inner")
-        .merge(features, on="municipality", how="left")
-    )
-    layer["canton_label"] = layer["canton"].map(canton_labels)
-    layer["fill"] = layer["canton"].map(colors).fillna("#cccccc")
-    layer["moved"] = layer["MUN_HEB"].isin(outlined)
-    layer["votes"] = layer["avg_votes"].map(lambda v: f"{v:,.0f}" if pd.notna(v) else "")
-    for bloc in BLOCS:
-        layer[bloc] = layer[f"{bloc}_avg"].map(lambda v: f"{v:.1f}%" if pd.notna(v) else "")
+    layer = canton_map_layer(geo, assignment, features, names, outlined)
+    colors, canton_labels = layer.attrs["colors"], layer.attrs["labels"]
     fields = ["MUN_HEB", "MUN_ENG", "canton_label", "votes", *BLOCS]
-    aliases = ["", "", "Canton", "Valid votes (avg.)", *[b.capitalize() for b in BLOCS]]
+    aliases = ["", "", "Canton", "Valid votes per election (avg.)", *[b.capitalize() for b in BLOCS]]
 
     folium.GeoJson(
         layer[[*fields, "fill", "moved", "geometry"]].to_json(),
-        style_function=lambda f: {
-            "fillColor": f["properties"]["fill"],
-            "color": MOVED_COLOR if f["properties"]["moved"] else "#555",
-            "weight": 2.2 if f["properties"]["moved"] else 0.6,
-            "fillOpacity": 0.7,
-        },
+        style_function=lambda f: town_style(f["properties"]),
         highlight_function=lambda f: {"weight": 2.5, "color": "#111", "fillOpacity": 0.85},
         tooltip=folium.GeoJsonTooltip(fields=fields, aliases=aliases, sticky=True),
     ).add_to(m)
@@ -432,7 +478,7 @@ def build_canton_map(
     if outlined:
         legend_items += (
             f'<li><span style="width:12px;height:12px;display:inline-block;margin-right:6px;'
-            f'border:2px solid {MOVED_COLOR}"></span> Different canton from the primary map</li>'
+            f'border:2px dashed {MOVED_COLOR}"></span> Different canton from the primary map</li>'
         )
 
     legend_macro = MacroElement()

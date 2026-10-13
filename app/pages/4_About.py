@@ -8,6 +8,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from utils import (
+    canton_profiles,
+    load_primary_assignment,
+    load_political_features,
     inject_custom_css,
     load_elections_summary,
     FIGURES_DIR,
@@ -123,12 +126,14 @@ with tab_results:
     st.divider()
     st.subheader("K=5 Canton Descriptions")
 
-    st.markdown("""
-1. **METRO Tel Aviv** -- Greater Tel Aviv and the Sharon, from Netanya to Rehovot (41.1% Right, 39.0% Center)
-2. **RIGHT Jerusalem & South** -- Jerusalem, the southern periphery and the Negev, and the Judea and Samaria authorities (53.1% Right, 22.1% Haredi)
-3. **RIGHT North** -- Mixed northern region including Haifa and the Galilee (44.8% Right)
-4. **ARAB** -- Arab-majority municipalities in the Galilee, the Triangle and the Negev (89.6% Arab)
-5. **HAREDI Cities** -- Bnei Brak, El'ad, Rekhasim, Kiryat Ye'arim, Modi'in Illit, Beitar Illit and Immanuel (90.0% Haredi); not contiguous, joined by political similarity
+    _p = canton_profiles(load_primary_assignment(), load_political_features())
+    _s = lambda cid, bloc: f"{_p.loc[cid, bloc]:.1f}%"  # noqa: E731
+    st.markdown(f"""
+1. **METRO Tel Aviv** -- Greater Tel Aviv and the Sharon, from Netanya to Yavne ({_s(0, "right")} Right, {_s(0, "center")} Center)
+2. **RIGHT Jerusalem & South** -- Jerusalem, the southern periphery and the Negev, and the Judea and Samaria authorities ({_s(1, "right")} Right, {_s(1, "haredi")} Haredi)
+3. **RIGHT North** -- Mixed northern region including Haifa and the Galilee ({_s(2, "right")} Right)
+4. **ARAB** -- Arab municipalities in the Galilee, the Triangle and the Negev ({_s(3, "arab")} Arab)
+5. **HAREDI Cities** -- Bnei Brak, El'ad, Rekhasim, Kiryat Ye'arim, Modi'in Illit, Beitar Illit and Immanuel ({_s(4, "haredi")} Haredi); not contiguous, joined by political similarity
 
 *Shares are weighted by voters and averaged over the five elections (2019-2022).*
 """)

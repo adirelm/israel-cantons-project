@@ -189,7 +189,7 @@ with info_col:
     pop_data = [{
         "Canton": canton_label_map.get(cid, f"Canton {cid}") if _is_featured else f"Canton {cid}",
         "Municipalities": p["n_munis"],
-        "Total Voters": f"{p['voters']:,.0f}",
+        "Valid votes per election (avg.)": f"{p['voters']:,.0f}",
         "Largest Bloc": largest_bloc(p),
     } for cid, p in profiles.iterrows()]
 

@@ -114,7 +114,7 @@ Party classification lives in `data/reference/parties.csv`; run `rebuild_results
 - 264 experiment configurations, 0 failures
 - Cantons: METRO Tel Aviv, RIGHT Jerusalem & South, RIGHT North, ARAB, and HAREDI Cities (seven non-contiguous cities)
 
-Results were regenerated in October 2026 after fixing the party-to-bloc mapping (see `CHANGELOG.md`).
+Results were regenerated in October 2026 after fixing the party-to-bloc mapping, adding the Judea and Samaria authorities and switching the party-level representation to vote shares per list and election (see `CHANGELOG.md`).
 
 ## Data Sources
 

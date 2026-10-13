@@ -20,7 +20,7 @@ def test_featured_cantons_carry_their_own_names(page):
     assert table.loc["HAREDI Cities", "Municipalities"] == 7
     assert table.loc["ARAB", "Municipalities"] == 60
     assert str(table.loc["HAREDI Cities", "Largest Bloc"]).startswith("Haredi")
-    # Voter-weighted, as in the report: Right 41.1% vs Center 39.0% (towns counted equally give Center)
+    # Voter-weighted, as in the report: Right 41.0% vs Center 39.1% (towns counted equally give Center)
     assert str(table.loc["METRO Tel Aviv", "Largest Bloc"]).startswith("Right")
 
 
@@ -101,7 +101,7 @@ def test_primary_cantons_get_distinct_colours_and_a_mixed_canton_blends_its_two_
     profiles = utils.canton_profiles(utils.load_primary_assignment(), utils.load_political_features())
     colours = utils.canton_colors(profiles)
     assert len(set(colours.values())) == len(profiles)
-    # METRO Tel Aviv: Right 41.1% vs Center 39.0% — neither the Right nor the Center shade family
+    # METRO Tel Aviv: Right 41.0% vs Center 39.1% — neither the Right nor the Center shade family
     assert colours[0] not in utils.BLOC_SHADES["right"] + utils.BLOC_SHADES["center"]
     assert colours[1] in utils.BLOC_SHADES["right"] and colours[3] in utils.BLOC_SHADES["arab"]
 
@@ -129,11 +129,37 @@ def test_canton_map_page_is_light_enough_to_load_quickly():
 def test_per_election_map_outlines_the_towns_that_moved():
     utils = _app_utils()
     args = (utils.load_geojson(), utils.load_primary_assignment(), utils.load_political_features())
-    assert utils.MOVED_COLOR not in utils.build_canton_map(*args).get_root().render()
-    assert utils.MOVED_COLOR in utils.build_canton_map(*args, outlined={"נחל שורק"}).get_root().render()
+    layer = utils.canton_map_layer(*args, outlined={"נחל שורק"}).set_index("MUN_HEB")
+    assert layer["moved"].sum() == 1 and layer.loc["נחל שורק", "moved"]
+    styles = {m: utils.town_style(row) for m, row in layer.iterrows()}
+    assert styles["נחל שורק"]["color"] == utils.MOVED_COLOR
+    assert all(st["color"] != utils.MOVED_COLOR for m, st in styles.items() if m != "נחל שורק")
+    assert layer.index[-1] == "נחל שורק"  # drawn last, so neighbours do not cover its outline
 
 
-def test_router_opens_the_home_page_with_explore_and_research_sections():
+def test_towns_outside_the_analysis_stay_on_the_map():
+    """Two municipalities without votes in every election are drawn grey instead of leaving holes."""
+    utils = _app_utils()
+    layer = utils.canton_map_layer(utils.load_geojson(), utils.load_primary_assignment(), utils.load_political_features())
+    assert len(layer) == len(utils.load_geojson())
+    missing = layer[layer["canton"].isna()]
+    assert set(missing["MUN_HEB"]) == {"מגדל תפן", "נאות חובב"}
+    assert (missing["fill"] == utils.OUTSIDE_COLOR).all()
+
+
+@pytest.mark.parametrize("args, expected", [
+    ((5.0, 2.0, 8.0, 0.001, 52, 61), "clear both in voters' terms and for the typical town"),
+    ((1.3, 0.2, 2.9, 0.073, 60, 7), "does not confirm"),
+    ((-0.5, -2.0, 1.0, 0.01, 52, 61), "typical town differs"),
+    ((0.5, -0.8, 2.0, 0.46, 52, 61), "no clear difference"),
+])
+def test_compare_verdict_covers_every_case(args, expected):
+    verdict = _app_utils().compare_verdict(*args)
+    assert expected in verdict
+    assert "does not differ" not in verdict  # a non-significant test is not evidence of no difference
+
+
+def test_router_opens_the_home_page_by_default():
     at = AppTest.from_file("../app/app.py", default_timeout=180).run()
     assert not at.exception, [e.message for e in at.exception]
     assert any("Largest Bloc" in df.value.columns for df in at.dataframe)
@@ -145,3 +171,23 @@ def test_compare_page_states_the_difference_in_words():
     text = " ".join(m.value for m in at.markdown)
     assert "points" in text and "METRO Tel Aviv" in text
     assert len(at.get("plotly_chart")) >= 1
+
+
+@pytest.mark.parametrize("page", ["pages/1_Canton_Map.py", "pages/2_Experiments.py", "pages/3_Stability.py",
+                                  "pages/4_About.py", "pages/5_Compare_Cantons.py"])
+def test_every_page_runs_through_the_router(page):
+    at = AppTest.from_file("../app/app.py", default_timeout=240).run()
+    at.switch_page(page).run()
+    assert not at.exception, [e.message for e in at.exception]
+
+
+def test_about_page_quotes_the_current_canton_shares():
+    import pandas as pd
+    from src.config import DATA_PROCESSED
+
+    stats = pd.read_csv(DATA_PROCESSED / "cantons_final_stats.csv").set_index("canton")
+    at = AppTest.from_file("../app/pages/4_About.py", default_timeout=180).run()
+    assert not at.exception
+    text = " ".join(m.value for m in at.markdown)
+    assert f"{stats.loc[0, 'right_pct']:.1f}% Right, {stats.loc[0, 'center_pct']:.1f}% Center" in text
+    assert f"{stats.loc[4, 'haredi_pct']:.1f}% Haredi" in text

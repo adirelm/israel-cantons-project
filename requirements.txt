@@ -26,8 +26,8 @@ jupyterlab>=4.0.0
 notebook>=7.0.0
 
 # Web app
-streamlit>=1.30.0
-streamlit-folium>=0.18.0
+streamlit>=1.65.0  # st.navigation, width= on charts and tables
+streamlit-folium>=0.27.0  # use_container_width
 plotly>=5.18.0
 
 # Testing
