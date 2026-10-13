@@ -47,16 +47,17 @@
       </div>
 
       <div class="map-wrap">
+        <p class="election-note" id="election-note" hidden></p>
         <div id="map" dir="ltr" role="region" data-i18n-aria="mapLabel"></div>
         <div class="legend" id="legend"></div>
         <div class="map-actions">
           <button type="button" id="btn-share" class="action" data-i18n="share">העתקת קישור</button>
           <button type="button" id="btn-download" class="action" data-i18n="download">הורדת המפה</button>
         </div>
-        <p class="election-note" id="election-note" hidden></p>
       </div>
 
-      <aside class="panel" id="panel" aria-live="polite"></aside>
+      <aside class="panel" id="panel"></aside>
+      <p class="visually-hidden" id="status" role="status" aria-live="polite"></p>
     </section>
 
     <section class="how">

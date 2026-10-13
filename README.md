@@ -110,7 +110,7 @@ Party classification lives in `data/reference/parties.csv`; run `rebuild_results
 - **255 municipalities**, including the 23 Israeli local authorities in Judea and Samaria, partitioned into **5 cantons** (primary result: NMF_5 / Cosine / Louvain)
 - Best silhouette score: **0.987** (BlocShares / Cosine / Agglomerative, K=3); primary K=5 partition: **0.142**
 - Temporal stability: ARI **0.992** (BlocShares Louvain), **0.954** (Agglomerative), **0.927** (primary partition)
-- Held-out test: cantons built from 2019-2021 differ in every bloc's vote share in the 2022 election (44 of 50 canton pairs)
+- Held-out test: cantons built from 2019-2021 differ in every bloc's vote share in the 2022 election (44 of 50 comparisons: 10 canton pairs × 5 blocs)
 - 264 experiment configurations, 0 failures
 - Cantons: METRO Tel Aviv, RIGHT Jerusalem & South, RIGHT North, ARAB, and HAREDI Cities (seven non-contiguous cities)
 

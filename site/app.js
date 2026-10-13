@@ -23,7 +23,7 @@ const TEXT = {
       [m.towns, "רשויות מקומיות"],
       ["5", `מערכות בחירות, ${m.first}–${m.last}`],
       [`${m.towns_never_moved} מתוך ${m.towns}`, "רשויות נשארות באותו קנטון כשמחלקים כל מערכת בחירות לבד"],
-      [`${m.heldout.significant} מתוך ${m.heldout.pairs}`, `השוואות בין קנטונים מובהקות גם בבחירות ${m.testYear}, שלא שימשו לבניית המפה`],
+      [`${m.heldout.significant} מתוך ${m.heldout.pairs}`, `השוואות בין קנטונים שנבנו מבחירות ${m.trainFirst}–${m.trainLast} בלבד מובהקות גם בבחירות ${m.testYear}`],
     ],
     searchLabel: "חיפוש רשות",
     searchPlaceholder: "חפשו עיר, מועצה מקומית או אזורית…",
@@ -58,15 +58,24 @@ const TEXT = {
     howTitle: "איך זה עובד",
     steps: (m) => [
       ["הנתונים", `תוצאות הבחירות לכנסת בכל רשות מקומית בחמש מערכות הבחירות ${m.first}–${m.last}, וגבולות הרשויות מהלשכה המרכזית לסטטיסטיקה ומהמנהל האזרחי.`],
-      ["החלוקה", "כל רשות מיוצגת באחוזי ההצבעה לכל רשימה שנכנסה לכנסת, בכל מערכת בחירות בנפרד. אלגוריתם לזיהוי קהילות ברשת (Louvain) מאחד רשויות שכנות שמצביעות באופן דומה לחמישה קנטונים. רשויות שבהן אותו גוש מקבל יותר מ־70% מהקולות מקושרות זו לזו גם כשאינן גובלות, ולכן רוב הקנטונים אינם רצף אחד במפה: בעיקר הקנטון הערבי והערים החרדיות, וגם כמה רשויות בודדות, כמו קריית שמונה, שמשויכות לקנטון רחוק."],
-      ["הבדיקה", `המפה כמעט לא זזה כשמריצים את השיטה על כל מערכת בחירות לבד: ${m.towns_never_moved} מתוך ${m.towns} הרשויות נשארות במקומן. וקנטונים שנבנו מבחירות ${m.trainFirst}–${m.trainLast} בלבד נבדלים זה מזה באופן מובהק סטטיסטית גם בבחירות ${m.testYear}, ב־${m.heldout.significant} מתוך ${m.heldout.pairs} ההשוואות.`],
+      ["החלוקה", "כל רשות מיוצגת באחוזי ההצבעה לכל רשימה שנכנסה לכנסת, בכל מערכת בחירות בנפרד. אלגוריתם לזיהוי קהילות ברשת (Louvain) מאחד רשויות שכנות שמצביעות באופן דומה לחמישה קנטונים. ברשת יש גם קישורים בין רשויות שאינן גובלות: בין רשויות שבהן אותו גוש מקבל יותר מ־70% מהקולות, ובין רשויות שאין להן שכנות בנתונים לרשויות הדומות להן ביותר. לכן רוב הקנטונים אינם רצף אחד במפה: בעיקר הקנטון הערבי והערים החרדיות, וגם כמה רשויות בודדות, כמו קריית שמונה ובית ג׳ן, שמשויכות לקנטון רחוק."],
+      ["הבדיקה", `המפה יציבה: כשמריצים את השיטה על כל מערכת בחירות לבד, ${m.towns_never_moved} מתוך ${m.towns} הרשויות נשארות באותו קנטון (בחירות ${m.testYear} שונות יותר מכולן). וקנטונים שנבנו מבחירות ${m.trainFirst}–${m.trainLast} בלבד נבדלים זה מזה באופן מובהק סטטיסטית גם בבחירות ${m.testYear}, ב־${m.heldout.significant} מתוך ${m.heldout.pairs} ההשוואות.`],
     ],
-    caveat: "הגושים (ימין, חרדים, מרכז, שמאל, ערבים) משמשים לתיאור הקנטונים ולקישור בין רשויות שבהן גוש אחד דומיננטי, לא לסיווג המפלגות לפני החלוקה. שמות הקנטונים נקבעו לפי הרשויות הבולטות בהם והגוש הגדול בהם. זהו ניתוח נתונים, לא הצעה מדינית.",
+    caveat: "הדמיון בין רשויות מחושב לפי רשימות בודדות; הגושים (ימין, חרדים, מרכז, שמאל, ערבים) רק מתארים את הקנטונים ומוסיפים קישורים ברשת. שמות הקנטונים נקבעו לפי הרשויות הבולטות בהם והגוש הגדול בהם. זהו ניתוח נתונים, לא הצעה מדינית.",
     footer: (l) => [
       "פרויקט M.Sc. במדעי המחשב, אוניברסיטת בר־אילן · אדיר אלמקייס · בהנחיית ד״ר אורן גליקמן",
       `<a href="${l.app}" target="_blank" rel="noopener">אפליקציית המחקר</a> · <a href="${l.report}" target="_blank" rel="noopener">הדוח המלא (PDF)</a> · <a href="${l.repo}" target="_blank" rel="noopener">הקוד והנתונים</a>`,
       "מקורות: תוצאות הבחירות לכנסת לפי רשות מקומית; גבולות רשויות: הלשכה המרכזית לסטטיסטיקה והמנהל האזרחי; מפת רקע: OpenFreeMap ו־OpenStreetMap.",
     ],
+    voteIn: (label) => `ההצבעה בבחירות ${label}`,
+    cantonsInElection: (label) => `הקנטונים בבחירות ${label}`,
+    statusTown: (name) => `נבחרה רשות: ${name}`,
+    statusCanton: (name) => `נבחר קנטון: ${name}`,
+    mapFailed: "המפה לא נטענה. נסו לרענן את הדף; הנתונים שלמטה זמינים בכל מקרה.",
+    dataFailed: "נתוני המפה לא נטענו. נסו לרענן את הדף.",
+    zoomIn: "הגדלה",
+    zoomOut: "הקטנה",
+    attribution: "קרדיטים",
     imageTitle: "ישראל בחמישה קנטונים",
     imageSub: (label) => `קנטונים לפי דפוסי הצבעה · ${label}`,
     cooperative: "השתמשו בשתי אצבעות כדי להזיז את המפה",
@@ -83,7 +92,7 @@ const TEXT = {
       [m.towns, "local authorities"],
       ["5", `Knesset elections, ${m.first}–${m.last}`],
       [`${m.towns_never_moved} of ${m.towns}`, "authorities stay in the same canton when each election is divided on its own"],
-      [`${m.heldout.significant} of ${m.heldout.pairs}`, `comparisons between cantons are significant in ${m.testYear} too, an election the map was not built from`],
+      [`${m.heldout.significant} of ${m.heldout.pairs}`, `comparisons between cantons built from the ${m.trainFirst}–${m.trainLast} elections only are significant in ${m.testYear} too`],
     ],
     searchLabel: "Find a municipality",
     searchPlaceholder: "Search a city, local or regional council…",
@@ -118,15 +127,24 @@ const TEXT = {
     howTitle: "How it works",
     steps: (m) => [
       ["The data", `Knesset election results for every local authority in the five elections from ${m.first} to ${m.last}, and municipal boundaries from the Central Bureau of Statistics and the Civil Administration.`],
-      ["The division", "Each municipality is described by the vote share of every list that won seats, in each election separately. A network community-detection algorithm (Louvain) groups neighbouring municipalities that vote alike into five cantons. Municipalities where one bloc wins over 70% of the vote are linked to each other even when they share no border, so most cantons are not single pieces on the map: mainly the Arab canton and the Haredi cities, and a few single towns, such as Kiryat Shmona, that belong to a distant canton."],
-      ["The checks", `The map barely moves when the method is run on each election alone: ${m.towns_never_moved} of ${m.towns} municipalities stay put. Cantons built from the ${m.trainFirst}–${m.trainLast} elections only still differ significantly in ${m.testYear}, in ${m.heldout.significant} of ${m.heldout.pairs} comparisons.`],
+      ["The division", "Each municipality is described by the vote share of every list that won seats, in each election separately. A network community-detection algorithm (Louvain) groups neighbouring municipalities that vote alike into five cantons. The network also links municipalities that share no border: those where the same bloc wins over 70% of the vote, and municipalities with no neighbour in the data to their most similar ones. So most cantons are not single pieces on the map: mainly the Arab canton and the Haredi cities, and a few single towns, such as Kiryat Shmona and Beit Jann, that belong to a distant canton."],
+      ["The checks", `The map is stable: when the method is run on each election alone, ${m.towns_never_moved} of ${m.towns} municipalities stay in the same canton (${m.testYear} differs most). Cantons built from the ${m.trainFirst}–${m.trainLast} elections only still differ significantly in ${m.testYear}, in ${m.heldout.significant} of ${m.heldout.pairs} comparisons.`],
     ],
-    caveat: "Blocs (Right, Haredi, Center, Left, Arab) describe the cantons and link municipalities dominated by one bloc; parties are not grouped before the division. Canton names come from their best-known municipalities and their largest bloc. This is a data analysis, not a policy proposal.",
+    caveat: "Similarity between municipalities is computed from individual lists; blocs (Right, Haredi, Center, Left, Arab) only describe the cantons and add links in the network. Canton names come from their best-known municipalities and their largest bloc. This is a data analysis, not a policy proposal.",
     footer: (l) => [
       "M.Sc. project in Computer Science, Bar-Ilan University · Adir Elmakais · Advisor: Dr. Oren Glickman",
       `<a href="${l.app}" target="_blank" rel="noopener">Research app</a> · <a href="${l.report}" target="_blank" rel="noopener">Full report (PDF)</a> · <a href="${l.repo}" target="_blank" rel="noopener">Code and data</a>`,
       "Sources: Knesset election results by local authority; municipal boundaries: Central Bureau of Statistics and the Civil Administration; basemap: OpenFreeMap and OpenStreetMap.",
     ],
+    voteIn: (label) => `Vote in the ${label} election`,
+    cantonsInElection: (label) => `Cantons in the ${label} election`,
+    statusTown: (name) => `Selected municipality: ${name}`,
+    statusCanton: (name) => `Selected canton: ${name}`,
+    mapFailed: "The map could not load. Try reloading the page; the data below is still available.",
+    dataFailed: "The map data could not load. Try reloading the page.",
+    zoomIn: "Zoom in",
+    zoomOut: "Zoom out",
+    attribution: "Credits",
     imageTitle: "Israel in five cantons",
     imageSub: (label) => `Cantons by voting pattern · ${label}`,
     cooperative: "Use two fingers to move the map",
@@ -215,6 +233,41 @@ function unionBbox(features) {
 // ---------------------------------------------------------------------------
 
 const cantonProp = () => (state.election === "all" ? ["get", "canton"] : ["get", `e${state.election}`]);
+// Canton of a town in the current view: the main map, or one election on its own
+const cantonOf = (p) => (state.election === "all" ? p.canton : p[`e${state.election}`]);
+const cantonIds = () => [...new Set(data.towns.features.map((f) => cantonOf(f.properties)))].sort((a, b) => a - b);
+const membersOf = (id) => data.towns.features.filter((f) => cantonOf(f.properties) === id)
+  .sort((a, b) => b.properties.voters - a.properties.voters);
+
+// The canton as shown: the report's figures for the main map; for one election, computed from
+// that election's vote in the canton's towns (weighted by their average number of valid votes)
+function cantonView(id) {
+  const base = data.cantons.get(id);
+  if (state.election === "all" && base) return base;
+  const members = membersOf(id);
+  const voters = members.reduce((sum, f) => sum + f.properties.voters, 0);
+  const blocs = BLOC_COLORS.map((_, i) => members.reduce(
+    (sum, f) => sum + f.properties.votes[state.election][i] * f.properties.voters, 0) / (voters || 1));
+  return {
+    id,
+    he: base ? base.he : TEXT.he.noCounterpart,
+    en: base ? base.en : TEXT.en.noCounterpart,
+    color: base ? base.color : NO_COUNTERPART_COLOR,
+    towns: members.length,
+    voters,
+    blocs,
+    largest: members.slice(0, 5).map((f) => ({ he: f.properties.he, en: f.properties.en })),
+  };
+}
+
+const localeStrings = () => ({
+  "CooperativeGesturesHandler.WindowsHelpText": t().cooperativeDesktop,
+  "CooperativeGesturesHandler.MacHelpText": t().cooperativeMac,
+  "CooperativeGesturesHandler.MobileHelpText": t().cooperative,
+  "NavigationControl.ZoomIn": t().zoomIn,
+  "NavigationControl.ZoomOut": t().zoomOut,
+  "AttributionControl.ToggleAttribution": t().attribution,
+});
 
 function colorExpression() {
   const expr = ["match", cantonProp()];
@@ -238,23 +291,23 @@ function initMap() {
     fitBoundsOptions: { padding: 24 },
     attributionControl: false,
     cooperativeGestures: true,
-    locale: {
-      "CooperativeGesturesHandler.WindowsHelpText": t().cooperativeDesktop,
-      "CooperativeGesturesHandler.MacHelpText": t().cooperativeMac,
-      "CooperativeGesturesHandler.MobileHelpText": t().cooperative,
-    },
+    locale: localeStrings(),
   });
   placeControls();
 
+  // If the basemap style never loads, draw the cantons on a plain background. Later errors
+  // (a failed tile while panning) must not replace the style, or the cantons would vanish.
+  let styleLoaded = false;
   let fellBack = false;
-  map.on("error", (e) => {
-    // Basemap unavailable: keep the cantons on a plain background
-    if (!fellBack && !map.isStyleLoaded() && String(e?.error?.message || "").length) {
-      fellBack = true;
-      map.setStyle(FALLBACK_STYLE);
-    }
+  map.on("style.load", () => {
+    styleLoaded = true;
+    addLayers();
   });
-  map.on("style.load", addLayers);
+  map.on("error", () => {
+    if (styleLoaded || fellBack) return;
+    fellBack = true;
+    map.setStyle(FALLBACK_STYLE, { diff: false });
+  });
 
   popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 8 });
   map.on("mousemove", "towns-fill", (e) => {
@@ -262,7 +315,7 @@ function initMap() {
     setHover(f.id);
     map.getCanvas().style.cursor = "pointer";
     const p = f.properties;
-    const c = data.cantons.get(Number(state.election === "all" ? p.canton : p[`e${state.election}`]));
+    const c = data.cantons.get(Number(cantonOf(p)));
     popup.setLngLat(e.lngLat)
       .setHTML(`<div dir="${t().dir}"><b>${escapeHtml(townName(data.byName.get(p.he).properties))}</b><br>${escapeHtml(c ? cantonName(c) : t().noCounterpart)}</div>`)
       .addTo(map);
@@ -272,7 +325,7 @@ function initMap() {
     map.getCanvas().style.cursor = "";
     popup.remove();
   });
-  map.on("click", "towns-fill", (e) => selectTown(e.features[0].properties.he, { fly: false }));
+  map.on("click", "towns-fill", (e) => selectTown(e.features[0].properties.he, { fly: false, focus: false }));
 }
 
 // Zoom buttons and attribution sit on the side away from the legend and the action buttons
@@ -363,14 +416,13 @@ function renderStatic() {
 }
 
 function renderLegend() {
-  const ids = new Set(data.towns.features.map((f) => (state.election === "all" ? f.properties.canton : f.properties[`e${state.election}`])));
-  const items = [...data.cantons.values()].filter((c) => ids.has(c.id)).map((c) =>
-    `<button type="button" data-canton="${c.id}" aria-pressed="${state.canton === c.id}"><span class="swatch" style="background:${c.color}"></span>${escapeHtml(cantonName(c))}</button>`);
-  if ([...ids].some((id) => !data.cantons.has(id))) {
-    items.push(`<button type="button" disabled><span class="swatch" style="background:${NO_COUNTERPART_COLOR}"></span>${escapeHtml(t().noCounterpart)}</button>`);
-  }
+  const ids = cantonIds();
+  const items = ids.map((id) => {
+    const c = cantonView(id);
+    return `<button type="button" data-canton="${id}" aria-pressed="${state.canton === id}"><span class="swatch" style="background:${c.color}"></span>${escapeHtml(cantonName(c))}</button>`;
+  });
   if (state.election !== "all") {
-    items.push(`<button type="button" disabled><span class="swatch moved"></span>${escapeHtml(t().legendMoved)}</button>`);
+    items.push(`<span class="legend-item"><span class="swatch moved"></span>${escapeHtml(t().legendMoved)}</span>`);
   }
   $("#legend").innerHTML = items.join("");
   const note = $("#election-note");
@@ -379,32 +431,34 @@ function renderLegend() {
 }
 
 function cantonCard(c, { clickable }) {
-  const tag = clickable ? "button" : "div";
   const largest = c.largest.map((x) => (state.lang === "he" ? x.he : x.en)).join(", ");
-  return `<${tag} ${clickable ? `type="button" data-canton="${c.id}"` : ""} class="card canton-card${state.canton === c.id ? " selected" : ""}">
-    <h3><span class="dot" style="background:${c.color}"></span>${escapeHtml(cantonName(c))}</h3>
+  const title = clickable
+    ? `<button type="button" class="card-link" data-canton="${c.id}">${escapeHtml(cantonName(c))}</button>`
+    : `<span tabindex="-1" data-focus>${escapeHtml(cantonName(c))}</span>`;
+  const voteLine = state.election === "all" ? "" : `<p class="sub" style="margin:-6px 0 6px">${escapeHtml(t().voteIn(electionLabel(state.election)))}</p>`;
+  return `<article class="card canton-card${state.canton === c.id ? " selected" : ""}"${clickable ? ` data-canton="${c.id}"` : ""}>
+    <h3><span class="dot" style="background:${c.color}"></span>${title}</h3>
     <p class="sub">${fmt(c.towns)} ${t().towns} · ${fmt(c.voters)} ${t().votesAvg}</p>
-    ${blocBar(c.blocs)}${blocKey(c.blocs)}
+    ${voteLine}${blocBar(c.blocs)}${blocKey(c.blocs)}
     <p class="towns-list">${t().largest}: ${escapeHtml(largest)}</p>
-  </${tag}>`;
+  </article>`;
 }
 
 function renderPanel() {
   const panel = $("#panel");
   if (state.town) {
     panel.innerHTML = townCard(data.byName.get(state.town));
-  } else if (state.canton !== null && data.cantons.has(state.canton)) {
-    const c = data.cantons.get(state.canton);
-    const members = data.towns.features.filter((f) => f.properties.canton === c.id)
-      .sort((a, b) => b.properties.voters - a.properties.voters);
+  } else if (state.canton !== null && cantonIds().includes(state.canton)) {
+    const members = membersOf(state.canton);
     panel.innerHTML = `<button type="button" class="back" data-back>${t().back}</button>
-      ${cantonCard(c, { clickable: false })}
+      ${cantonCard(cantonView(state.canton), { clickable: false })}
       <div class="card"><h3>${escapeHtml(t().allTowns(members.length))}</h3>
       <p class="towns-list">${members.map((f) => `<a href="#" data-town="${escapeHtml(f.properties.he)}">${escapeHtml(townName(f.properties))}</a>`).join(" · ")}</p></div>`;
   } else {
-    panel.innerHTML = `<div><h2 style="margin:0 0 2px;font-size:1.2rem">${t().cantonsTitle}</h2>
+    const title = state.election === "all" ? t().cantonsTitle : t().cantonsInElection(electionLabel(state.election));
+    panel.innerHTML = `<div><h2 tabindex="-1" data-focus style="margin:0 0 2px;font-size:1.2rem">${escapeHtml(title)}</h2>
       <p class="sub" style="margin:0 0 6px;color:var(--ink-soft)">${t().cantonsHint}</p></div>
-      ${[...data.cantons.values()].map((c) => cantonCard(c, { clickable: true })).join("")}`;
+      ${cantonIds().map((id) => cantonCard(cantonView(id), { clickable: true })).join("")}`;
   }
 }
 
@@ -417,13 +471,14 @@ function townCard(f) {
     const id = p.elections[k];
     const color = data.cantons.get(id)?.color || NO_COUNTERPART_COLOR;
     const name = data.cantons.has(id) ? cantonName(data.cantons.get(id)) : t().noCounterpart;
-    return `<div><div class="chip${id !== p.canton ? " moved" : ""}" style="background:${color}" title="${escapeHtml(name)}"></div>${escapeHtml(data.meta.elections[k].short)}</div>`;
+    const label = `${data.meta.elections[k].short}: ${name}`;
+    return `<div><div class="chip${id !== p.canton ? " moved" : ""}" style="background:${color}" role="img" aria-label="${escapeHtml(label)}" title="${escapeHtml(name)}"></div>${escapeHtml(data.meta.elections[k].short)}</div>`;
   }).join("");
   const rows = keys.map((k) => `<tr><td>${escapeHtml(electionLabel(k))}</td>${p.votes[k].map((v) => `<td>${v.toFixed(0)}</td>`).join("")}</tr>`).join("");
   const other = state.lang === "he" ? p.en : p.he;
   return `<button type="button" class="back" data-back>${t().back}</button>
     <div class="card">
-      <h3>${escapeHtml(townName(p))}</h3>
+      <h3 tabindex="-1" data-focus>${escapeHtml(townName(p))}</h3>
       <p class="sub">${escapeHtml(other)} · ${fmt(p.voters)} ${t().votesAvg}</p>
       <p class="sub" style="color:var(--ink)"><span class="dot" style="background:${c.color};vertical-align:-2px"></span> ${t().canton}: <b>${escapeHtml(cantonName(c))}</b></p>
       <p class="sub" style="margin-bottom:4px">${t().townVsCanton}</p>
@@ -441,44 +496,46 @@ function townCard(f) {
     </div>`;
 }
 
-function render() {
+function render({ focus = false } = {}) {
   renderLegend();
   renderPanel();
   applyMapState();
   syncUrl();
+  const status = state.town ? t().statusTown(townName(data.byName.get(state.town).properties))
+    : state.canton !== null ? t().statusCanton(cantonName(cantonView(state.canton))) : "";
+  $("#status").textContent = status;
+  // Keep keyboard users in place: move focus to the panel's new heading
+  if (focus) $("#panel [data-focus]")?.focus({ preventScroll: true });
 }
 
 // ---------------------------------------------------------------------------
 // Actions
 // ---------------------------------------------------------------------------
 
-function selectTown(name, { fly = true } = {}) {
+function selectTown(name, { fly = true, focus = true } = {}) {
   const f = data.byName.get(name);
   if (!f) return;
   state.town = name;
   state.canton = null;
-  if (fly) map.fitBounds(f.bbox, { padding: 80, maxZoom: 11, duration: 700 });
-  render();
+  if (fly && map) map.fitBounds(f.bbox, { padding: 80, maxZoom: 11, duration: 700 });
+  render({ focus });
 }
 
 function selectCanton(id) {
   state.town = null;
   state.canton = state.canton === id ? null : id;
-  if (state.canton !== null) {
-    const members = data.towns.features.filter((f) => f.properties.canton === id);
-    map.fitBounds(unionBbox(members), { padding: 40, duration: 700 });
-  }
-  render();
+  if (state.canton !== null && map) map.fitBounds(unionBbox(membersOf(id)), { padding: 40, duration: 700 });
+  render({ focus: true });
 }
 
 function resetSelection() {
   state.town = null;
   state.canton = null;
-  render();
+  render({ focus: true });
 }
 
 // Ignore case, spaces, hyphens, apostrophes, Hebrew geresh/gershayim and full spelling (קריית = קרית)
-const normalize = (s) => s.toLowerCase().replace(/['"`’׳״()\-–.\s]/g, "").replace(/יי/g, "י").replace(/וו/g, "ו");
+const normalize = (s) => s.toLowerCase().replace(/['"`’׳״()\-–־.\s]/g, "").replace(/יי/g, "י").replace(/וו/g, "ו");
 
 function findTown(query) {
   const q = normalize(query);
@@ -512,11 +569,11 @@ function readUrl() {
   const params = new URLSearchParams(location.search);
   if (params.get("lang") === "en") state.lang = "en";
   const e = params.get("e");
-  if (e && data.meta.elections[e]) state.election = e;
+  if (e && Object.hasOwn(data.meta.elections, e)) state.election = e;
   const town = params.get("town");
   if (town && data.byName.has(town)) state.town = town;
   const canton = Number(params.get("canton"));
-  if (!state.town && params.has("canton") && data.cantons.has(canton)) state.canton = canton;
+  if (!state.town && params.has("canton") && cantonIds().includes(canton)) state.canton = canton;
 }
 
 async function copyLink() {
@@ -528,8 +585,13 @@ async function copyLink() {
   }
 }
 
-// Copy the WebGL canvas right after drawing it, before the browser clears its buffer
-function captureMap() {
+// Copy the WebGL canvas right after drawing it, before the browser clears its buffer.
+// Waits for tiles still loading, so an early click does not export an empty map.
+async function captureMap() {
+  if (!map.loaded()) {
+    // Wait for tiles still loading, but never hang the download on a stuck tile
+    await Promise.race([new Promise((resolve) => map.once("idle", resolve)), new Promise((resolve) => setTimeout(resolve, 4000))]);
+  }
   const copyNow = () => {
     const live = map.getCanvas();
     const copy = document.createElement("canvas");
@@ -540,7 +602,7 @@ function captureMap() {
   };
   if (typeof map.redraw === "function") {
     map.redraw(); // synchronous draw, so the buffer is still intact below
-    return Promise.resolve(copyNow());
+    return copyNow();
   }
   return new Promise((resolve) => {
     map.once("render", () => resolve(copyNow()));
@@ -548,18 +610,34 @@ function captureMap() {
   });
 }
 
+// Split text at " · " into lines no wider than maxWidth (the credit line is long on phones)
+function wrapCredit(ctx, text, maxWidth) {
+  const lines = [];
+  for (const part of text.split(" · ")) {
+    const last = lines[lines.length - 1];
+    if (last !== undefined && ctx.measureText(`${last} · ${part}`).width <= maxWidth) lines[lines.length - 1] = `${last} · ${part}`;
+    else lines.push(part);
+  }
+  return lines;
+}
+
 async function downloadMap() {
+  if (!map) return;
   try {
     await document.fonts.ready;
     const src = await captureMap();
     const dpr = src.width / map.getCanvas().clientWidth;
     const W = src.width;
     const head = Math.round(70 * dpr);
-    const foot = Math.round(30 * dpr);
     const out = document.createElement("canvas");
     out.width = W;
-    out.height = src.height + head + foot;
-    const ctx = out.getContext("2d");
+    let ctx = out.getContext("2d");
+    const creditFont = `400 ${11 * dpr}px Heebo, Arial, sans-serif`;
+    ctx.font = creditFont;
+    const credit = wrapCredit(ctx, `${t().footer(data.meta.links)[0]} · © OpenStreetMap`, W - 36 * dpr);
+    const lineGap = 15 * dpr;
+    out.height = src.height + head + Math.round(10 * dpr + credit.length * lineGap); // resets the context state
+    ctx = out.getContext("2d");
     const rtl = state.lang === "he";
     const x0 = rtl ? W - 18 * dpr : 18 * dpr;
     ctx.fillStyle = "#ffffff";
@@ -601,9 +679,9 @@ async function downloadMap() {
       ctx.fillStyle = "#0f172a";
       ctx.fillText(name, rtl ? sx - 8 * dpr : sx + 22 * dpr, y + 14 * dpr);
     });
-    ctx.font = `400 ${11 * dpr}px Heebo, Arial, sans-serif`;
+    ctx.font = creditFont;
     ctx.fillStyle = "#64748b";
-    ctx.fillText(`${t().footer(data.meta.links)[0]} · © OpenStreetMap`, x0, out.height - 11 * dpr);
+    credit.forEach((line, i) => ctx.fillText(line, x0, head + src.height + 4 * dpr + (i + 1) * lineGap - 3 * dpr));
 
     out.toBlob((blob) => {
       if (!blob) { toast(t().downloadFailed); return; }
@@ -623,6 +701,13 @@ function bindEvents() {
   $("#lang-toggle").addEventListener("click", () => {
     state.lang = state.lang === "he" ? "en" : "he";
     renderStatic();
+    if (map) {
+      Object.assign(map._locale || {}, localeStrings()); // MapLibre keeps UI strings here
+      if (map.cooperativeGestures.isEnabled()) {
+        map.cooperativeGestures.disable();
+        map.cooperativeGestures.enable();
+      }
+    }
     placeControls();
     render();
   });
@@ -646,7 +731,11 @@ function bindEvents() {
     onCanton(e);
   });
   const search = $("#search");
+  let lastGo = { value: null, at: 0 };
   const go = () => {
+    // Enter fires keydown and then change: handle the same query once
+    if (search.value === lastGo.value && Date.now() - lastGo.at < 800) return;
+    lastGo = { value: search.value, at: Date.now() };
     const f = findTown(search.value);
     if (f) { selectTown(f.properties.he); search.blur(); } else if (search.value.trim()) toast(t().notFound);
   };
@@ -660,22 +749,28 @@ async function main() {
   try {
     data = await loadData();
   } catch (err) {
-    $("#panel").innerHTML = `<div class="card">Could not load the map data. ${escapeHtml(err.message)}</div>`;
+    console.error(err);
+    $("#panel").innerHTML = `<div class="card">${escapeHtml(TEXT.he.dataFailed)}<br><span dir="ltr">${escapeHtml(TEXT.en.dataFailed)}</span></div>`;
     return;
   }
   readUrl();
   renderStatic();
+  bindEvents();
+  if (typeof maplibregl === "undefined") {
+    // The map library did not load (blocked or offline): keep the cards, search and text working
+    $("#map").innerHTML = `<p class="map-failed">${escapeHtml(t().mapFailed)}</p>`;
+    render();
+    return;
+  }
   // Hebrew and Arabic basemap labels need the RTL shaping plugin; without it they still show, unshaped
   Promise.resolve().then(() => maplibregl.setRTLTextPlugin(RTL_PLUGIN, true)).catch(() => {});
   initMap();
-  bindEvents();
   render();
   // Fit once the container has its final size (the map is created before layout settles)
   map.once("load", () => {
     map.resize();
-    const members = state.canton === null ? data.towns.features
-      : data.towns.features.filter((f) => f.properties.canton === state.canton);
-    const box = state.town ? data.byName.get(state.town).bbox : unionBbox(members);
+    const box = state.town ? data.byName.get(state.town).bbox
+      : unionBbox(state.canton === null ? data.towns.features : membersOf(state.canton));
     map.fitBounds(box, { padding: state.town ? 80 : 24, maxZoom: 11, duration: 0 });
   });
 }

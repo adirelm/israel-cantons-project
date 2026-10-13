@@ -82,3 +82,28 @@ def test_share_preview_image_has_the_standard_size():
 
     with Image.open(SITE_DATA.parent / "og.png") as img:
         assert img.size == (1200, 630)
+
+
+def test_committed_page_data_is_what_the_builder_writes(tmp_path):
+    """Everything the page shows (vote tables, colors, largest towns, meta, preview image) is current."""
+    import sys
+
+    sys.path.insert(0, str(SITE_DATA.parent.parent / "scripts"))
+    import build_site_data
+
+    build_site_data.main(tmp_path)
+    for name in ("towns.geojson", "cantons.json"):
+        assert json.loads((tmp_path / "data" / name).read_text(encoding="utf-8")) == \
+            json.loads((SITE_DATA / name).read_text(encoding="utf-8")), name
+    fresh, committed = (json.loads((d / "meta.json").read_text(encoding="utf-8")) for d in (tmp_path / "data", SITE_DATA))
+    fresh.pop("built"), committed.pop("built")
+    assert fresh == committed
+    assert (tmp_path / "og.png").read_bytes() == (SITE_DATA.parent / "og.png").read_bytes()
+
+
+def test_static_page_text_matches_the_data(meta):
+    """The description in index.html (shown before the script runs and in link previews)."""
+    html = (SITE_DATA.parent / "index.html").read_text(encoding="utf-8")
+    years = [e["en"].split()[-1] for e in meta["elections"].values()]
+    assert f"{meta['towns']} רשויות" in html
+    assert f"{years[0]}–{years[-1]}" in html

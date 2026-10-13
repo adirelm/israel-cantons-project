@@ -159,7 +159,7 @@ def meta_json(n_towns: int) -> dict:
     }
 
 
-def og_image(towns: dict, cantons: list[dict], meta: dict) -> None:
+def og_image(towns: dict, cantons: list[dict], meta: dict, site: Path = SITE) -> None:
     """The preview image social networks show for a shared link."""
     import matplotlib
     matplotlib.use("Agg")
@@ -180,12 +180,13 @@ def og_image(towns: dict, cantons: list[dict], meta: dict) -> None:
         y = 0.58 - i * 0.085
         fig.patches.append(Rectangle((0.935, y - 0.012), 0.025, 0.045, color=c["color"], transform=fig.transFigure))
         fig.text(0.92, y, c["he"], ha="right", fontsize=21, color="#0f172a")
-    fig.savefig(SITE / "og.png", facecolor="white")
+    fig.savefig(site / "og.png", facecolor="white")
     plt.close(fig)
 
 
-def main() -> None:
-    SITE_DATA.mkdir(parents=True, exist_ok=True)
+def main(site: Path = SITE) -> None:
+    """Write the page's data files and preview image under ``site`` (tests build into a temporary folder)."""
+    (site / "data").mkdir(parents=True, exist_ok=True)
     labeled = pd.read_csv(DATA_PROCESSED / "cantons_labeled.csv")
     final = dict(labeled[["municipality", "canton"]].values)
     features = pd.read_csv(DATA_PROCESSED / "political_features.csv").set_index("municipality")
@@ -197,11 +198,11 @@ def main() -> None:
         "meta.json": meta_json(len(towns["features"])),
     }
     for name, data in files.items():
-        path = SITE_DATA / name
+        path = site / "data" / name
         path.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-        print(f"{path.relative_to(ROOT)}: {path.stat().st_size / 1e6:.2f} MB")
-    og_image(towns, files["cantons.json"], files["meta.json"])
-    print(f"site/og.png: {(SITE / 'og.png').stat().st_size / 1e6:.2f} MB")
+        print(f"{path}: {path.stat().st_size / 1e6:.2f} MB")
+    og_image(towns, files["cantons.json"], files["meta.json"], site)
+    print(f"{site / 'og.png'}: {(site / 'og.png').stat().st_size / 1e6:.2f} MB")
 
 
 if __name__ == "__main__":
