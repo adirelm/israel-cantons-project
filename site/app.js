@@ -10,7 +10,9 @@ const BASEMAP_STYLE = "https://tiles.openfreemap.org/styles/positron";
 const FALLBACK_STYLE = { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#eef2f6" } }] };
 // Country, territory and region names are hidden on the basemap; city names stay
 const HIDDEN_BASEMAP_LABELS = ["label_country_1", "label_country_2", "label_country_3", "label_state", "label_other"];
-const RTL_PLUGIN = "https://unpkg.com/@mapbox/mapbox-gl-rtl-text@0.2.3/mapbox-gl-rtl-text.min.js";
+// Local copy of @mapbox/mapbox-gl-rtl-text 0.2.3 (BSD-2, licence next to it); MapLibre loads it in a worker,
+// which takes an absolute URL and cannot check integrity, so it is served from the site itself
+const RTL_PLUGIN = new URL("vendor/mapbox-gl-rtl-text.min.js", document.baseURI).href;
 
 const TEXT = {
   he: {

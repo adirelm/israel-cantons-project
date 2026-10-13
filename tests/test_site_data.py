@@ -107,3 +107,15 @@ def test_static_page_text_matches_the_data(meta):
     years = [e["en"].split()[-1] for e in meta["elections"].values()]
     assert f"{meta['towns']} רשויות" in html
     assert f"{years[0]}–{years[-1]}" in html
+
+
+def test_rtl_text_plugin_is_served_from_the_site():
+    """No third-party script without an integrity check: the plugin is a pinned local copy."""
+    import hashlib
+
+    plugin = SITE_DATA.parent / "vendor" / "mapbox-gl-rtl-text.min.js"
+    assert hashlib.sha256(plugin.read_bytes()).hexdigest() == \
+        "142f4fc31b4911887bacfea4df1813df67be28dfcb4c56e3f8f576f2e6fdf5d2"  # v0.2.3, same on unpkg and jsDelivr
+    assert (SITE_DATA.parent / "vendor" / "mapbox-gl-rtl-text.LICENSE.md").exists()
+    js = (SITE_DATA.parent / "app.js").read_text(encoding="utf-8")
+    assert "vendor/mapbox-gl-rtl-text.min.js" in js and "mapbox-gl-rtl-text@" not in js
