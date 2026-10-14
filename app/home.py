@@ -26,6 +26,7 @@ from utils import (
     CREDITS,
     COALITION_GOVERNMENTS,
     ELECTION_LABELS,
+    ELECTION_SPAN,
     load_canton_coalition,
     build_canton_map,
     canton_profiles,
@@ -63,10 +64,12 @@ st.divider()
 results = load_experiment_results()
 
 col1, col2, col3, col4 = st.columns(4)
-col1.metric("Municipalities", "255", help="With votes in all 5 elections, including 23 Israeli local authorities in Judea and Samaria")
+col1.metric("Municipalities", "255", help=f"With votes in all {len(ELECTION_LABELS)} elections, including 23 Israeli local authorities in Judea and Samaria")
 col2.metric("Experiments", f"{len(results)}", help="4 representations x 3 metrics x 4 algorithms x 6 K values (minus incompatible)")
 col3.metric("Algorithms", "4", help="Simulated Annealing, Agglomerative, Louvain, KMeans")
-col4.metric("Elections Analyzed", "5", help="Knesset 21-25 (April 2019 -- November 2022)")
+col4.metric("Elections Analyzed", str(len(ELECTION_LABELS)), help=(
+    f"Knesset {min(ELECTION_LABELS)}-{max(ELECTION_LABELS)} "
+    f"({ELECTION_LABELS[min(ELECTION_LABELS)]} -- {ELECTION_LABELS[max(ELECTION_LABELS)]})"))
 
 st.divider()
 
@@ -82,7 +85,7 @@ st.markdown(
     "The map below shows the K=5 partition using "
     "**NMF_5 / Cosine / Louvain**, which produces five politically coherent "
     f"cantons with a positive silhouette ({_primary['silhouette'].iloc[0]:.3f}) and stable boundaries "
-    f"across the five elections (mean ARI = {_ari:.3f}). "
+    f"across all {len(ELECTION_LABELS)} elections (mean ARI = {_ari:.3f}). "
     f"Explore all {len(_ex)} configurations in the **Canton Map Explorer** page."
 )
 
@@ -219,8 +222,7 @@ with link_col3:
     with st.container(border=True):
         st.markdown(
             ":chart_with_upwards_trend: **Stability Analysis**\n\n"
-            "See how canton boundaries persist across five Knesset elections "
-            "(2019-2022)."
+            f"See how canton boundaries persist across {ELECTION_SPAN}."
         )
         st.page_link("pages/3_Stability.py", label="Open Stability", icon=":material/timeline:")
 

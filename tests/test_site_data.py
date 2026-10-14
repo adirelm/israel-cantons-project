@@ -107,6 +107,8 @@ def test_static_page_text_matches_the_data(meta):
     years = [e["en"].split()[-1] for e in meta["elections"].values()]
     assert f"{meta['towns']} רשויות" in html
     assert f"{years[0]}–{years[-1]}" in html
+    count = {5: "חמש", 6: "שש", 7: "שבע"}[len(years)]
+    assert f"{count} מערכות" in html
 
 
 def test_rtl_text_plugin_is_served_from_the_site():

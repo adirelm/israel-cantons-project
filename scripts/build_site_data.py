@@ -6,7 +6,7 @@ Run after scripts/rebuild_results.py:
     python scripts/build_site_data.py
 
 site/data/towns.geojson   one feature per municipality: names, canton, voters, bloc shares
-                          (five-election average and per election), canton in each election
+                          (average over the elections and per election), canton in each election
 site/data/cantons.json    one entry per canton: names, color, towns, voters, bloc shares, largest towns
 site/data/meta.json       election labels and the headline numbers quoted on the page
 site/og.png               preview image shown when the page is shared (1200 x 630)
@@ -60,8 +60,9 @@ ENGLISH_DISPLAY = {
     "Giv'atayim": "Givatayim",
     "Um Al-Fahem": "Umm al-Fahm",
 }
-ELECTION_SHORT = {21: "4/2019", 22: "9/2019", 23: "3/2020", 24: "3/2021", 25: "11/2022"}
-ELECTION_LABELS_HE = {21: "אפריל 2019", 22: "ספטמבר 2019", 23: "מרץ 2020", 24: "מרץ 2021", 25: "נובמבר 2022"}
+MONTHS = ["January", "February", "March", "April", "May", "June",
+          "July", "August", "September", "October", "November", "December"]
+MONTHS_HE = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"]
 # Coalition and opposition (a description of each election; data/reference/parties.csv, column "coalition")
 GOVERNMENTS = {
     24: {"he": "ממשלת בנט–לפיד (הממשלה ה־36)", "en": "Bennett–Lapid government (36th)"},
@@ -73,6 +74,8 @@ NO_COALITION = {
     23: {"he": "אחרי הבחירות התפצלו רשימות (כחול לבן, העבודה־גשר־מרצ), ולכן אי אפשר לשייך את קולותיהן לקואליציה או לאופוזיציה.",
          "en": "Lists split after this election (Blue and White, Labor–Gesher–Meretz), so their votes cannot be assigned to coalition or opposition."},
 }
+# A new election until its government forms (then mark its lists in parties.csv and name it in GOVERNMENTS)
+NO_GOVERNMENT_YET = {"he": "אחרי הבחירות עדיין לא הוקמה ממשלה.", "en": "A government has not been formed yet after this election."}
 LINKS = {
     "site": "https://adirelm.github.io/israel-cantons-project/",
     "app": "https://israel-cantons-project-5j7kgq8acxrbiflraqnhgb.streamlit.app/",
@@ -155,6 +158,18 @@ def cantons_json(labeled: pd.DataFrame, features: pd.DataFrame) -> list[dict]:
     return out
 
 
+def election_names(label: str) -> dict[str, str]:
+    """English, Hebrew and short labels of an election, from its English label ("October 2026")."""
+    month, year = label.split()
+    i = MONTHS.index(month)
+    return {"en": label, "he": f"{MONTHS_HE[i]} {year}", "short": f"{i + 1}/{year}"}
+
+
+def no_coalition_reasons(knesset_ids: list[int], coalition_lists: dict[int, set[str]]) -> dict[int, dict[str, str]]:
+    """Why each election without coalition lists has no coalition view (a new one: no government yet)."""
+    return {k: NO_COALITION.get(k, NO_GOVERNMENT_YET) for k in knesset_ids if k not in coalition_lists}
+
+
 def coalition_names() -> dict[int, list[tuple[str, str]]]:
     """Hebrew and English names of each government's lists, as in the party table."""
     import csv
@@ -172,10 +187,13 @@ def meta_json(n_towns: int) -> dict:
     stab = pd.read_csv(DATA_PROCESSED / "stability_results.csv").set_index("config")["mean_ari"]
     changes = pd.read_csv(DATA_PROCESSED / "per_election" / "per_election_changes.csv")
     tests = pd.read_csv(DATA_PROCESSED / "canton_tests.csv")
+    unnamed = sorted(set(COALITION_LISTS) - set(GOVERNMENTS))
+    if unnamed:
+        raise SystemExit(f"parties.csv marks coalition lists for election(s) {unnamed}: name the government in GOVERNMENTS")
     return {
         "towns": n_towns,
         "blocs": BLOC_COLS,
-        "elections": {str(k): {"en": ELECTION_LABELS[k], "he": ELECTION_LABELS_HE[k], "short": ELECTION_SHORT[k]} for k in KNESSET_IDS},
+        "elections": {str(k): election_names(ELECTION_LABELS[k]) for k in KNESSET_IDS},
         "stability_ari": round(float(stab["NMF_5 / Cosine / Louvain"]), 3),
         "towns_never_moved": int((changes["n_differ"] == 0).sum()),
         "heldout": {
@@ -186,7 +204,7 @@ def meta_json(n_towns: int) -> dict:
         },
         "coalition": {str(k): {**GOVERNMENTS[k], "lists_he": [n for n, _ in names], "lists_en": [e for _, e in names]}
                       for k, names in coalition_names().items()},
-        "no_coalition": {str(k): v for k, v in NO_COALITION.items()},
+        "no_coalition": {str(k): v for k, v in no_coalition_reasons(KNESSET_IDS, COALITION_LISTS).items()},
         "links": LINKS,
         "built": date.today().isoformat(),
     }

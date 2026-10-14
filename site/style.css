@@ -130,7 +130,7 @@ main { max-width: 1280px; margin: 0 auto; padding: 0 16px; }
 .bloc-key i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-inline-end: 4px; vertical-align: -1px; }
 .towns-list { font-size: 0.85rem; color: var(--ink-soft); margin: 8px 0 0; }
 .back { border: 0; background: none; color: var(--accent); cursor: pointer; padding: 0; font-size: 0.9rem; }
-.timeline { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin: 8px 0 4px; }
+.timeline { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 4px; margin: 8px 0 4px; }
 .timeline div { text-align: center; font-size: 0.72rem; color: var(--ink-soft); }
 .timeline .chip { height: 22px; border-radius: 6px; margin-bottom: 3px; border: 2px solid transparent; }
 .timeline .chip.moved { border-color: var(--moved); }

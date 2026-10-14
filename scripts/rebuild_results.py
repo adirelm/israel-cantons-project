@@ -52,8 +52,9 @@ PRIMARY_CANTON_ANCHORS = [
     ("בני ברק", 4, "HAREDI Cities"),
 ]
 EXPERIMENTS_DIR = DATA_PROCESSED / "experiments"
-TRAIN_ELECTIONS = [21, 22, 23, 24]
-TEST_ELECTION = 25
+# Held-out test: cantons built from every earlier election, tested on the latest one
+TRAIN_ELECTIONS = KNESSET_IDS[:-1]
+TEST_ELECTION = KNESSET_IDS[-1]
 
 
 def save_bloc_mappings() -> None:

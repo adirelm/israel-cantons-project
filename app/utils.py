@@ -286,6 +286,9 @@ def load_cantons_labeled() -> pd.DataFrame:
 
 # Copy of src.config.ELECTION_LABELS (the app does not import src); tests/test_app_labels.py keeps them equal
 ELECTION_LABELS = {21: "April 2019", 22: "September 2019", 23: "March 2020", 24: "March 2021", 25: "November 2022"}
+_FIRST, _LAST = min(ELECTION_LABELS), max(ELECTION_LABELS)
+# "5 elections (2019-2022)", for the page text
+ELECTION_SPAN = f"{len(ELECTION_LABELS)} Knesset elections ({ELECTION_LABELS[_FIRST].split()[-1]}-{ELECTION_LABELS[_LAST].split()[-1]})"
 
 
 # Governments formed after each election, whose lists the coalition shares count (the lists are in

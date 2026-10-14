@@ -5,27 +5,31 @@ Loads election CSVs, CBS locality mapping, and municipality GeoJSON.
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pandas as pd
 import geopandas as gpd
 
 from src.config import ELECTIONS_DIR, ELECTION_FILES, DATA_RAW, GEO_DIR, GEO_NAME_FIXES
 
 
-def load_election_csv(knesset: int) -> pd.DataFrame:
-    """Load a single election CSV with encoding fallback.
+def read_election_csv(filepath: Path) -> pd.DataFrame:
+    """Read an election results CSV: UTF-8, else ISO-8859-8, else Windows-1255 (which has geresh and gershayim)."""
+    for encoding in ("utf-8", "iso-8859-8"):
+        try:
+            return pd.read_csv(filepath, encoding=encoding)
+        except UnicodeDecodeError:
+            pass
+    return pd.read_csv(filepath, encoding="cp1255")
 
-    Returns the raw DataFrame with Hebrew column names.
-    """
-    filename = ELECTION_FILES[knesset]
-    filepath = ELECTIONS_DIR / filename
-    try:
-        return pd.read_csv(filepath, encoding="utf-8")
-    except UnicodeDecodeError:
-        return pd.read_csv(filepath, encoding="iso-8859-8")
+
+def load_election_csv(knesset: int) -> pd.DataFrame:
+    """Load a single election CSV. Returns the raw DataFrame with Hebrew column names."""
+    return read_election_csv(ELECTIONS_DIR / ELECTION_FILES[knesset])
 
 
 def load_all_elections() -> dict[int, pd.DataFrame]:
-    """Load all 5 election CSVs.
+    """Load every election CSV in ``ELECTION_FILES``.
 
     Returns ``{knesset_id: DataFrame}``.
     """

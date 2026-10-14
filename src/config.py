@@ -26,9 +26,10 @@ ELECTION_FILES: dict[int, str] = {
     25: "knesset_25_nov2022.csv",
 }
 
-KNESSET_IDS: list[int] = [21, 22, 23, 24, 25]
+# Adding an election: its results file above, its label below, and its lists in data/reference/parties.csv
+KNESSET_IDS: list[int] = sorted(ELECTION_FILES)
 
-# Election dates for figures and the app (app/utils.py keeps a copy; a test keeps them equal)
+# Election dates for figures and the app, ending with the year (app/utils.py keeps a copy; a test keeps them equal)
 ELECTION_LABELS: dict[int, str] = {
     21: "April 2019", 22: "September 2019", 23: "March 2020", 24: "March 2021", 25: "November 2022",
 }

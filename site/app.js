@@ -11,6 +11,11 @@ const COALITION_COLOR = "#c2410c";
 const OPPOSITION_COLOR = "#0f766e";
 const MIDPOINT_COLOR = "#f5f5f4";
 const NO_TOWN = ["==", ["get", "he"], ""]; // a filter that matches nothing
+// The number of elections in words, for the page text; "מערכות" takes the feminine form
+const COUNT_WORDS = {
+  he: { 3: "שלוש", 4: "ארבע", 5: "חמש", 6: "שש", 7: "שבע", 8: "שמונה" },
+  en: { 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven", 8: "eight" },
+};
 const BASEMAP_STYLE = "https://tiles.openfreemap.org/styles/positron";
 const FALLBACK_STYLE = { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#eef2f6" } }] };
 // Country, territory and region names are hidden on the basemap; city names stay
@@ -25,10 +30,10 @@ const TEXT = {
     brand: "ישראל בקנטונים",
     research: "למחקר המלא",
     title: "ישראל בחמישה קנטונים",
-    lead: (m) => `מה יקרה אם נחלק את ישראל לאזורים לפי הדרך שבה הם מצביעים? חילקנו ${m.towns} רשויות מקומיות, כולל הרשויות הישראליות ביהודה ושומרון, לחמישה קנטונים: קבוצות של רשויות שמצביעות באופן דומה. החלוקה נשענת על אחוזי ההצבעה לכל רשימה בחמש מערכות הבחירות שבין ${m.first} ל־${m.last}.`,
+    lead: (m) => `מה יקרה אם נחלק את ישראל לאזורים לפי הדרך שבה הם מצביעים? חילקנו ${m.towns} רשויות מקומיות, כולל הרשויות הישראליות ביהודה ושומרון, לחמישה קנטונים: קבוצות של רשויות שמצביעות באופן דומה. החלוקה נשענת על אחוזי ההצבעה לכל רשימה ב${m.countHe} מערכות הבחירות שבין ${m.first} ל־${m.last}.`,
     facts: (m) => [
       [m.towns, "רשויות מקומיות"],
-      ["5", `מערכות בחירות, ${m.first}–${m.last}`],
+      [String(m.n), `מערכות בחירות, ${m.first}–${m.last}`],
       [`${m.towns_never_moved} מתוך ${m.towns}`, "רשויות נשארות באותו קנטון כשמחלקים כל מערכת בחירות לבד"],
       [`${m.heldout.significant} מתוך ${m.heldout.pairs}`, `השוואות בין קנטונים שנבנו מבחירות ${m.trainFirst}–${m.trainLast} בלבד מובהקות גם בבחירות ${m.testYear}`],
     ],
@@ -65,19 +70,19 @@ const TEXT = {
     largest: "הגדולות",
     back: "→ כל הקנטונים",
     canton: "קנטון",
-    townVsCanton: "הצבעה לפי גוש, ממוצע חמש מערכות הבחירות",
+    townVsCanton: (m) => `הצבעה לפי גוש, ממוצע ${m.countHe} מערכות הבחירות`,
     thisTown: "הרשות",
     thisCanton: "הקנטון",
     perElection: "הקנטון בכל מערכת בחירות",
-    stayed: "באותו קנטון בכל חמש מערכות הבחירות.",
-    movedCount: (n) => `שויכה לקנטון אחר ב־${n} מתוך חמש מערכות הבחירות.`,
+    stayed: (m) => `באותו קנטון בכל ${m.countHe} מערכות הבחירות.`,
+    movedCount: (n, m) => `שויכה לקנטון אחר ב־${n} מתוך ${m.countHe} מערכות הבחירות.`,
     votesTable: "אחוז הקולות לפי גוש ולרשימות הקואליציה",
     election: "בחירות",
     allTowns: (n) => `כל ${n} הרשויות`,
     blocs: ["ימין", "חרדים", "מרכז", "שמאל", "ערבים"],
     howTitle: "איך זה עובד",
     steps: (m) => [
-      ["הנתונים", `תוצאות הבחירות לכנסת בכל רשות מקומית בחמש מערכות הבחירות ${m.first}–${m.last}, וגבולות הרשויות מהלשכה המרכזית לסטטיסטיקה ומהמנהל האזרחי.`],
+      ["הנתונים", `תוצאות הבחירות לכנסת בכל רשות מקומית ב${m.countHe} מערכות הבחירות ${m.first}–${m.last}, וגבולות הרשויות מהלשכה המרכזית לסטטיסטיקה ומהמנהל האזרחי.`],
       ["החלוקה", "כל רשות מיוצגת באחוזי ההצבעה לכל רשימה שנכנסה לכנסת, בכל מערכת בחירות בנפרד. אלגוריתם לזיהוי קהילות ברשת (Louvain) מאחד רשויות שכנות שמצביעות באופן דומה לחמישה קנטונים. ברשת יש גם קישורים בין רשויות שאינן גובלות: בין רשויות שבהן אותו גוש מקבל יותר מ־70% מהקולות, ובין רשויות שאין להן שכנות בנתונים לרשויות הדומות להן ביותר. לכן רוב הקנטונים אינם רצף אחד במפה: בעיקר הקנטון הערבי והערים החרדיות, וגם כמה רשויות בודדות, כמו קריית שמונה ובית ג׳ן, שמשויכות לקנטון רחוק."],
       ["הבדיקה", `המפה יציבה: כשמריצים את השיטה על כל מערכת בחירות לבד, ${m.towns_never_moved} מתוך ${m.towns} הרשויות נשארות באותו קנטון (בחירות ${m.testYear} שונות יותר מכולן). וקנטונים שנבנו מבחירות ${m.trainFirst}–${m.trainLast} בלבד נבדלים זה מזה באופן מובהק סטטיסטית גם בבחירות ${m.testYear}, ב־${m.heldout.significant} מתוך ${m.heldout.pairs} ההשוואות.`],
     ],
@@ -109,10 +114,10 @@ const TEXT = {
     brand: "Israel in Cantons",
     research: "Full research",
     title: "Israel in five cantons",
-    lead: (m) => `What if Israel were divided by the way its towns vote? We grouped ${m.towns} local authorities, including the Israeli authorities in Judea and Samaria, into five cantons: groups of municipalities that vote alike. The division rests on each list's share of the vote in the five elections from ${m.first} to ${m.last}.`,
+    lead: (m) => `What if Israel were divided by the way its towns vote? We grouped ${m.towns} local authorities, including the Israeli authorities in Judea and Samaria, into five cantons: groups of municipalities that vote alike. The division rests on each list's share of the vote in the ${m.countEn} elections from ${m.first} to ${m.last}.`,
     facts: (m) => [
       [m.towns, "local authorities"],
-      ["5", `Knesset elections, ${m.first}–${m.last}`],
+      [String(m.n), `Knesset elections, ${m.first}–${m.last}`],
       [`${m.towns_never_moved} of ${m.towns}`, "authorities stay in the same canton when each election is divided on its own"],
       [`${m.heldout.significant} of ${m.heldout.pairs}`, `comparisons between cantons built from the ${m.trainFirst}–${m.trainLast} elections only are significant in ${m.testYear} too`],
     ],
@@ -149,19 +154,19 @@ const TEXT = {
     largest: "Largest",
     back: "← All cantons",
     canton: "Canton",
-    townVsCanton: "Vote by bloc, average of five elections",
+    townVsCanton: (m) => `Vote by bloc, average of ${m.countEn} elections`,
     thisTown: "Municipality",
     thisCanton: "Canton",
     perElection: "Canton in each election",
-    stayed: "In the same canton in all five elections.",
-    movedCount: (n) => `In a different canton in ${n} of the five elections.`,
+    stayed: (m) => `In the same canton in all ${m.countEn} elections.`,
+    movedCount: (n, m) => `In a different canton in ${n} of the ${m.countEn} elections.`,
     votesTable: "Share of the vote by bloc and for the coalition lists",
     election: "Election",
     allTowns: (n) => `All ${n} municipalities`,
     blocs: ["Right", "Haredi", "Center", "Left", "Arab"],
     howTitle: "How it works",
     steps: (m) => [
-      ["The data", `Knesset election results for every local authority in the five elections from ${m.first} to ${m.last}, and municipal boundaries from the Central Bureau of Statistics and the Civil Administration.`],
+      ["The data", `Knesset election results for every local authority in the ${m.countEn} elections from ${m.first} to ${m.last}, and municipal boundaries from the Central Bureau of Statistics and the Civil Administration.`],
       ["The division", "Each municipality is described by the vote share of every list that won seats, in each election separately. A network community-detection algorithm (Louvain) groups neighbouring municipalities that vote alike into five cantons. The network also links municipalities that share no border: those where the same bloc wins over 70% of the vote, and municipalities with no neighbour in the data to their most similar ones. So most cantons are not single pieces on the map: mainly the Arab canton and the Haredi cities, and a few single towns, such as Kiryat Shmona and Beit Jann, that belong to a distant canton."],
       ["The checks", `The map is stable: when the method is run on each election alone, ${m.towns_never_moved} of ${m.towns} municipalities stay in the same canton (${m.testYear} differs most). Cantons built from the ${m.trainFirst}–${m.trainLast} elections only still differ significantly in ${m.testYear}, in ${m.heldout.significant} of ${m.heldout.pairs} comparisons.`],
     ],
@@ -221,6 +226,9 @@ function metaForText() {
   const train = m.heldout.train.map(String);
   return {
     ...m,
+    n: keys.length,
+    countHe: COUNT_WORDS.he[keys.length] || String(keys.length),
+    countEn: COUNT_WORDS.en[keys.length] || String(keys.length),
     coalitionSummary: coalitionSummary(),
     first: year(m.elections[keys[0]]),
     last: year(m.elections[keys[keys.length - 1]]),
@@ -566,6 +574,7 @@ function renderPanel() {
 }
 
 function townCard(f) {
+  const m = metaForText();
   const p = f.properties;
   const c = data.cantons.get(p.canton);
   const keys = electionKeys();
@@ -592,7 +601,7 @@ function townCard(f) {
       <p class="sub">${escapeHtml(other)} · ${fmt(p.voters)} ${t().votesAvg}</p>
       <p class="sub" style="color:var(--ink)"><span class="dot" style="background:${c.color};vertical-align:-2px"></span> ${t().canton}: <b>${escapeHtml(cantonName(c))}</b></p>
       ${coalitionBlock}
-      <p class="sub" style="margin-bottom:4px">${t().townVsCanton}</p>
+      <p class="sub" style="margin-bottom:4px">${t().townVsCanton(m)}</p>
       <div class="bar-label"><span>${t().thisTown}</span></div>${blocBar(p.blocs)}
       <div class="bar-label"><span>${t().thisCanton}</span></div>${blocBar(c.blocs)}
       ${blocKey(p.blocs)}
@@ -600,7 +609,7 @@ function townCard(f) {
     <div class="card">
       <h3>${t().perElection}</h3>
       <div class="timeline">${chips}</div>
-      <p class="sub" style="margin:6px 0 0">${moved ? t().movedCount(moved) : t().stayed}</p>
+      <p class="sub" style="margin:6px 0 0">${moved ? t().movedCount(moved, m) : t().stayed(m)}</p>
       <table class="votes"><caption class="visually-hidden">${t().votesTable}</caption>
         <thead><tr><th>${t().election}</th>${t().blocs.map((b) => `<th>${escapeHtml(b)}</th>`).join("")}<th>${t().coalition}</th></tr></thead>
         <tbody>${rows}</tbody></table>

@@ -20,6 +20,7 @@ from utils import (
     inject_custom_css,
     PLOTLY_LAYOUT,
     ELECTION_LABELS,
+    ELECTION_SPAN,
     build_canton_map,
     load_cantons_labeled,
     load_geojson,
@@ -33,7 +34,7 @@ inject_custom_css()
 st.title(":chart_with_upwards_trend: Cross-Election Stability Analysis")
 st.markdown(
     "How stable are canton boundaries when computed independently from each "
-    "of the five Knesset elections (2019-2022)? Higher ARI/NMI indicates "
+    f"of the {ELECTION_SPAN}? Higher ARI/NMI indicates "
     "that the same partition emerges regardless of which election is used."
 )
 
@@ -173,7 +174,7 @@ else:
               use_container_width=True, height=550, returned_objects=[])
     figure = FIGURES_DIR / "per_election_maps.png"
     if figure.exists():
-        with st.expander("All five elections side by side"):
+        with st.expander(f"All {len(ELECTION_LABELS)} elections side by side"):
             st.image(str(figure), width="stretch")
     moved = changes[changes["n_differ"] > 0].copy()
     for col in [c for c in moved.columns if c == "primary" or c.startswith("knesset_")]:
