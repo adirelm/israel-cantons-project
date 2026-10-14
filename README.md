@@ -108,6 +108,19 @@ python scripts/build_site_data.py      # site/data/*.json and site/og.png for th
 
 Party classification lives in `data/reference/parties.csv`, including which lists formed the government after each election (`coalition`); run `rebuild_results.py` after changing it. The first two steps are needed only when boundaries change. Pushing `site/` to `main` deploys the public page (`.github/workflows/pages.yml`); to preview it locally, run `python -m http.server --directory site` and open http://localhost:8000. The notebooks document the original exploratory analysis; notebooks 05 and 06 save their outputs under separate names so they do not overwrite the published results.
 
+## Adding an Election (October 2026)
+
+The Central Elections Committee must publish the official results within eight days of the vote (Basic Law: The Knesset, section 11); in 2022 the final count came two days after the vote and the official results on the eighth day. Steps once the results by locality are out:
+
+1. **Results file.** Download the committee's results **by locality** (one row per locality, not per ballot box): `סמל ועדה, שם ישוב, סמל ישוב, בזב, מצביעים, פסולים, כשרים`, then one column per ballot letter. Save it as `data/raw/elections/knesset_26_oct2026.csv`, preferably UTF-8 (ISO-8859-8 and Windows-1255 are also read). Every other column is read as a list, so remove any extra text or count columns.
+2. **Config.** Add `26: "knesset_26_oct2026.csv"` to `ELECTION_FILES` and `26: "October 2026"` to `ELECTION_LABELS` in `src/config.py` (the label must end with the year), and the same label to the copy in `app/utils.py`.
+3. **Lists.** Add a row per list to `data/reference/parties.csv`: `knesset` 26, `letters` exactly as the column header, names, `bloc`; leave `coalition` empty until a government forms. `tests/test_bloc_mapping.py` names any list with 1% or more that has no bloc.
+4. **Check the towns.** Localities are matched to municipalities by code through the 2021 `data/raw/localities_bycode.xlsx`, so a locality founded since is dropped, and the analysis keeps only municipalities with votes in every election. Rebuilding prints the graph size: it should still be 255 nodes.
+5. **Rebuild** (see Regenerating Results): `rebuild_results.py` (the held-out test becomes "built from 2019–2022, tested on 2026"), `make_report_figures.py`, `report_numbers.py`, `build_site_data.py`. If the cantons change, update `PRIMARY_CANTON_ANCHORS` in `rebuild_results.py` and `CANTON_NAMES_HE` in `build_site_data.py`; tests that pin today's cantons (sizes, names, colours) will point at what changed.
+6. **Page text.** Update the years and the number of elections in the description at the top of `site/index.html` (a test checks both); the rest of the page reads them from the data.
+7. **Publish.** Push to `main` (GitHub Pages deploys `site/`), then reboot the Streamlit app.
+8. **When the government forms,** mark its lists `coalition=yes` in `parties.csv`, name it in `GOVERNMENTS` (`scripts/build_site_data.py`) and `COALITION_GOVERNMENTS` (`app/utils.py`), and rebuild. Until then the page says no government has been formed yet.
+
 ## Key Results
 
 - **255 municipalities**, including the 23 Israeli local authorities in Judea and Samaria, partitioned into **5 cantons** (primary result: NMF_5 / Cosine / Louvain)
