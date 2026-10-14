@@ -104,6 +104,7 @@ python scripts/make_report_figures.py  # docs/figures/*.png
 python scripts/sa_sensitivity.py       # 30-seed SA sensitivity (~50 min)
 python scripts/report_numbers.py       # every number the report and app quote
 python scripts/build_site_data.py      # site/data/*.json and site/og.png for the public map page
+python scripts/make_press_map.py       # docs/figures/press_map_{he,en}.{png,pdf}: A4 map for the press
 ```
 
 Party classification lives in `data/reference/parties.csv`, including which lists formed the government after each election (`coalition`); run `rebuild_results.py` after changing it. The first two steps are needed only when boundaries change. Pushing `site/` to `main` deploys the public page (`.github/workflows/pages.yml`); to preview it locally, run `python -m http.server --directory site` and open http://localhost:8000. The notebooks document the original exploratory analysis; notebooks 05 and 06 save their outputs under separate names so they do not overwrite the published results.
