@@ -43,16 +43,22 @@
           <input id="search" type="search" list="town-names" autocomplete="off" data-i18n-placeholder="searchPlaceholder">
           <datalist id="town-names"></datalist>
         </label>
+        <div class="views" role="group" id="views" data-i18n-aria="viewLabel">
+          <button type="button" data-view="cantons" aria-pressed="true" data-i18n="viewCantons">קנטונים</button>
+          <button type="button" data-view="coalition" aria-pressed="false" data-i18n="viewCoalition">קואליציה ואופוזיציה</button>
+        </div>
         <div class="elections" role="group" id="elections" data-i18n-aria="electionsLabel"></div>
       </div>
 
       <div class="map-wrap">
         <p class="election-note" id="election-note" hidden></p>
-        <div id="map" dir="ltr" role="region" data-i18n-aria="mapLabel"></div>
-        <div class="legend" id="legend"></div>
-        <div class="map-actions">
-          <button type="button" id="btn-share" class="action" data-i18n="share">העתקת קישור</button>
-          <button type="button" id="btn-download" class="action" data-i18n="download">הורדת המפה</button>
+        <div class="map-stage">
+          <div id="map" dir="ltr" role="region" data-i18n-aria="mapLabel"></div>
+          <div class="legend" id="legend"></div>
+          <div class="map-actions">
+            <button type="button" id="btn-share" class="action" data-i18n="share">העתקת קישור</button>
+            <button type="button" id="btn-download" class="action" data-i18n="download">הורדת המפה</button>
+          </div>
         </div>
       </div>
 
@@ -60,7 +66,7 @@
       <p class="visually-hidden" id="status" role="status" aria-live="polite"></p>
     </section>
 
-    <section class="how">
+    <section class="how" id="how">
       <h2 data-i18n="howTitle">איך זה עובד</h2>
       <ol class="steps" id="steps"></ol>
       <p class="caveat" id="caveat"></p>

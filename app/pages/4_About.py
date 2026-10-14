@@ -24,7 +24,9 @@ st.title(":information_source: About This Project")
 st.markdown(
     "**Partitioning Israeli Municipalities into Politically Homogeneous Cantons**\n\n"
     "Author: **Adir Elmakais** · Advisor: **Dr. Oren Glickman** · "
-    "M.Sc. Computer Science (Project Track), Bar-Ilan University · 2025-2026"
+    "with **Prof. Julia Elad-Strenger**, Bundeswehr University Munich · "
+    "M.Sc. Computer Science (Project Track), Bar-Ilan University · 2025-2026\n\n"
+    "Paper: [arXiv:2603.11805](https://arxiv.org/abs/2603.11805)"
 )
 
 st.divider()

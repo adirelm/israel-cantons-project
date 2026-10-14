@@ -28,7 +28,7 @@ import pandas as pd
 import shapely
 
 import utils as app_utils
-from src.config import BLOC_COLS, DATA_PROCESSED, ELECTION_LABELS, KNESSET_IDS
+from src.config import BLOC_COLS, COALITION_LISTS, DATA_PROCESSED, ELECTION_LABELS, KNESSET_IDS, PARTIES_CSV
 from src.data.processing import process_all_elections
 from src.data.representations import BlocShares
 
@@ -62,11 +62,23 @@ ENGLISH_DISPLAY = {
 }
 ELECTION_SHORT = {21: "4/2019", 22: "9/2019", 23: "3/2020", 24: "3/2021", 25: "11/2022"}
 ELECTION_LABELS_HE = {21: "אפריל 2019", 22: "ספטמבר 2019", 23: "מרץ 2020", 24: "מרץ 2021", 25: "נובמבר 2022"}
+# Coalition and opposition (a description of each election; data/reference/parties.csv, column "coalition")
+GOVERNMENTS = {
+    24: {"he": "ממשלת בנט–לפיד (הממשלה ה־36)", "en": "Bennett–Lapid government (36th)"},
+    25: {"he": "ממשלת נתניהו (הממשלה ה־37)", "en": "Netanyahu government (37th)"},
+}
+NO_COALITION = {
+    21: {"he": "אחרי הבחירות לא קמה ממשלה.", "en": "No government was formed after this election."},
+    22: {"he": "אחרי הבחירות לא קמה ממשלה.", "en": "No government was formed after this election."},
+    23: {"he": "אחרי הבחירות התפצלו רשימות (כחול לבן, העבודה־גשר־מרצ), ולכן אי אפשר לשייך את קולותיהן לקואליציה או לאופוזיציה.",
+         "en": "Lists split after this election (Blue and White, Labor–Gesher–Meretz), so their votes cannot be assigned to coalition or opposition."},
+}
 LINKS = {
     "site": "https://adirelm.github.io/israel-cantons-project/",
     "app": "https://israel-cantons-project-5j7kgq8acxrbiflraqnhgb.streamlit.app/",
     "repo": "https://github.com/adirelm/israel-cantons-project",
     "report": "https://github.com/adirelm/israel-cantons-project/blob/main/docs/Elmakais_MSc_Project_2026.pdf",
+    "paper": "https://arxiv.org/abs/2603.11805",
 }
 
 
@@ -91,6 +103,8 @@ def towns_geojson(final: dict[str, int], features: pd.DataFrame) -> dict:
                 for k in KNESSET_IDS}
     per_canton = {k: dict(pd.read_csv(DATA_PROCESSED / "per_election" / f"knesset_{k}.csv").values) for k in KNESSET_IDS}
     avg_cols = [f"{b}_avg" for b in BLOC_COLS]
+    coalition = {(r.municipality, r.knesset): r.coalition_pct
+                 for r in pd.read_csv(DATA_PROCESSED / "coalition_shares.csv").itertuples()}
 
     out = []
     for _, row in geo.sort_values("MUN_HEB").iterrows():
@@ -108,6 +122,7 @@ def towns_geojson(final: dict[str, int], features: pd.DataFrame) -> dict:
                 "blocs": _shares(f, avg_cols),
                 "votes": {str(k): _shares(per_vote[k].loc[he], avg_cols) for k in KNESSET_IDS},
                 "elections": {str(k): int(per_canton[k][he]) for k in KNESSET_IDS},
+                "coalition": {str(k): round(float(coalition[(he, k)]), 1) for k in sorted(COALITION_LISTS)},
             },
             "geometry": {"type": geom["type"], "coordinates": _round(geom["coordinates"], COORDINATE_DECIMALS)},
         })
@@ -121,6 +136,7 @@ def cantons_json(labeled: pd.DataFrame, features: pd.DataFrame) -> list[dict]:
     names = dict(labeled[["canton", "label"]].drop_duplicates().values)
     geo = gpd.read_file(DATA_PROCESSED / "municipalities_dissolved.geojson")
     eng = dict(zip(geo["MUN_HEB"], geo["MUN_ENG"]))
+    coalition = pd.read_csv(DATA_PROCESSED / "canton_coalition.csv")
     out = []
     for cid, row in stats.iterrows():
         members = labeled.loc[labeled["canton"] == cid, "municipality"]
@@ -134,8 +150,22 @@ def cantons_json(labeled: pd.DataFrame, features: pd.DataFrame) -> list[dict]:
             "voters": int(row["total_voters"]),
             "blocs": [float(row[f"{b}_pct"]) for b in BLOC_COLS],
             "largest": [{"he": m, "en": ENGLISH_DISPLAY.get(eng[m], eng[m])} for m in largest.index],
+            "coalition": {str(r.knesset): float(r.coalition_pct) for r in coalition[coalition["canton"] == cid].itertuples()},
         })
     return out
+
+
+def coalition_names() -> dict[int, list[tuple[str, str]]]:
+    """Hebrew and English names of each government's lists, as in the party table."""
+    import csv
+
+    names: dict[int, list[tuple[str, str]]] = {}
+    with open(PARTIES_CSV, encoding="utf-8", newline="") as f:
+        for row in csv.DictReader(f):
+            k = int(row["knesset"])
+            if row["letters"] in COALITION_LISTS.get(k, set()):
+                names.setdefault(k, []).append((row["name_he"], row["name_en"]))
+    return names
 
 
 def meta_json(n_towns: int) -> dict:
@@ -154,6 +184,9 @@ def meta_json(n_towns: int) -> dict:
             "train": [int(k) for k in str(tests["train_elections"].iloc[0]).split(",")],
             "test": int(tests["test_election"].iloc[0]),
         },
+        "coalition": {str(k): {**GOVERNMENTS[k], "lists_he": [n for n, _ in names], "lists_en": [e for _, e in names]}
+                      for k, names in coalition_names().items()},
+        "no_coalition": {str(k): v for k, v in NO_COALITION.items()},
         "links": LINKS,
         "built": date.today().isoformat(),
     }

@@ -63,6 +63,24 @@ def _load_bloc_mapping(path: Path) -> dict[int, dict[str, str]]:
 # Party-code → bloc mapping for each Knesset (names in data/reference/parties.csv)
 BLOC_MAPPING: dict[int, dict[str, str]] = _load_bloc_mapping(PARTIES_CSV)
 
+
+def _load_coalition_lists(path: Path) -> dict[int, set[str]]:
+    """Ballot letters of the lists that formed the government after each election.
+
+    Only elections after which a government of those lists formed are included: none formed
+    after either 2019 election, and after 2020 several lists split, so their votes cannot be
+    assigned to coalition or opposition. Used to describe cantons, never to build them.
+    """
+    lists: dict[int, set[str]] = {}
+    with open(path, encoding="utf-8", newline="") as f:
+        for row in csv.DictReader(f):
+            if row.get("coalition") == "yes":
+                lists.setdefault(int(row["knesset"]), set()).add(row["letters"])
+    return lists
+
+
+COALITION_LISTS: dict[int, set[str]] = _load_coalition_lists(PARTIES_CSV)
+
 # ---------------------------------------------------------------------------
 # Municipality name fixes (election spelling → GeoJSON spelling)
 # ---------------------------------------------------------------------------

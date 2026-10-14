@@ -22,6 +22,11 @@ from utils import (
     FIGURES_DIR,
     PUBLIC_MAP_LIVE,
     PUBLIC_MAP_URL,
+    PAPER_URL,
+    CREDITS,
+    COALITION_GOVERNMENTS,
+    ELECTION_LABELS,
+    load_canton_coalition,
     build_canton_map,
     canton_profiles,
     largest_bloc,
@@ -41,10 +46,7 @@ st.title(":world_map: Israel Cantons Explorer")
 st.markdown(
     "**Dividing Israel into politically homogeneous cantons based on Knesset election results**"
 )
-st.markdown(
-    "_M.Sc. Computer Science Project -- Adir Elmakais, Bar-Ilan University "
-    "(Advisor: Dr. Oren Glickman)_"
-)
+st.markdown(f"_M.Sc. Computer Science Project -- {CREDITS}_ · Paper: [arXiv:2603.11805]({PAPER_URL})")
 if PUBLIC_MAP_LIVE:
     st.info(
         f"**Looking for the map for readers?** The [public map]({PUBLIC_MAP_URL}) shows the five cantons in "
@@ -152,6 +154,26 @@ if assignment is not None:
         "are also linked to each other, so **ARAB** joins Arab towns from the Galilee to the Negev and "
         "**HAREDI Cities** joins seven cities that share no borders."
     )
+
+    coalition = load_canton_coalition()
+    if coalition is not None:
+        st.markdown("#### Coalition and Opposition")
+        wide = coalition.pivot(index="canton", columns="knesset", values="coalition_pct")
+        table = pd.DataFrame({"Canton": [_canton_label_map.get(c, f"Canton {c}") for c in wide.index]})
+        for k in wide.columns:
+            table[f"Coalition, {ELECTION_LABELS[k]}"] = wide[k].to_numpy()
+        st.dataframe(
+            table, width="stretch", hide_index=True,
+            column_config={c: st.column_config.NumberColumn(format="%.1f%%") for c in table.columns[1:]},
+        )
+        st.caption(
+            "Share of each canton's valid votes that went to the lists that formed the government after that "
+            + "election: " + " and ".join(f"the {COALITION_GOVERNMENTS[k]} government after {ELECTION_LABELS[k]}"
+                                          for k in wide.columns)
+            + ". No government was formed after either 2019 election, and after March 2020 "
+            "lists split (Blue and White; Labor–Gesher–Meretz), so their votes cannot be assigned. These shares "
+            "describe the cantons; they are not used to build them."
+        )
 
 else:
     st.warning("Featured K=5 assignment not found. Run notebook 06 first.")

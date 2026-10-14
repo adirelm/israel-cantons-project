@@ -119,3 +119,27 @@ def test_rtl_text_plugin_is_served_from_the_site():
     assert (SITE_DATA.parent / "vendor" / "mapbox-gl-rtl-text.LICENSE.md").exists()
     js = (SITE_DATA.parent / "app.js").read_text(encoding="utf-8")
     assert "vendor/mapbox-gl-rtl-text.min.js" in js and "mapbox-gl-rtl-text@" not in js
+
+
+def test_coalition_shares_on_the_page_come_from_the_results(towns, cantons, meta):
+    shares = pd.read_csv(DATA_PROCESSED / "coalition_shares.csv")
+    by_town = {(r.municipality, str(r.knesset)): r.coalition_pct for r in shares.itertuples()}
+    for f in towns:
+        p = f["properties"]
+        assert set(p["coalition"]) == {"24", "25"}
+        for k, v in p["coalition"].items():
+            assert v == pytest.approx(by_town[(p["he"], k)], abs=0.051)
+    table = pd.read_csv(DATA_PROCESSED / "canton_coalition.csv")
+    for r in table.itertuples():
+        assert cantons[r.canton]["coalition"][str(r.knesset)] == r.coalition_pct
+    assert set(meta["coalition"]) == {"24", "25"}
+    assert all(meta["coalition"][k]["he"] and meta["coalition"][k]["en"] and meta["coalition"][k]["lists_he"]
+               for k in meta["coalition"])
+
+
+def test_page_credits_the_collaborator_and_links_the_paper(meta):
+    assert meta["links"]["paper"] == "https://arxiv.org/abs/2603.11805"
+    js = (SITE_DATA.parent / "app.js").read_text(encoding="utf-8")
+    assert "בשיתוף פרופ׳ יוליה אלעד־שטרנגר, אוניברסיטת הבונדסוור במינכן" in js
+    assert "with Prof. Julia Elad-Strenger, Bundeswehr University Munich" in js
+    assert js.count("${l.paper}") == 2  # Hebrew and English footers

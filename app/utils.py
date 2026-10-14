@@ -22,6 +22,11 @@ PER_ELECTION_DIR = DATA_DIR / "per_election"
 FIGURES_DIR = PROJECT_ROOT / "docs" / "figures"
 PUBLIC_MAP_URL = "https://adirelm.github.io/israel-cantons-project/"
 PUBLIC_MAP_LIVE = True  # GitHub Pages serves site/; set False to hide the app's links to it
+PAPER_URL = "https://arxiv.org/abs/2603.11805"
+CREDITS = (
+    "Adir Elmakais, Bar-Ilan University · Advisor: Dr. Oren Glickman · "
+    "with Prof. Julia Elad-Strenger, Bundeswehr University Munich"
+)
 MAP_SIMPLIFY_M = 60.0  # display only: invisible at country zoom, cuts the map page from ~30 MB to ~2 MB
 MOVED_COLOR = "#dc2626"  # outline of towns whose canton differs from the primary map (drawn dashed)
 OUTSIDE_COLOR = "#cccccc"  # municipalities without votes in every election (not in the analysis)
@@ -108,6 +113,7 @@ def inject_custom_css() -> None:
         </style>
         <div class="app-footer">
             M.Sc. Computer Science Project &middot; Bar-Ilan University &middot; Adir Elmakais
+            &middot; with Prof. Julia Elad-Strenger, Bundeswehr University Munich
         </div>
         """,
         unsafe_allow_html=True,
@@ -280,6 +286,18 @@ def load_cantons_labeled() -> pd.DataFrame:
 
 # Copy of src.config.ELECTION_LABELS (the app does not import src); tests/test_app_labels.py keeps them equal
 ELECTION_LABELS = {21: "April 2019", 22: "September 2019", 23: "March 2020", 24: "March 2021", 25: "November 2022"}
+
+
+# Governments formed after each election, whose lists the coalition shares count (the lists are in
+# data/reference/parties.csv); no government formed after either 2019 election, and after 2020 lists split
+COALITION_GOVERNMENTS = {24: "Bennett–Lapid", 25: "Netanyahu"}
+
+
+@st.cache_data
+def load_canton_coalition() -> pd.DataFrame | None:
+    """Each canton's share of the vote for the coalition lists, by election (None if not built)."""
+    path = DATA_DIR / "canton_coalition.csv"
+    return pd.read_csv(path) if path.exists() else None
 
 
 @st.cache_data

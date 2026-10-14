@@ -1,5 +1,23 @@
 # Changelog
 
+## October 2026 — coalition and opposition
+
+Each election is characterised by the government formed after it: the Bennett–Lapid government (36th) after March 2021 and the Netanyahu government (37th) after November 2022. The lists are marked in a new `coalition` column of `data/reference/parties.csv`. No government was formed after either 2019 election, and after March 2020 lists split (Blue and White; Labor–Gesher–Meretz), so their votes cannot be assigned. The coalition only describes the cantons; it is not used to build them, and the map is unchanged.
+
+- `src/data/coalition.py` computes each municipality's share of the vote for the coalition lists, and each canton's (weighted by valid votes); `rebuild_results.py` writes `coalition_shares.csv` and `canton_coalition.csv`.
+
+  | Canton | 2021 (Bennett–Lapid) | 2022 (Netanyahu) |
+  |---|---|---|
+  | METRO Tel Aviv | 62.0% | 42.8% |
+  | RIGHT Jerusalem & South | 37.8% | 69.8% |
+  | RIGHT North | 55.5% | 44.4% |
+  | ARAB | 47.7% | 1.6% |
+  | HAREDI Cities | 2.1% | 98.5% |
+
+- **Public map:** a coalition-and-opposition view colours each municipality by its coalition share (2021 or 2022), with the government and its lists named, canton and town cards showing the shares, a coalition column in each town's vote table, and the same view in links and downloaded images. The election note no longer sits under the share and download buttons.
+- **Research app:** the home page has a table of each canton's coalition share.
+- Credits: Prof. Julia Elad-Strenger (Bundeswehr University Munich) is credited on the public map, in the app and in this README, which also link the paper (arXiv:2603.11805).
+
 ## October 2026 — party-by-election representation
 
 Following the advisor's suggestion, the party-level representation no longer averages each ballot letter over the five elections (a letter can belong to different parties: "פה" was Blue and White in 2019-2020 and Yesh Atid in 2021-2022). `RawPartyShares` now has one feature per list and election, for the lists that passed the 3.25% threshold (51 features; the 11, 9, 8, 13 and 10 lists that won seats). NMF_5 and PCA_5 are built on it, so the primary map uses no party-to-bloc grouping; blocs describe the cantons and still define the graph's enclave edges.

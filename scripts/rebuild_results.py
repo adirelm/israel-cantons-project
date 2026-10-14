@@ -40,6 +40,7 @@ from src.evaluation.canton_names import name_cantons
 from src.evaluation.metrics import canton_profiles
 from src.evaluation.canton_tests import canton_tests
 from src.evaluation.per_election import align_to_reference, changes_table, per_election_maps
+from src.data.coalition import canton_coalition, coalition_shares
 
 PRIMARY_CONFIG = "nmf_5__cosine__louvain__k5"
 # (anchor municipality, canton ID, name): one anchor per canton of the primary map
@@ -228,6 +229,14 @@ def save_canton_tests(elections) -> None:
     results.to_csv(DATA_PROCESSED / "canton_tests.csv", index=False)
 
 
+def save_coalition(elections) -> None:
+    """Coalition share of each town and primary canton (2021, 2022): a description, not a clustering input."""
+    shares = coalition_shares(elections)
+    shares.round({"coalition_pct": 2}).to_csv(DATA_PROCESSED / "coalition_shares.csv", index=False, encoding="utf-8")
+    final = dict(pd.read_csv(DATA_PROCESSED / "cantons_final.csv").values)
+    canton_coalition(shares, final).to_csv(DATA_PROCESSED / "canton_coalition.csv", index=False, encoding="utf-8")
+
+
 def main() -> None:
     logging.basicConfig(level=logging.WARNING)
     elections = process_all_elections()
@@ -247,6 +256,7 @@ def main() -> None:
     save_primary_map(bloc_features, weights)
     save_per_election_maps(elections, G_aug)
     save_canton_tests(elections)
+    save_coalition(elections)
     print("Done.")
 
 

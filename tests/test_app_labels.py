@@ -199,3 +199,33 @@ def test_app_links_to_the_public_map_only_once_it_is_published():
     assert not at.exception
     shown = any(utils.PUBLIC_MAP_URL in (m.value or "") for m in [*at.markdown, *at.info])
     assert shown == utils.PUBLIC_MAP_LIVE
+
+
+def test_home_page_describes_each_canton_by_coalition_share():
+    """Coalition and opposition describe the cantons, election by election (never an input)."""
+    import pandas as pd
+    from src.config import COALITION_LISTS, DATA_PROCESSED
+
+    utils = _app_utils()
+    assert set(utils.COALITION_GOVERNMENTS) == set(COALITION_LISTS)
+    shares = pd.read_csv(DATA_PROCESSED / "canton_coalition.csv")
+    names = dict(utils.load_cantons_labeled()[["canton", "label"]].drop_duplicates().values)
+    at = AppTest.from_file("../app/app.py", default_timeout=180).run()
+    assert not at.exception, [e.message for e in at.exception]
+    tables = [df.value for df in at.dataframe if any("coalition" in str(c).lower() for c in df.value.columns)]
+    assert tables, "no coalition table on the home page"
+    table = tables[0].set_index("Canton")
+    for r in shares.itertuples():
+        col = next(c for c in table.columns if utils.ELECTION_LABELS[r.knesset] in c)
+        assert table.loc[names[r.canton], col] == pytest.approx(r.coalition_pct), (r.canton, r.knesset)
+    text = " ".join(m.value for m in [*at.markdown, *at.caption])
+    assert "no government was formed" in text.lower()
+
+
+def test_app_credits_the_collaborator_and_links_the_paper():
+    for page in ("../app/app.py", "../app/pages/4_About.py"):
+        at = AppTest.from_file(page, default_timeout=180).run()
+        assert not at.exception
+        text = " ".join(m.value for m in [*at.markdown, *at.caption])
+        assert "Julia Elad-Strenger" in text and "Bundeswehr University Munich" in text, page
+        assert "arxiv.org/abs/2603.11805" in text, page

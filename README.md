@@ -6,12 +6,15 @@ Dividing Israel into politically homogeneous cantons based on Knesset election r
 
 **Research app:** https://israel-cantons-project-5j7kgq8acxrbiflraqnhgb.streamlit.app/
 
+**Paper:** [arXiv:2603.11805](https://arxiv.org/abs/2603.11805)
+
 ## Project Overview
 
 This M.Sc. project develops a data-driven algorithmic approach to partition Israeli municipalities into "cantons" of neighbouring municipalities that maximize internal political similarity. The system uses town-level election results from the five most recent Knesset elections (2019-2022) combined with municipal boundary data.
 
 **Author:** Adir Elmakais — M.Sc. Computer Science, Bar-Ilan University
 **Advisor:** Dr. Oren Glickman
+**In collaboration with:** Prof. Julia Elad-Strenger, Bundeswehr University Munich
 
 ## Directory Structure
 
@@ -103,7 +106,7 @@ python scripts/report_numbers.py       # every number the report and app quote
 python scripts/build_site_data.py      # site/data/*.json and site/og.png for the public map page
 ```
 
-Party classification lives in `data/reference/parties.csv`; run `rebuild_results.py` after changing it. The first two steps are needed only when boundaries change. Pushing `site/` to `main` deploys the public page (`.github/workflows/pages.yml`); to preview it locally, run `python -m http.server --directory site` and open http://localhost:8000. The notebooks document the original exploratory analysis; notebooks 05 and 06 save their outputs under separate names so they do not overwrite the published results.
+Party classification lives in `data/reference/parties.csv`, including which lists formed the government after each election (`coalition`); run `rebuild_results.py` after changing it. The first two steps are needed only when boundaries change. Pushing `site/` to `main` deploys the public page (`.github/workflows/pages.yml`); to preview it locally, run `python -m http.server --directory site` and open http://localhost:8000. The notebooks document the original exploratory analysis; notebooks 05 and 06 save their outputs under separate names so they do not overwrite the published results.
 
 ## Key Results
 
@@ -113,6 +116,7 @@ Party classification lives in `data/reference/parties.csv`; run `rebuild_results
 - Held-out test: cantons built from 2019-2021 differ in every bloc's vote share in the 2022 election (44 of 50 comparisons: 10 canton pairs × 5 blocs)
 - 264 experiment configurations, 0 failures
 - Cantons: METRO Tel Aviv, RIGHT Jerusalem & South, RIGHT North, ARAB, and HAREDI Cities (seven non-contiguous cities)
+- Coalition and opposition, as a description of the cantons (never an input): the share of each canton's vote for the lists that formed the government after the election. HAREDI Cities gave 2.1% to the Bennett–Lapid coalition (2021) and 98.5% to the Netanyahu coalition (2022); ARAB 47.7% and 1.6%; METRO Tel Aviv 62.0% and 42.8%. No government was formed after either 2019 election, and after 2020 lists split, so those elections are not characterised.
 
 Results were regenerated in October 2026 after fixing the party-to-bloc mapping, adding the Judea and Samaria authorities and switching the party-level representation to vote shares per list and election (see `CHANGELOG.md`).
 

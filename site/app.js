@@ -6,6 +6,11 @@
 const BLOC_COLORS = ["#3b82f6", "#6b7280", "#a855f7", "#ef4444", "#22c55e"]; // right, haredi, center, left, arab
 const NO_COUNTERPART_COLOR = "#f59e0b";
 const MOVED_COLOR = "#dc2626";
+// Coalition view: each town's share of the vote for the lists that formed the government after the election
+const COALITION_COLOR = "#c2410c";
+const OPPOSITION_COLOR = "#0f766e";
+const MIDPOINT_COLOR = "#f5f5f4";
+const NO_TOWN = ["==", ["get", "he"], ""]; // a filter that matches nothing
 const BASEMAP_STYLE = "https://tiles.openfreemap.org/styles/positron";
 const FALLBACK_STYLE = { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#eef2f6" } }] };
 // Country, territory and region names are hidden on the basemap; city names stay
@@ -38,6 +43,19 @@ const TEXT = {
     download: "הורדת המפה",
     downloadFailed: "לא הצלחנו ליצור תמונה. נסו שוב.",
     electionNote: (label) => `אותה שיטה הורצה על בחירות ${label} בלבד. רשויות שהקנטון שלהן שונה מהמפה הראשית מסומנות באדום.`,
+    viewLabel: "תצוגה",
+    viewCantons: "קנטונים",
+    viewCoalition: "קואליציה ואופוזיציה",
+    coalition: "קואליציה",
+    others: "אופוזיציה ואחרות",
+    coalitionLegend: (label) => `אחוז הקולות לרשימות הקואליציה, ${label}`,
+    coalitionNote: (gov, lists) => `הקואליציה היא הרשימות שהרכיבו את ${gov}: ${lists}. הצבע מראה את אחוז הקולות שלהן בכל רשות. הקנטונים עצמם לא משתנים.`,
+    noCoalitionShort: (years) => `לבחירות ${years} אין תצוגה כזו.`,
+    howLink: "למה?",
+    coalitionTitle: (label) => `הקואליציה בקנטונים, בחירות ${label}`,
+    coalitionIn: (label) => `הצבעה לרשימות הקואליציה בבחירות ${label}`,
+    coalitionColumnNote: "קואליציה: אחוז הקולות לרשימות שהרכיבו את הממשלה אחרי אותן בחירות. ״—״: אין ממשלה שאפשר לשייך אליה את הקולות.",
+    imageSubCoalition: (label) => `הצבעה לרשימות הקואליציה · ${label}`,
     legendMoved: "קנטון שונה מהמפה הראשית",
     noCounterpart: "קנטון ללא מקבילה במפה הראשית",
     cantonsTitle: "חמשת הקנטונים",
@@ -53,7 +71,7 @@ const TEXT = {
     perElection: "הקנטון בכל מערכת בחירות",
     stayed: "באותו קנטון בכל חמש מערכות הבחירות.",
     movedCount: (n) => `שויכה לקנטון אחר ב־${n} מתוך חמש מערכות הבחירות.`,
-    votesTable: "אחוז הקולות לפי גוש",
+    votesTable: "אחוז הקולות לפי גוש ולרשימות הקואליציה",
     election: "בחירות",
     allTowns: (n) => `כל ${n} הרשויות`,
     blocs: ["ימין", "חרדים", "מרכז", "שמאל", "ערבים"],
@@ -63,10 +81,12 @@ const TEXT = {
       ["החלוקה", "כל רשות מיוצגת באחוזי ההצבעה לכל רשימה שנכנסה לכנסת, בכל מערכת בחירות בנפרד. אלגוריתם לזיהוי קהילות ברשת (Louvain) מאחד רשויות שכנות שמצביעות באופן דומה לחמישה קנטונים. ברשת יש גם קישורים בין רשויות שאינן גובלות: בין רשויות שבהן אותו גוש מקבל יותר מ־70% מהקולות, ובין רשויות שאין להן שכנות בנתונים לרשויות הדומות להן ביותר. לכן רוב הקנטונים אינם רצף אחד במפה: בעיקר הקנטון הערבי והערים החרדיות, וגם כמה רשויות בודדות, כמו קריית שמונה ובית ג׳ן, שמשויכות לקנטון רחוק."],
       ["הבדיקה", `המפה יציבה: כשמריצים את השיטה על כל מערכת בחירות לבד, ${m.towns_never_moved} מתוך ${m.towns} הרשויות נשארות באותו קנטון (בחירות ${m.testYear} שונות יותר מכולן). וקנטונים שנבנו מבחירות ${m.trainFirst}–${m.trainLast} בלבד נבדלים זה מזה באופן מובהק סטטיסטית גם בבחירות ${m.testYear}, ב־${m.heldout.significant} מתוך ${m.heldout.pairs} ההשוואות.`],
     ],
+    govAfter: (gov, label) => `${gov} אחרי בחירות ${label}`,
+    coalitionStep: (s) => ["קואליציה ואופוזיציה", `בתצוגת הקואליציה כל רשות צבועה לפי אחוז הקולות לרשימות שהרכיבו את הממשלה אחרי אותן בחירות: ${s.govs}. שאר הקולות הלכו לאופוזיציה ולרשימות שלא עברו את אחוז החסימה. ${s.none} הקואליציה רק מתארת את הקנטונים, ולא משמשת לבנייתם.`],
     caveat: "הדמיון בין רשויות מחושב לפי רשימות בודדות; הגושים (ימין, חרדים, מרכז, שמאל, ערבים) רק מתארים את הקנטונים ומוסיפים קישורים ברשת. שמות הקנטונים נקבעו לפי הרשויות הבולטות בהם והגוש הגדול בהם. זהו ניתוח נתונים, לא הצעה מדינית.",
     footer: (l) => [
-      "פרויקט M.Sc. במדעי המחשב, אוניברסיטת בר־אילן · אדיר אלמקייס · בהנחיית ד״ר אורן גליקמן",
-      `<a href="${l.app}" target="_blank" rel="noopener">אפליקציית המחקר</a> · <a href="${l.report}" target="_blank" rel="noopener">הדוח המלא (PDF)</a> · <a href="${l.repo}" target="_blank" rel="noopener">הקוד והנתונים</a>`,
+      "פרויקט M.Sc. במדעי המחשב, אוניברסיטת בר־אילן · אדיר אלמקייס · בהנחיית ד״ר אורן גליקמן · בשיתוף פרופ׳ יוליה אלעד־שטרנגר, אוניברסיטת הבונדסוור במינכן",
+      `<a href="${l.paper}" target="_blank" rel="noopener">המאמר (arXiv)</a> · <a href="${l.app}" target="_blank" rel="noopener">אפליקציית המחקר</a> · <a href="${l.report}" target="_blank" rel="noopener">הדוח המלא (PDF)</a> · <a href="${l.repo}" target="_blank" rel="noopener">הקוד והנתונים</a>`,
       "מקורות: תוצאות הבחירות לכנסת לפי רשות מקומית; גבולות רשויות: הלשכה המרכזית לסטטיסטיקה והמנהל האזרחי; מפת רקע: OpenFreeMap ו־OpenStreetMap.",
     ],
     voteIn: (label) => `ההצבעה בבחירות ${label}`,
@@ -107,6 +127,19 @@ const TEXT = {
     download: "Download map",
     downloadFailed: "Could not create the image. Please try again.",
     electionNote: (label) => `The same method run on the ${label} election alone. Municipalities whose canton differs from the main map are outlined in red.`,
+    viewLabel: "View",
+    viewCantons: "Cantons",
+    viewCoalition: "Coalition and opposition",
+    coalition: "Coalition",
+    others: "Opposition and others",
+    coalitionLegend: (label) => `Share of the vote for the coalition lists, ${label}`,
+    coalitionNote: (gov, lists) => `The coalition is the lists that formed the ${gov}: ${lists}. The colour shows their share of the vote in each municipality. The cantons themselves do not change.`,
+    noCoalitionShort: (years) => `There is no such view for ${years}.`,
+    howLink: "Why?",
+    coalitionTitle: (label) => `The coalition in the cantons, ${label} election`,
+    coalitionIn: (label) => `Vote for the coalition lists in the ${label} election`,
+    coalitionColumnNote: "Coalition: share of the vote for the lists that formed the government after that election. “—”: no government the votes can be assigned to.",
+    imageSubCoalition: (label) => `Vote for the coalition lists · ${label}`,
     legendMoved: "Different canton from the main map",
     noCounterpart: "Canton with no counterpart in the main map",
     cantonsTitle: "The five cantons",
@@ -122,7 +155,7 @@ const TEXT = {
     perElection: "Canton in each election",
     stayed: "In the same canton in all five elections.",
     movedCount: (n) => `In a different canton in ${n} of the five elections.`,
-    votesTable: "Share of the vote by bloc",
+    votesTable: "Share of the vote by bloc and for the coalition lists",
     election: "Election",
     allTowns: (n) => `All ${n} municipalities`,
     blocs: ["Right", "Haredi", "Center", "Left", "Arab"],
@@ -132,10 +165,12 @@ const TEXT = {
       ["The division", "Each municipality is described by the vote share of every list that won seats, in each election separately. A network community-detection algorithm (Louvain) groups neighbouring municipalities that vote alike into five cantons. The network also links municipalities that share no border: those where the same bloc wins over 70% of the vote, and municipalities with no neighbour in the data to their most similar ones. So most cantons are not single pieces on the map: mainly the Arab canton and the Haredi cities, and a few single towns, such as Kiryat Shmona and Beit Jann, that belong to a distant canton."],
       ["The checks", `The map is stable: when the method is run on each election alone, ${m.towns_never_moved} of ${m.towns} municipalities stay in the same canton (${m.testYear} differs most). Cantons built from the ${m.trainFirst}–${m.trainLast} elections only still differ significantly in ${m.testYear}, in ${m.heldout.significant} of ${m.heldout.pairs} comparisons.`],
     ],
+    govAfter: (gov, label) => `the ${gov} after the ${label} election`,
+    coalitionStep: (s) => ["Coalition and opposition", `In the coalition view each municipality is coloured by the share of the vote for the lists that formed the government after that election: ${s.govs}. The rest went to the opposition and to lists below the threshold. ${s.none} The coalition only describes the cantons; it is not used to build them.`],
     caveat: "Similarity between municipalities is computed from individual lists; blocs (Right, Haredi, Center, Left, Arab) only describe the cantons and add links in the network. Canton names come from their best-known municipalities and their largest bloc. This is a data analysis, not a policy proposal.",
     footer: (l) => [
-      "M.Sc. project in Computer Science, Bar-Ilan University · Adir Elmakais · Advisor: Dr. Oren Glickman",
-      `<a href="${l.app}" target="_blank" rel="noopener">Research app</a> · <a href="${l.report}" target="_blank" rel="noopener">Full report (PDF)</a> · <a href="${l.repo}" target="_blank" rel="noopener">Code and data</a>`,
+      "M.Sc. project in Computer Science, Bar-Ilan University · Adir Elmakais · Advisor: Dr. Oren Glickman · with Prof. Julia Elad-Strenger, Bundeswehr University Munich",
+      `<a href="${l.paper}" target="_blank" rel="noopener">Paper (arXiv)</a> · <a href="${l.app}" target="_blank" rel="noopener">Research app</a> · <a href="${l.report}" target="_blank" rel="noopener">Full report (PDF)</a> · <a href="${l.repo}" target="_blank" rel="noopener">Code and data</a>`,
       "Sources: Knesset election results by local authority; municipal boundaries: Central Bureau of Statistics and the Civil Administration; basemap: OpenFreeMap and OpenStreetMap.",
     ],
     voteIn: (label) => `Vote in the ${label} election`,
@@ -155,7 +190,7 @@ const TEXT = {
   },
 };
 
-const state = { lang: "he", election: "all", canton: null, town: null };
+const state = { lang: "he", view: "cantons", election: "all", canton: null, town: null };
 let data = null; // { towns, cantons, meta, byName, search }
 let map = null;
 let hovered = null;
@@ -170,6 +205,11 @@ const townName = (p) => (state.lang === "he" ? p.he : p.en);
 const cantonName = (c) => (state.lang === "he" ? c.he : c.en);
 const electionKeys = () => Object.keys(data.meta.elections);
 const electionLabel = (k) => data.meta.elections[k][state.lang];
+const coalitionKeys = () => Object.keys(data.meta.coalition || {});
+const coalitionView = () => state.view === "coalition";
+// One election's own canton map; the coalition view keeps the main map's cantons
+const perElection = () => !coalitionView() && state.election !== "all";
+const pct = (v, digits = 0) => `${v.toFixed(digits)}%`;
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
@@ -181,12 +221,26 @@ function metaForText() {
   const train = m.heldout.train.map(String);
   return {
     ...m,
+    coalitionSummary: coalitionSummary(),
     first: year(m.elections[keys[0]]),
     last: year(m.elections[keys[keys.length - 1]]),
     trainFirst: year(m.elections[train[0]]),
     trainLast: year(m.elections[train[train.length - 1]]),
     testYear: year(m.elections[String(m.heldout.test)]),
   };
+}
+
+// The governments the coalition view describes, and the elections it leaves out (with the reasons)
+function coalitionSummary() {
+  const govs = coalitionKeys().map((k) => t().govAfter(data.meta.coalition[k][state.lang], electionLabel(k))).join("; ");
+  const groups = new Map();
+  for (const [k, r] of Object.entries(data.meta.no_coalition || {})) {
+    groups.set(r[state.lang], [...(groups.get(r[state.lang]) || []), electionLabel(k)]);
+  }
+  const none = [...groups].map(([reason, labels]) => `${labels.join(", ")}: ${reason}`).join(" ");
+  const years = new Intl.ListFormat(t().locale, { type: "disjunction" })
+    .format([...new Set(Object.keys(data.meta.no_coalition || {}).map((k) => year(data.meta.elections[k])))]);
+  return { govs, none, years };
 }
 
 // ---------------------------------------------------------------------------
@@ -208,6 +262,7 @@ async function loadData() {
       p[`e${k}`] = p.elections[k];
       p[`m${k}`] = p.elections[k] !== p.canton ? 1 : 0;
     }
+    for (const [k, v] of Object.entries(p.coalition || {})) p[`c${k}`] = v;
     f.bbox = bboxOf(f.geometry.coordinates);
     byName.set(p.he, f);
   }
@@ -234,9 +289,9 @@ function unionBbox(features) {
 // Map
 // ---------------------------------------------------------------------------
 
-const cantonProp = () => (state.election === "all" ? ["get", "canton"] : ["get", `e${state.election}`]);
+const cantonProp = () => (perElection() ? ["get", `e${state.election}`] : ["get", "canton"]);
 // Canton of a town in the current view: the main map, or one election on its own
-const cantonOf = (p) => (state.election === "all" ? p.canton : p[`e${state.election}`]);
+const cantonOf = (p) => (perElection() ? p[`e${state.election}`] : p.canton);
 const cantonIds = () => [...new Set(data.towns.features.map((f) => cantonOf(f.properties)))].sort((a, b) => a - b);
 const membersOf = (id) => data.towns.features.filter((f) => cantonOf(f.properties) === id)
   .sort((a, b) => b.properties.voters - a.properties.voters);
@@ -245,7 +300,7 @@ const membersOf = (id) => data.towns.features.filter((f) => cantonOf(f.propertie
 // that election's vote in the canton's towns (weighted by their average number of valid votes)
 function cantonView(id) {
   const base = data.cantons.get(id);
-  if (state.election === "all" && base) return base;
+  if (!perElection() && base) return base;
   const members = membersOf(id);
   const voters = members.reduce((sum, f) => sum + f.properties.voters, 0);
   const blocs = BLOC_COLORS.map((_, i) => members.reduce(
@@ -272,6 +327,10 @@ const localeStrings = () => ({
 });
 
 function colorExpression() {
+  if (coalitionView()) {
+    return ["interpolate", ["linear"], ["coalesce", ["get", `c${state.election}`], 50],
+      0, OPPOSITION_COLOR, 50, MIDPOINT_COLOR, 100, COALITION_COLOR];
+  }
   const expr = ["match", cantonProp()];
   for (const c of data.cantons.values()) expr.push(c.id, c.color);
   expr.push(NO_COUNTERPART_COLOR);
@@ -280,7 +339,8 @@ function colorExpression() {
 
 function opacityExpression() {
   const hover = ["boolean", ["feature-state", "hover"], false];
-  if (state.canton === null) return ["case", hover, 0.92, 0.74];
+  // The coalition shades need more opacity than the canton colours to read against the basemap
+  if (state.canton === null) return coalitionView() ? ["case", hover, 0.97, 0.88] : ["case", hover, 0.92, 0.74];
   return ["case", ["==", cantonProp(), state.canton], ["case", hover, 0.95, 0.85], 0.14];
 }
 
@@ -317,9 +377,11 @@ function initMap() {
     setHover(f.id);
     map.getCanvas().style.cursor = "pointer";
     const p = f.properties;
-    const c = data.cantons.get(Number(cantonOf(p)));
+    const town = data.byName.get(p.he).properties;
+    const c = data.cantons.get(Number(cantonOf(town)));
+    const share = coalitionView() ? `<br>${escapeHtml(t().coalition)}: ${pct(town.coalition[state.election])}` : "";
     popup.setLngLat(e.lngLat)
-      .setHTML(`<div dir="${t().dir}"><b>${escapeHtml(townName(data.byName.get(p.he).properties))}</b><br>${escapeHtml(c ? cantonName(c) : t().noCounterpart)}</div>`)
+      .setHTML(`<div dir="${t().dir}"><b>${escapeHtml(townName(town))}</b><br>${escapeHtml(c ? cantonName(c) : t().noCounterpart)}${share}</div>`)
       .addTo(map);
   });
   map.on("mouseleave", "towns-fill", () => {
@@ -349,11 +411,11 @@ function addLayers() {
     paint: { "fill-color": colorExpression(), "fill-opacity": opacityExpression() } }, firstLabel);
   map.addLayer({ id: "towns-line", type: "line", source: "towns",
     paint: { "line-color": "#ffffff", "line-width": ["interpolate", ["linear"], ["zoom"], 6, 0.2, 10, 1], "line-opacity": 0.8 } }, firstLabel);
-  map.addLayer({ id: "towns-moved", type: "line", source: "towns", filter: ["==", ["get", "m21"], 2],
+  map.addLayer({ id: "towns-moved", type: "line", source: "towns", filter: NO_TOWN,
     paint: { "line-color": MOVED_COLOR, "line-width": 1.8 } }, firstLabel);
-  map.addLayer({ id: "towns-focus", type: "line", source: "towns", filter: ["==", ["get", "he"], ""],
+  map.addLayer({ id: "towns-focus", type: "line", source: "towns", filter: NO_TOWN,
     paint: { "line-color": "#0f172a", "line-width": 1.6 } });
-  map.addLayer({ id: "towns-selected", type: "line", source: "towns", filter: ["==", ["get", "he"], ""],
+  map.addLayer({ id: "towns-selected", type: "line", source: "towns", filter: NO_TOWN,
     paint: { "line-color": "#0f172a", "line-width": 3 } });
   applyMapState();
 }
@@ -368,10 +430,10 @@ function applyMapState() {
   if (!map || !map.getLayer("towns-fill")) return;
   map.setPaintProperty("towns-fill", "fill-color", colorExpression());
   map.setPaintProperty("towns-fill", "fill-opacity", opacityExpression());
-  map.setFilter("towns-moved", state.election === "all" ? ["==", ["get", "m21"], 2] : ["==", ["get", `m${state.election}`], 1]);
+  map.setFilter("towns-moved", perElection() ? ["==", ["get", `m${state.election}`], 1] : NO_TOWN);
   map.setFilter("towns-selected", ["==", ["get", "he"], state.town || ""]);
   // Outline the selected canton's towns so small ones (the Haredi cities) stand out
-  map.setFilter("towns-focus", state.canton === null ? ["==", ["get", "he"], ""] : ["==", cantonProp(), state.canton]);
+  map.setFilter("towns-focus", state.canton === null ? NO_TOWN : ["==", cantonProp(), state.canton]);
 }
 
 // ---------------------------------------------------------------------------
@@ -387,6 +449,18 @@ function blocKey(shares) {
   return `<div class="bloc-key">${shares.map((v, i) => `<span><i style="background:${BLOC_COLORS[i]}"></i>${escapeHtml(t().blocs[i])} ${v.toFixed(0)}%</span>`).join("")}</div>`;
 }
 
+// Coalition share against everyone else (the opposition and lists below the threshold)
+function coalitionBar(share) {
+  const label = `${t().coalition} ${pct(share)}, ${t().others} ${pct(100 - share)}`;
+  return `<div class="bar" role="img" aria-label="${escapeHtml(label)}"><span style="width:${share}%;background:${COALITION_COLOR}"></span><span style="width:${100 - share}%;background:${OPPOSITION_COLOR}"></span></div>`;
+}
+
+// The key names the two colours; with a share it also gives each side's percentage
+function coalitionKey(share = null) {
+  const num = (v) => (share === null ? "" : ` ${pct(v, 1)}`);
+  return `<div class="bloc-key"><span><i style="background:${COALITION_COLOR}"></i>${escapeHtml(t().coalition)}${num(share)}</span><span><i style="background:${OPPOSITION_COLOR}"></i>${escapeHtml(t().others)}${num(100 - share)}</span></div>`;
+}
+
 function renderStatic() {
   const m = metaForText();
   document.documentElement.lang = state.lang;
@@ -399,7 +473,8 @@ function renderStatic() {
   $("#link-app").href = data.meta.links.app;
   $("#lead").textContent = t().lead(m);
   $("#facts").innerHTML = t().facts(m).map(([n, s]) => `<li><b>${escapeHtml(n)}</b><span>${escapeHtml(s)}</span></li>`).join("");
-  $("#steps").innerHTML = t().steps(m).map(([h, s]) => `<li><b>${escapeHtml(h)}</b>${escapeHtml(s)}</li>`).join("");
+  const steps = coalitionKeys().length ? [...t().steps(m), t().coalitionStep(m.coalitionSummary)] : t().steps(m);
+  $("#steps").innerHTML = steps.map(([h, s]) => `<li><b>${escapeHtml(h)}</b>${escapeHtml(s)}</li>`).join("");
   $("#caveat").textContent = t().caveat;
   $("#footer").innerHTML = `<div class="inner">${t().footer(data.meta.links).map((x) => `<div>${x}</div>`).join("")}</div>`;
 
@@ -412,12 +487,34 @@ function renderStatic() {
   $("#town-names").innerHTML = [...new Set(options)].sort((a, b) => a.localeCompare(b, t().locale))
     .map((o) => `<option value="${escapeHtml(o)}"></option>`).join("");
 
-  const buttons = [["all", t().allElections(m)], ...electionKeys().map((k) => [k, electionLabel(k)])];
-  $("#elections").innerHTML = buttons.map(([k, label]) =>
-    `<button type="button" data-election="${k}" aria-pressed="${state.election === k}">${escapeHtml(label)}</button>`).join("");
+  renderControls();
+}
+
+// The coalition view only offers the elections after which a government of those lists formed
+function renderControls() {
+  $("#views").hidden = !coalitionKeys().length;
+  document.querySelectorAll("#views button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === state.view)));
+  const keys = coalitionView() ? coalitionKeys() : ["all", ...electionKeys()];
+  $("#elections").innerHTML = keys.map((k) => {
+    const label = k === "all" ? t().allElections(metaForText()) : electionLabel(k);
+    return `<button type="button" data-election="${k}" aria-pressed="${state.election === k}">${escapeHtml(label)}</button>`;
+  }).join("");
 }
 
 function renderLegend() {
+  const note = $("#election-note");
+  if (coalitionView()) {
+    const gov = data.meta.coalition[state.election];
+    $("#legend").innerHTML = `<div class="ramp-legend">
+      <div class="ramp-title">${escapeHtml(t().coalitionLegend(electionLabel(state.election)))}</div>
+      <div class="ramp" dir="ltr" style="background:linear-gradient(to right, ${OPPOSITION_COLOR}, ${MIDPOINT_COLOR}, ${COALITION_COLOR})"></div>
+      <div class="ramp-ticks" dir="ltr"><span>0%</span><span>50%</span><span>100%</span></div></div>`;
+    note.hidden = false;
+    const years = metaForText().coalitionSummary.years;
+    note.innerHTML = `${escapeHtml(t().coalitionNote(gov[state.lang], gov[`lists_${state.lang}`].join(", ")))}`
+      + (years ? ` ${escapeHtml(t().noCoalitionShort(years))} <a href="#how">${escapeHtml(t().howLink)}</a>` : "");
+    return;
+  }
   const ids = cantonIds();
   const items = ids.map((id) => {
     const c = cantonView(id);
@@ -427,7 +524,6 @@ function renderLegend() {
     items.push(`<span class="legend-item"><span class="swatch moved"></span>${escapeHtml(t().legendMoved)}</span>`);
   }
   $("#legend").innerHTML = items.join("");
-  const note = $("#election-note");
   note.hidden = state.election === "all";
   if (!note.hidden) note.textContent = t().electionNote(electionLabel(state.election));
 }
@@ -437,11 +533,15 @@ function cantonCard(c, { clickable }) {
   const title = clickable
     ? `<button type="button" class="card-link" data-canton="${c.id}">${escapeHtml(cantonName(c))}</button>`
     : `<span tabindex="-1" data-focus>${escapeHtml(cantonName(c))}</span>`;
-  const voteLine = state.election === "all" ? "" : `<p class="sub" style="margin:-6px 0 6px">${escapeHtml(t().voteIn(electionLabel(state.election)))}</p>`;
+  // The coalition view names the election in the panel title, so its cards skip this line
+  const voteLine = perElection() ? `<p class="sub" style="margin:-6px 0 6px">${escapeHtml(t().voteIn(electionLabel(state.election)))}</p>` : "";
+  const shares = coalitionView()
+    ? `${coalitionBar(c.coalition[state.election])}${coalitionKey(c.coalition[state.election])}`
+    : `${blocBar(c.blocs)}${blocKey(c.blocs)}`;
   return `<article class="card canton-card${state.canton === c.id ? " selected" : ""}"${clickable ? ` data-canton="${c.id}"` : ""}>
     <h3><span class="dot" style="background:${c.color}"></span>${title}</h3>
     <p class="sub">${fmt(c.towns)} ${t().towns} · ${fmt(c.voters)} ${t().votesAvg}</p>
-    ${voteLine}${blocBar(c.blocs)}${blocKey(c.blocs)}
+    ${voteLine}${shares}
     <p class="towns-list">${t().largest}: ${escapeHtml(largest)}</p>
   </article>`;
 }
@@ -457,7 +557,8 @@ function renderPanel() {
       <div class="card"><h3>${escapeHtml(t().allTowns(members.length))}</h3>
       <p class="towns-list">${members.map((f) => `<a href="#" data-town="${escapeHtml(f.properties.he)}">${escapeHtml(townName(f.properties))}</a>`).join(" · ")}</p></div>`;
   } else {
-    const title = state.election === "all" ? t().cantonsTitle : t().cantonsInElection(electionLabel(state.election));
+    const title = coalitionView() ? t().coalitionTitle(electionLabel(state.election))
+      : state.election === "all" ? t().cantonsTitle : t().cantonsInElection(electionLabel(state.election));
     panel.innerHTML = `<div><h2 tabindex="-1" data-focus style="margin:0 0 2px;font-size:1.2rem">${escapeHtml(title)}</h2>
       <p class="sub" style="margin:0 0 6px;color:var(--ink-soft)">${t().cantonsHint}</p></div>
       ${cantonIds().map((id) => cantonCard(cantonView(id), { clickable: true })).join("")}`;
@@ -476,13 +577,21 @@ function townCard(f) {
     const label = `${data.meta.elections[k].short}: ${name}`;
     return `<div><div class="chip${id !== p.canton ? " moved" : ""}" style="background:${color}" role="img" aria-label="${escapeHtml(label)}" title="${escapeHtml(name)}"></div>${escapeHtml(data.meta.elections[k].short)}</div>`;
   }).join("");
-  const rows = keys.map((k) => `<tr><td>${escapeHtml(electionLabel(k))}</td>${p.votes[k].map((v) => `<td>${v.toFixed(0)}</td>`).join("")}</tr>`).join("");
+  const coalitionCell = (k) => (Object.hasOwn(p.coalition || {}, k) ? p.coalition[k].toFixed(0) : "—");
+  const rows = keys.map((k) => `<tr><td>${escapeHtml(electionLabel(k))}</td>${p.votes[k].map((v) => `<td>${v.toFixed(0)}</td>`).join("")}<td class="coalition-cell">${coalitionCell(k)}</td></tr>`).join("");
   const other = state.lang === "he" ? p.en : p.he;
+  const k = state.election;
+  const coalitionBlock = coalitionView() ? `<p class="sub" style="margin-bottom:4px">${escapeHtml(t().coalitionIn(electionLabel(k)))}</p>
+      <div class="bar-label"><span>${t().thisTown}</span><span>${pct(p.coalition[k], 1)}</span></div>${coalitionBar(p.coalition[k])}
+      <div class="bar-label"><span>${t().thisCanton}</span><span>${pct(c.coalition[k], 1)}</span></div>${coalitionBar(c.coalition[k])}
+      ${coalitionKey()}
+      <hr class="divider">` : "";
   return `<button type="button" class="back" data-back>${t().back}</button>
     <div class="card">
       <h3 tabindex="-1" data-focus>${escapeHtml(townName(p))}</h3>
       <p class="sub">${escapeHtml(other)} · ${fmt(p.voters)} ${t().votesAvg}</p>
       <p class="sub" style="color:var(--ink)"><span class="dot" style="background:${c.color};vertical-align:-2px"></span> ${t().canton}: <b>${escapeHtml(cantonName(c))}</b></p>
+      ${coalitionBlock}
       <p class="sub" style="margin-bottom:4px">${t().townVsCanton}</p>
       <div class="bar-label"><span>${t().thisTown}</span></div>${blocBar(p.blocs)}
       <div class="bar-label"><span>${t().thisCanton}</span></div>${blocBar(c.blocs)}
@@ -493,8 +602,9 @@ function townCard(f) {
       <div class="timeline">${chips}</div>
       <p class="sub" style="margin:6px 0 0">${moved ? t().movedCount(moved) : t().stayed}</p>
       <table class="votes"><caption class="visually-hidden">${t().votesTable}</caption>
-        <thead><tr><th>${t().election}</th>${t().blocs.map((b) => `<th>${escapeHtml(b)}</th>`).join("")}</tr></thead>
+        <thead><tr><th>${t().election}</th>${t().blocs.map((b) => `<th>${escapeHtml(b)}</th>`).join("")}<th>${t().coalition}</th></tr></thead>
         <tbody>${rows}</tbody></table>
+      ${coalitionKeys().length ? `<p class="sub table-note">${t().coalitionColumnNote}</p>` : ""}
     </div>`;
 }
 
@@ -560,6 +670,7 @@ function toast(msg) {
 function syncUrl() {
   const params = new URLSearchParams();
   if (state.lang !== "he") params.set("lang", state.lang);
+  if (coalitionView()) params.set("view", "coalition");
   if (state.election !== "all") params.set("e", state.election);
   if (state.town) params.set("town", state.town);
   else if (state.canton !== null) params.set("canton", String(state.canton));
@@ -570,8 +681,10 @@ function syncUrl() {
 function readUrl() {
   const params = new URLSearchParams(location.search);
   if (params.get("lang") === "en") state.lang = "en";
+  if (params.get("view") === "coalition" && coalitionKeys().length) state.view = "coalition";
   const e = params.get("e");
   if (e && Object.hasOwn(data.meta.elections, e)) state.election = e;
+  if (coalitionView() && !coalitionKeys().includes(state.election)) state.election = coalitionKeys().at(-1);
   const town = params.get("town");
   if (town && data.byName.has(town)) state.town = town;
   const canton = Number(params.get("canton"));
@@ -653,34 +766,12 @@ async function downloadMap() {
     ctx.font = `400 ${14 * dpr}px Heebo, Arial, sans-serif`;
     ctx.fillStyle = "#475569";
     const label = state.election === "all" ? t().allElections(metaForText()) : electionLabel(state.election);
-    ctx.fillText(t().imageSub(label), x0, 56 * dpr);
+    ctx.fillText((coalitionView() ? t().imageSubCoalition : t().imageSub)(label), x0, 56 * dpr);
+    if (coalitionView()) drawCoalitionLegend(ctx, { dpr, rtl, W, bottom: head + src.height });
+    else drawCantonLegend(ctx, { dpr, rtl, W, bottom: head + src.height });
 
-    const ids = new Set(data.towns.features.map((f) => (state.election === "all" ? f.properties.canton : f.properties[`e${state.election}`])));
-    const entries = [...data.cantons.values()].filter((c) => ids.has(c.id)).map((c) => [c.color, cantonName(c)]);
-    if ([...ids].some((id) => !data.cantons.has(id))) entries.push([NO_COUNTERPART_COLOR, t().noCounterpart]);
-    if (state.election !== "all") entries.push([null, t().legendMoved]);
-    ctx.font = `500 ${13 * dpr}px Heebo, Arial, sans-serif`;
-    const lineH = 20 * dpr;
-    const boxW = Math.max(...entries.map(([, n]) => ctx.measureText(n).width)) + 44 * dpr;
-    const boxH = entries.length * lineH + 14 * dpr;
-    const bx = rtl ? W - boxW - 12 * dpr : 12 * dpr;
-    const by = head + src.height - boxH - 12 * dpr;
-    ctx.fillStyle = "rgba(255,255,255,0.94)";
-    ctx.fillRect(bx, by, boxW, boxH);
-    entries.forEach(([color, name], i) => {
-      const y = by + 10 * dpr + i * lineH;
-      const sx = rtl ? bx + boxW - 24 * dpr : bx + 10 * dpr;
-      if (color) {
-        ctx.fillStyle = color;
-        ctx.fillRect(sx, y + 2 * dpr, 14 * dpr, 14 * dpr);
-      } else {
-        ctx.strokeStyle = MOVED_COLOR;
-        ctx.lineWidth = 2 * dpr;
-        ctx.strokeRect(sx + dpr, y + 3 * dpr, 12 * dpr, 12 * dpr);
-      }
-      ctx.fillStyle = "#0f172a";
-      ctx.fillText(name, rtl ? sx - 8 * dpr : sx + 22 * dpr, y + 14 * dpr);
-    });
+    ctx.direction = rtl ? "rtl" : "ltr";
+    ctx.textAlign = rtl ? "right" : "left";
     ctx.font = creditFont;
     ctx.fillStyle = "#64748b";
     credit.forEach((line, i) => ctx.fillText(line, x0, head + src.height + 4 * dpr + (i + 1) * lineGap - 3 * dpr));
@@ -689,7 +780,7 @@ async function downloadMap() {
       if (!blob) { toast(t().downloadFailed); return; }
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = `israel-cantons-${state.election}-${state.lang}.png`;
+      a.download = `israel-cantons-${coalitionView() ? "coalition-" : ""}${state.election}-${state.lang}.png`;
       a.click();
       setTimeout(() => URL.revokeObjectURL(a.href), 2000);
     }, "image/png");
@@ -697,6 +788,64 @@ async function downloadMap() {
     console.error(err);
     toast(t().downloadFailed);
   }
+}
+
+function drawCantonLegend(ctx, { dpr, rtl, W, bottom }) {
+  const ids = new Set(data.towns.features.map((f) => cantonOf(f.properties)));
+  const entries = [...data.cantons.values()].filter((c) => ids.has(c.id)).map((c) => [c.color, cantonName(c)]);
+  if ([...ids].some((id) => !data.cantons.has(id))) entries.push([NO_COUNTERPART_COLOR, t().noCounterpart]);
+  if (perElection()) entries.push([null, t().legendMoved]);
+  ctx.font = `500 ${13 * dpr}px Heebo, Arial, sans-serif`;
+  const lineH = 20 * dpr;
+  const boxW = Math.max(...entries.map(([, n]) => ctx.measureText(n).width)) + 44 * dpr;
+  const boxH = entries.length * lineH + 14 * dpr;
+  const bx = rtl ? W - boxW - 12 * dpr : 12 * dpr;
+  const by = bottom - boxH - 12 * dpr;
+  ctx.fillStyle = "rgba(255,255,255,0.94)";
+  ctx.fillRect(bx, by, boxW, boxH);
+  entries.forEach(([color, name], i) => {
+    const y = by + 10 * dpr + i * lineH;
+    const sx = rtl ? bx + boxW - 24 * dpr : bx + 10 * dpr;
+    if (color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(sx, y + 2 * dpr, 14 * dpr, 14 * dpr);
+    } else {
+      ctx.strokeStyle = MOVED_COLOR;
+      ctx.lineWidth = 2 * dpr;
+      ctx.strokeRect(sx + dpr, y + 3 * dpr, 12 * dpr, 12 * dpr);
+    }
+    ctx.fillStyle = "#0f172a";
+    ctx.fillText(name, rtl ? sx - 8 * dpr : sx + 22 * dpr, y + 14 * dpr);
+  });
+}
+
+// The colour ramp of the coalition view: 0% (all other lists) to 100% (all for the coalition)
+function drawCoalitionLegend(ctx, { dpr, rtl, W, bottom }) {
+  const title = t().coalitionLegend(electionLabel(state.election));
+  ctx.font = `500 ${13 * dpr}px Heebo, Arial, sans-serif`;
+  const rampW = Math.max(ctx.measureText(title).width, 200 * dpr);
+  const boxW = rampW + 20 * dpr;
+  const boxH = 64 * dpr;
+  const bx = rtl ? W - boxW - 12 * dpr : 12 * dpr;
+  const by = bottom - boxH - 12 * dpr;
+  const rx = bx + 10 * dpr;
+  ctx.fillStyle = "rgba(255,255,255,0.94)";
+  ctx.fillRect(bx, by, boxW, boxH);
+  ctx.fillStyle = "#0f172a";
+  ctx.fillText(title, rtl ? rx + rampW : rx, by + 20 * dpr);
+  const grad = ctx.createLinearGradient(rx, 0, rx + rampW, 0);
+  grad.addColorStop(0, OPPOSITION_COLOR);
+  grad.addColorStop(0.5, MIDPOINT_COLOR);
+  grad.addColorStop(1, COALITION_COLOR);
+  ctx.fillStyle = grad;
+  ctx.fillRect(rx, by + 28 * dpr, rampW, 12 * dpr);
+  ctx.font = `400 ${11 * dpr}px Heebo, Arial, sans-serif`;
+  ctx.fillStyle = "#475569";
+  ctx.direction = "ltr";
+  [["0%", "left", rx], ["50%", "center", rx + rampW / 2], ["100%", "right", rx + rampW]].forEach(([s, align, x]) => {
+    ctx.textAlign = align;
+    ctx.fillText(s, x, by + 55 * dpr);
+  });
 }
 
 function bindEvents() {
@@ -711,6 +860,15 @@ function bindEvents() {
       }
     }
     placeControls();
+    render();
+  });
+  $("#views").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-view]");
+    if (!b || b.dataset.view === state.view) return;
+    state.view = b.dataset.view;
+    if (coalitionView() && !coalitionKeys().includes(state.election)) state.election = coalitionKeys().at(-1);
+    state.canton = null;
+    renderControls();
     render();
   });
   $("#elections").addEventListener("click", (e) => {
