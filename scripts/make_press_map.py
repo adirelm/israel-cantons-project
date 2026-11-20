@@ -60,6 +60,8 @@ INSET_LABELS = [
 # Label offset (points) and alignment for each side of the dot
 SIDES = {"w": ((-5, 0), "right", "center"), "e": ((5, 0), "left", "center"),
          "n": ((0, 5), "center", "bottom"), "s": ((0, -5), "center", "top")}
+COUNT_HE = {5: "חמש", 6: "שש", 7: "שבע"}
+COUNT_EN = {5: "five", 6: "six", 7: "seven"}
 BLOC_NAMES = {
     "he": ["ימין", "חרדים", "מרכז", "שמאל", "רשימות ערביות"],
     "en": ["Right", "Haredi", "Center", "Left", "Arab lists"],
@@ -68,7 +70,7 @@ BLOC_NAMES = {
 TEXT = {
     "he": {
         "title": "ישראל בחמישה קנטונים",
-        "subtitle": lambda m: f"{m['towns']} רשויות מקומיות, מקובצות לפי דפוסי ההצבעה בחמש מערכות הבחירות {m['first']}–{m['last']}",
+        "subtitle": lambda m: f"{m['towns']} רשויות מקומיות, מקובצות לפי דפוסי ההצבעה ב{COUNT_HE.get(m['n'], m['n'])} מערכות הבחירות {m['first']}–{m['last']}",
         "legend": "חמשת הקנטונים",
         "towns": "רשויות",
         "outside": "ללא תוצאות בכל מערכות הבחירות",
@@ -81,7 +83,7 @@ TEXT = {
     },
     "en": {
         "title": "Israel in five cantons",
-        "subtitle": lambda m: f"{m['towns']} local authorities, grouped by how they voted in the five elections of {m['first']}–{m['last']}",
+        "subtitle": lambda m: f"{m['towns']} local authorities, grouped by how they voted in the {COUNT_EN.get(m['n'], m['n'])} elections of {m['first']}–{m['last']}",
         "legend": "The five cantons",
         "towns": "municipalities",
         "outside": "No results in every election",
@@ -106,7 +108,7 @@ def load() -> tuple[gpd.GeoDataFrame, list[dict], dict]:
     cantons = json.loads((SITE_DATA / "cantons.json").read_text(encoding="utf-8"))
     meta = json.loads((SITE_DATA / "meta.json").read_text(encoding="utf-8"))
     years = [e["en"].split()[-1] for e in meta["elections"].values()]
-    meta = {**meta, "first": years[0], "last": years[-1]}
+    meta = {**meta, "first": years[0], "last": years[-1], "n": len(years)}
     final = dict(pd.read_csv(DATA_PROCESSED / "cantons_final.csv").values)
     geo = gpd.read_file(DATA_PROCESSED / "municipalities_dissolved.geojson").to_crs(2039)
     geo["geometry"] = gpd.GeoSeries(shapely.coverage_simplify(geo.geometry.values, SIMPLIFY_M), crs=2039)

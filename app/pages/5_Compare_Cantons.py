@@ -1,4 +1,4 @@
-"""Compare cantons: differences in bloc vote shares, tested on the 2022 election."""
+"""Compare cantons: differences in bloc vote shares, tested on an election the map did not use."""
 
 import sys
 from pathlib import Path

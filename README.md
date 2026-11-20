@@ -10,7 +10,7 @@ Dividing Israel into politically homogeneous cantons based on Knesset election r
 
 ## Project Overview
 
-This M.Sc. project develops a data-driven algorithmic approach to partition Israeli municipalities into "cantons" of neighbouring municipalities that maximize internal political similarity. The system uses town-level election results from the five most recent Knesset elections (2019-2022) combined with municipal boundary data.
+This M.Sc. project develops a data-driven algorithmic approach to partition Israeli municipalities into "cantons" of neighbouring municipalities that maximize internal political similarity. The system uses town-level election results from the six most recent Knesset elections (2019–2026) combined with municipal boundary data.
 
 **Author:** Adir Elmakais — M.Sc. Computer Science, Bar-Ilan University
 **Advisor:** Dr. Oren Glickman
@@ -105,13 +105,14 @@ python scripts/sa_sensitivity.py       # 30-seed SA sensitivity (~50 min)
 python scripts/report_numbers.py       # every number the report and app quote
 python scripts/build_site_data.py      # site/data/*.json and site/og.png for the public map page
 python scripts/make_press_map.py       # docs/figures/press_map_{he,en}.{png,pdf}: A4 map for the press
+python scripts/experiments_2026.py     # the 2026 election and experiments A-D (data/processed/experiments_2026)
 ```
 
 Party classification lives in `data/reference/parties.csv`, including which lists formed the government after each election (`coalition`); run `rebuild_results.py` after changing it. The first two steps are needed only when boundaries change. Pushing `site/` to `main` deploys the public page (`.github/workflows/pages.yml`); to preview it locally, run `python -m http.server --directory site` and open http://localhost:8000. The notebooks document the original exploratory analysis; notebooks 05 and 06 save their outputs under separate names so they do not overwrite the published results.
 
-## Adding an Election (October 2026)
+## Adding an Election
 
-The Central Elections Committee must publish the official results within eight days of the vote (Basic Law: The Knesset, section 11); in 2022 the final count came two days after the vote and the official results on the eighth day. A rehearsal with a copy of the 2022 results as a sixth election ran every step below end to end; only the two checks meant to fail until steps 3 and 6 are done failed. Steps once the results by locality are out:
+The October 2026 election was added this way on 20 November 2026. The Central Elections Committee must publish the official results within eight days of the vote (Basic Law: The Knesset, section 11); in 2022 the final count came two days after the vote and the official results on the eighth day. A rehearsal with a copy of the 2022 results as a sixth election ran every step below end to end; only the two checks meant to fail until steps 3 and 6 are done failed. Steps once the results by locality are out:
 
 1. **Results file.** Download the committee's results **by locality** (one row per locality, not per ballot box): `סמל ועדה, שם ישוב, סמל ישוב, בזב, מצביעים, פסולים, כשרים`, then one column per ballot letter. Save it as `data/raw/elections/knesset_26_oct2026.csv`, preferably UTF-8 (ISO-8859-8 and Windows-1255 are also read). Every other column is read as a list, so remove any extra text or count columns.
 2. **Config.** Add `26: "knesset_26_oct2026.csv"` to `ELECTION_FILES` and `26: "October 2026"` to `ELECTION_LABELS` in `src/config.py` (the label must end with the year), and the same label to the copy in `app/utils.py`.
@@ -125,16 +126,17 @@ The Central Elections Committee must publish the official results within eight d
 ## Key Results
 
 - **255 municipalities**, including the 23 Israeli local authorities in Judea and Samaria, partitioned into **5 cantons** (primary result: NMF_5 / Cosine / Louvain)
-- Best silhouette score: **0.987** (BlocShares / Cosine / Agglomerative, K=3); primary K=5 partition: **0.142**
-- Temporal stability: ARI **0.992** (BlocShares Louvain), **0.954** (Agglomerative), **0.927** (primary partition)
-- Held-out test: cantons built from 2019-2021 differ in every bloc's vote share in the 2022 election (44 of 50 comparisons: 10 canton pairs × 5 blocs)
+- Best silhouette score: **0.978** (BlocShares / Cosine / Agglomerative, K=3); primary K=5 partition: **0.114**
+- Temporal stability: ARI **0.956** (BlocShares Louvain and the primary partition), **0.822** (Agglomerative)
+- Held-out test: cantons built from 2019–2022 differ in every bloc's vote share in the 2026 election (44 of 50 comparisons: 10 canton pairs × 5 blocs)
 - 264 experiment configurations, 0 failures
 - Cantons: METRO Tel Aviv, RIGHT Jerusalem & South, RIGHT North, ARAB, and HAREDI Cities (seven non-contiguous cities)
-- Coalition and opposition, as a description of the cantons (never an input): the share of each canton's vote for the lists that formed the government after the election. HAREDI Cities gave 2.1% to the Bennett–Lapid coalition (2021) and 98.5% to the Netanyahu coalition (2022); ARAB 47.7% and 1.6%; METRO Tel Aviv 62.0% and 42.8%. No government was formed after either 2019 election, and after 2020 lists split, so those elections are not characterised.
+- Coalition and opposition, as a description of the cantons (never an input): the share of each canton's vote for the lists that formed the government after the election. HAREDI Cities gave 2.1% to the Bennett–Lapid coalition (2021) and 98.5% to the Netanyahu coalition (2022); ARAB 47.7% and 1.6%; METRO Tel Aviv 62.0% and 42.8%. No government was formed after either 2019 election, and after 2020 lists split, so those elections are not characterised; no government has been formed yet after the 2026 election.
+- The 2026 election (`scripts/experiments_2026.py`): adding it moves only 2 municipalities; the map built from 2026 alone moves 40, mostly the Tel Aviv metro's suburbs into RIGHT Jerusalem & South. Turnout in the ARAB canton rose from 55% to 81%. The cantons match the 2026 camps (Netanyahu 53 seats, change 48, Arab 19) only in the ARAB and HAREDI cantons; with no geographic constraint the clusters follow the camps closely but break into 114 pieces.
 
-Results were regenerated in October 2026 after fixing the party-to-bloc mapping, adding the Judea and Samaria authorities and switching the party-level representation to vote shares per list and election (see `CHANGELOG.md`).
+Results were regenerated in October 2026 after fixing the party-to-bloc mapping, adding the Judea and Samaria authorities and switching the party-level representation to vote shares per list and election, and in November 2026 with the October 2026 election (see `CHANGELOG.md`). The report and the arXiv paper describe the five elections of 2019–2022.
 
 ## Data Sources
 
-- **Election Data:** Israel Central Bureau of Statistics (CBS), Knesset elections 21-25
+- **Election Data:** Israel Central Bureau of Statistics (CBS), Knesset elections 21-25; Central Elections Committee, results by locality, Knesset election 26 (October 2026)
 - **Geographic Data:** CBS GIS repository, municipal boundary polygons

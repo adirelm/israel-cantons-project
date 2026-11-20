@@ -7,7 +7,15 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+import json
+
 from utils import (
+    DATA_DIR,
+    ELECTION_LABELS,
+    ELECTION_SPAN,
+    config_label,
+    load_experiment_results,
+    load_stability_results,
     canton_profiles,
     load_primary_assignment,
     load_political_features,
@@ -43,8 +51,8 @@ tab_method, tab_results, tab_data, tab_tech = st.tabs([
 with tab_method:
     st.subheader("Motivation")
     st.markdown(
-        "Over the past four years, Israel held five Knesset elections "
-        "(April 2019, September 2019, March 2020, March 2021, and November 2022). "
+        "Israel held five Knesset elections in under four years "
+        "(April 2019, September 2019, March 2020, March 2021, and November 2022), and a sixth in October 2026. "
         "Public discourse repeatedly invoked the notion of dividing Israel into "
         'separate "cantons" along political lines.\n\n'
         "This project applies data-driven computational methods to answer: "
@@ -62,7 +70,7 @@ with tab_method:
 | Representation | Dimensions | Description |
 |---|---|---|
 | **BlocShares** | 11 | Average + std of 5 political blocs across elections |
-| **RawParty** | 51 | Vote share of each list that won seats, per election |
+| **RawParty** | 62 | Vote share of each list that won seats, per election |
 | **PCA (5)** | 5 | Principal component analysis on raw party shares |
 | **NMF (5)** | 5 | Non-negative matrix factorization on raw party shares |
 """)
@@ -100,10 +108,14 @@ and JSD requires non-negative inputs. This excludes 24 configurations (288 - 24 
 with tab_results:
     st.subheader("Experiment Overview")
 
+    _ex = load_experiment_results()
+    _best = _ex.loc[_ex["silhouette"].idxmax()]
+    _stab = load_stability_results().set_index("config")["mean_ari"]
     r1, r2, r3 = st.columns(3)
-    r1.metric("Total Configurations", "264")
-    r2.metric("Highest Silhouette", "0.987", help="BlocShares / Cosine / Agglomerative, K=3")
-    r3.metric("Best Stability (ARI)", "0.992", help="BlocShares / Euclidean / Louvain -- near-deterministic on a fixed graph")
+    r1.metric("Total Configurations", f"{len(_ex)}")
+    r2.metric("Highest Silhouette", f"{_best['silhouette']:.3f}",
+              help=config_label(_best["repr"], _best["metric"], _best["algo"], int(_best["k_target"])))
+    r3.metric("Best Stability (ARI)", f"{_stab.max():.3f}", help=f"{_stab.idxmax()} -- deterministic on a fixed graph")
 
     st.divider()
 
@@ -137,7 +149,7 @@ with tab_results:
 4. **ARAB** -- Arab municipalities in the Galilee, the Triangle and the Negev ({_s(3, "arab")} Arab)
 5. **HAREDI Cities** -- Bnei Brak, El'ad, Rekhasim, Kiryat Ye'arim, Modi'in Illit, Beitar Illit and Immanuel ({_s(4, "haredi")} Haredi); not contiguous, joined by political similarity
 
-*Shares are weighted by voters and averaged over the five elections (2019-2022).*
+*Shares are weighted by voters and averaged over the {ELECTION_SPAN}.*
 """)
 
     canton_map_path = FIGURES_DIR / "canton_map_k5.png"
@@ -148,9 +160,9 @@ with tab_results:
 with tab_data:
     st.subheader("Election Data")
     st.markdown(
-        "Municipality-level results from **Knesset elections 21-25** "
-        "(Israel Central Bureau of Statistics). "
-        "**255 municipalities** with votes in all 5 elections, including the 23 Israeli local "
+        f"Municipality-level results from **Knesset elections {min(ELECTION_LABELS)}-{max(ELECTION_LABELS)}** "
+        "(Israel Central Bureau of Statistics; 2026 from the Central Elections Committee). "
+        f"**255 municipalities** with votes in all {len(ELECTION_LABELS)} elections, including the 23 Israeli local "
         "authorities in Judea and Samaria."
     )
 
@@ -196,7 +208,8 @@ with tab_data:
         "municipal layer (cities and local councils) and the Civil Administration's council and settlement "
         "jurisdiction layers (regional councils). "
         "Adjacency graph: 257 raw nodes, 574 edges. "
-        "After subsetting to 255 analysis municipalities and 3-step augmentation: 255 nodes, 2,490 edges."
+        "After subsetting to 255 analysis municipalities and 3-step augmentation: 255 nodes, "
+        f"{len(json.loads((DATA_DIR / 'adjacency_graph_augmented.json').read_text(encoding='utf-8'))['edges']):,} edges."
     )
 
 # ===== TECHNOLOGY TAB =======================================================

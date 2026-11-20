@@ -1,5 +1,14 @@
 # Changelog
 
+## November 2026 — the October 2026 election
+
+The official results by locality for the 26th Knesset (Central Elections Committee, `data/raw/elections/knesset_26_oct2026.csv`) join the five earlier elections; all 255 municipalities match. The 2026 lists are in `data/reference/parties.csv` with their blocs and, in a new `camp` column, their camp by the seats won (Netanyahu 53, change 48, Arab 19). Judgement calls: Bennett's Together counts as Right (as Yamina did in 2021), the Reservists (2.7%) as Center and Amcha Israel (1.7%) as Right; neither passed the threshold.
+
+- Every result is rebuilt on the six elections: 62 party-by-election features, 264 configurations with no errors. The primary map moves only Or Akiva and Harish (between RIGHT North and RIGHT Jerusalem & South); stability ARI 0.927 → 0.956; primary silhouette 0.142 → 0.114. The held-out test now builds the cantons from 2019–2022 and tests them on 2026: 44 of 50 comparisons differ.
+- `scripts/experiments_2026.py` runs the advisor's experiments: the method on 2019–2022, 2019–2026 and 2026 alone (2026 alone moves 40 towns, mostly the metro's suburbs to the right); the cantons against three classifications of the 2026 camps; the map with no geographic constraint (it follows the camps, NMI 0.75 against 0.42, but in 114 pieces); 3 to 10 cantons and stricter or looser links. It also measures turnout (the ARAB canton 55% → 81%), the Shas vote and the towns that swung.
+- The public map shows six elections and says no government has been formed yet after 2026. The five primary cantons keep their published colours (METRO Tel Aviv is no longer within 5 points between Right and Center, which would have repainted the map), and the page names the elections whose own maps actually differ most.
+- The app's About page reads its headline numbers from the data.
+
 ## October 2026 — coalition and opposition
 
 Each election is characterised by the government formed after it: the Bennett–Lapid government (36th) after March 2021 and the Netanyahu government (37th) after November 2022. The lists are marked in a new `coalition` column of `data/reference/parties.csv`. No government was formed after either 2019 election, and after March 2020 lists split (Blue and White; Labor–Gesher–Meretz), so their votes cannot be assigned. The coalition only describes the cantons; it is not used to build them, and the map is unchanged.
