@@ -67,5 +67,23 @@
     "אמת": "left",
     "עם": "arab",
     "כן": "center"
+  },
+  "26": {
+    "מחל": "right",
+    "דרך": "center",
+    "רק": "right",
+    "ודם": "arab",
+    "אמת": "left",
+    "עם": "arab",
+    "ל": "right",
+    "ב": "right",
+    "ג": "haredi",
+    "שס": "haredi",
+    "ט": "right",
+    "די": "center",
+    "ך": "right",
+    "נר": "haredi",
+    "זך": "haredi",
+    "ני": "right"
   }
 }

@@ -1,0 +1,4 @@
+map,cantons,ari_vs_reference,towns_moved,variance_explained,pieces,population_cv,ari_vs_c
+a: 2019-2022 (published),5,1.0,0,0.769,43,0.65,0.639
+b: 2019-2026,5,0.977,2,0.77,44,0.65,0.639
+c: 2026 alone,5,0.639,40,0.757,55,0.69,1.0

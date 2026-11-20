@@ -96,14 +96,24 @@ def test_featured_map_names_its_cantons_and_needs_no_basemap_key():
     assert "cartocdn" not in html  # CARTO basemaps now need an API key and show watermarks
 
 
-def test_primary_cantons_get_distinct_colours_and_a_mixed_canton_blends_its_two_blocs():
+def test_primary_cantons_keep_their_published_colours():
+    """The colours readers and the press map know stay put when new elections shift the shares."""
     utils = _app_utils()
     profiles = utils.canton_profiles(utils.load_primary_assignment(), utils.load_political_features())
+    names = dict(utils.load_cantons_labeled()[["canton", "label"]].drop_duplicates().values)
+    colours = utils.canton_colors(profiles, names)
+    assert {names[c]: colour for c, colour in colours.items()} == utils.PRIMARY_COLORS
+
+
+def test_a_mixed_canton_blends_its_two_blocs_and_others_take_their_blocs_shade():
+    import pandas as pd
+
+    utils = _app_utils()
+    profiles = pd.DataFrame({"right": [41.0, 55.0, 2.0], "haredi": [7.0, 20.0, 1.0], "center": [39.0, 15.0, 2.0],
+                             "left": [11.0, 5.0, 4.0], "arab": [2.0, 5.0, 91.0]}, index=[0, 1, 2])
     colours = utils.canton_colors(profiles)
-    assert len(set(colours.values())) == len(profiles)
-    # METRO Tel Aviv: Right 41.0% vs Center 39.1% — neither the Right nor the Center shade family
-    assert colours[0] not in utils.BLOC_SHADES["right"] + utils.BLOC_SHADES["center"]
-    assert colours[1] in utils.BLOC_SHADES["right"] and colours[3] in utils.BLOC_SHADES["arab"]
+    assert colours[0] not in utils.BLOC_SHADES["right"] + utils.BLOC_SHADES["center"]  # 41 vs 39: mixed
+    assert colours[1] in utils.BLOC_SHADES["right"] and colours[2] in utils.BLOC_SHADES["arab"]
 
 
 def test_home_page_quotes_the_current_primary_numbers():

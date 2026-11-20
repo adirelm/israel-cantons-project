@@ -1,0 +1,4 @@
+map,cantons,ari_vs_reference,towns_moved,variance_explained,pieces,population_cv,nmi_vs_camps3
+"b: 2019-2026, with geography",5,1.0,0,0.77,44,0.65,0.424
+no geography: Louvain on a similarity graph,5,0.248,128,0.732,114,0.71,0.747
+no geography: K-means,5,0.272,124,0.853,91,0.93,0.749

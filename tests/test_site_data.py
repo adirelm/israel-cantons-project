@@ -145,3 +145,12 @@ def test_page_credits_the_collaborator_and_links_the_paper(meta):
     assert "בשיתוף פרופ׳ יוליה אלעד־שטרנגר, אוניברסיטת הבונדסוור במינכן" in js
     assert "with Prof. Julia Elad-Strenger, Bundeswehr University Munich" in js
     assert js.count("${l.paper}") == 2  # Hebrew and English footers
+
+
+def test_the_election_said_to_differ_most_does(meta):
+    changes = pd.read_csv(DATA_PROCESSED / "per_election" / "per_election_changes.csv")
+    differ = {k: int((changes[f"knesset_{k}"] != changes["primary"]).sum()) for k in KNESSET_IDS}
+    most = max(differ.values())
+    assert meta["differs_most"] == [str(k) for k in KNESSET_IDS if differ[k] == most]
+    js = (SITE_DATA.parent / "app.js").read_text(encoding="utf-8")
+    assert "${m.testYear} שונות יותר מכולן" not in js and "${m.testYear} differs most" not in js

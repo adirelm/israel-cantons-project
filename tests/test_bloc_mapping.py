@@ -67,6 +67,9 @@ EXPECTED_MAPPING = {
     25: {"מחל": "right", "פה": "center", "שס": "haredi", "ג": "haredi", "ט": "right", "ב": "right",
          "ל": "right", "ד": "arab", "ום": "arab", "מרצ": "left", "אמת": "left", "עם": "arab",
          "כן": "center"},
+    26: {"מחל": "right", "דרך": "center", "רק": "right", "ודם": "arab", "אמת": "left", "עם": "arab",
+         "ל": "right", "ב": "right", "ג": "haredi", "שס": "haredi", "ט": "right", "די": "center",
+         "ך": "right", "נר": "haredi", "זך": "haredi", "ני": "right"},
 }
 
 

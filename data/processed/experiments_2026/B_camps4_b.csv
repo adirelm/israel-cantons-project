@@ -1,0 +1,6 @@
+canton,name,towns,zionist_change,non_zionist,zionist_netanyahu,arab,leading_camp,towns_led_by_it_pct
+0,מטרופולין תל אביב,52,55.2,4.9,32.1,1.9,zionist_change,76.9
+1,ימין: ירושלים והדרום,61,26.7,19.2,46.0,1.6,zionist_netanyahu,60.7
+2,ימין: הצפון,75,45.8,5.6,33.8,9.4,zionist_change,58.7
+3,הקנטון הערבי,60,3.1,0.1,0.4,95.8,arab,100.0
+4,ערים חרדיות,7,1.2,85.3,9.7,0.0,non_zionist,100.0

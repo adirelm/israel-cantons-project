@@ -285,7 +285,7 @@ def load_cantons_labeled() -> pd.DataFrame:
 
 
 # Copy of src.config.ELECTION_LABELS (the app does not import src); tests/test_app_labels.py keeps them equal
-ELECTION_LABELS = {21: "April 2019", 22: "September 2019", 23: "March 2020", 24: "March 2021", 25: "November 2022"}
+ELECTION_LABELS = {21: "April 2019", 22: "September 2019", 23: "March 2020", 24: "March 2021", 25: "November 2022", 26: "October 2026"}
 _FIRST, _LAST = min(ELECTION_LABELS), max(ELECTION_LABELS)
 # "5 elections (2019-2022)", for the page text
 ELECTION_SPAN = f"{len(ELECTION_LABELS)} Knesset elections ({ELECTION_LABELS[_FIRST].split()[-1]}-{ELECTION_LABELS[_LAST].split()[-1]})"
@@ -363,6 +363,15 @@ BLOC_SHADES = {
     "haredi": ["#6b7280", "#374151", "#9ca3af", "#4b5563"],
 }
 MIXED_MARGIN = 5.0  # points between the two largest blocs below which a canton counts as mixed
+# The primary cantons keep the colours they were published with (on the public map and the press
+# map), so a new election that shifts their shares does not repaint the map readers know
+PRIMARY_COLORS = {
+    "METRO Tel Aviv": "#716bf6",
+    "RIGHT Jerusalem & South": "#3b82f6",
+    "RIGHT North": "#1d4ed8",
+    "ARAB": "#22c55e",
+    "HAREDI Cities": "#6b7280",
+}
 
 
 def _blend(a: str, b: str) -> str:
@@ -370,11 +379,12 @@ def _blend(a: str, b: str) -> str:
     return "#" + "".join(f"{v:02x}" for v in rgb)
 
 
-def canton_colors(profiles: pd.DataFrame) -> dict[int, str]:
+def canton_colors(profiles: pd.DataFrame, names: dict[int, str] | None = None) -> dict[int, str]:
     """A color per canton from its largest bloc's shade family.
 
     A mixed canton (two largest blocs within MIXED_MARGIN points) gets a blend of both
-    families, so it neither reads as one bloc nor looks like its neighbours.
+    families, so it neither reads as one bloc nor looks like its neighbours. Cantons named
+    in ``names`` after a primary canton take that canton's published colour.
     """
     colors, used = {}, {}
     for cid, p in profiles.iterrows():
@@ -384,6 +394,9 @@ def canton_colors(profiles: pd.DataFrame) -> dict[int, str]:
         used[key] = idx + 1
         shade = lambda bloc: BLOC_SHADES[bloc][idx % len(BLOC_SHADES[bloc])]  # noqa: E731
         colors[cid] = shade(top) if len(key) == 1 else _blend(shade(top), shade(second))
+    for cid, name in (names or {}).items():
+        if cid in colors and name in PRIMARY_COLORS:
+            colors[cid] = PRIMARY_COLORS[name]
     return colors
 
 
@@ -420,7 +433,7 @@ def canton_map_layer(
     Towns in ``outlined`` come last so their outline is drawn over their neighbours'.
     """
     profiles = canton_profiles(assignment, features)
-    colors = canton_colors(profiles)
+    colors = canton_colors(profiles, names)
     labels = {}
     for cid, profile in profiles.iterrows():
         if names is None:

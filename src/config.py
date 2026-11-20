@@ -24,6 +24,7 @@ ELECTION_FILES: dict[int, str] = {
     23: "knesset_23_mar2020.csv",
     24: "knesset_24_mar2021.csv",
     25: "knesset_25_nov2022.csv",
+    26: "knesset_26_oct2026.csv",
 }
 
 # Adding an election: its results file above, its label below, and its lists in data/reference/parties.csv
@@ -32,6 +33,7 @@ KNESSET_IDS: list[int] = sorted(ELECTION_FILES)
 # Election dates for figures and the app, ending with the year (app/utils.py keeps a copy; a test keeps them equal)
 ELECTION_LABELS: dict[int, str] = {
     21: "April 2019", 22: "September 2019", 23: "March 2020", 24: "March 2021", 25: "November 2022",
+    26: "October 2026",
 }
 
 # Share of valid votes (%) a list needs to win seats; RawPartyShares keeps the lists above it

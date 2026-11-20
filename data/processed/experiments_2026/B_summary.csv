@@ -1,0 +1,7 @@
+map,scheme,ari,nmi,towns_in_their_cantons_leading_camp_pct,cantons_per_camp
+b: 2019-2026,camps3,0.324,0.424,74.1,"{""arab"": 1, ""change"": 2, ""netanyahu"": 2}"
+b: 2019-2026,camps2,0.11,0.179,78.4,"{""anti"": 3, ""netanyahu"": 2}"
+b: 2019-2026,camps4,0.345,0.46,73.7,"{""arab"": 1, ""non_zionist"": 1, ""zionist_change"": 2, ""zionist_netanyahu"": 1}"
+c: 2026 alone,camps3,0.432,0.517,80.0,"{""arab"": 1, ""change"": 2, ""netanyahu"": 2}"
+c: 2026 alone,camps2,0.145,0.239,82.0,"{""anti"": 3, ""netanyahu"": 2}"
+c: 2026 alone,camps4,0.416,0.529,76.9,"{""arab"": 1, ""non_zionist"": 1, ""zionist_change"": 2, ""zionist_netanyahu"": 1}"

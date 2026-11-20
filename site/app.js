@@ -84,7 +84,7 @@ const TEXT = {
     steps: (m) => [
       ["הנתונים", `תוצאות הבחירות לכנסת בכל רשות מקומית ב${m.countHe} מערכות הבחירות ${m.first}–${m.last}, וגבולות הרשויות מהלשכה המרכזית לסטטיסטיקה ומהמנהל האזרחי.`],
       ["החלוקה", "כל רשות מיוצגת באחוזי ההצבעה לכל רשימה שנכנסה לכנסת, בכל מערכת בחירות בנפרד. אלגוריתם לזיהוי קהילות ברשת (Louvain) מאחד רשויות שכנות שמצביעות באופן דומה לחמישה קנטונים. ברשת יש גם קישורים בין רשויות שאינן גובלות: בין רשויות שבהן אותו גוש מקבל יותר מ־70% מהקולות, ובין רשויות שאין להן שכנות בנתונים לרשויות הדומות להן ביותר. לכן רוב הקנטונים אינם רצף אחד במפה: בעיקר הקנטון הערבי והערים החרדיות, וגם כמה רשויות בודדות, כמו קריית שמונה ובית ג׳ן, שמשויכות לקנטון רחוק."],
-      ["הבדיקה", `המפה יציבה: כשמריצים את השיטה על כל מערכת בחירות לבד, ${m.towns_never_moved} מתוך ${m.towns} הרשויות נשארות באותו קנטון (בחירות ${m.testYear} שונות יותר מכולן). וקנטונים שנבנו מבחירות ${m.trainFirst}–${m.trainLast} בלבד נבדלים זה מזה באופן מובהק סטטיסטית גם בבחירות ${m.testYear}, ב־${m.heldout.significant} מתוך ${m.heldout.pairs} ההשוואות.`],
+      ["הבדיקה", `המפה יציבה: כשמריצים את השיטה על כל מערכת בחירות לבד, ${m.towns_never_moved} מתוך ${m.towns} הרשויות נשארות באותו קנטון (${m.differsMostHe}). וקנטונים שנבנו מבחירות ${m.trainFirst}–${m.trainLast} בלבד נבדלים זה מזה באופן מובהק סטטיסטית גם בבחירות ${m.testYear}, ב־${m.heldout.significant} מתוך ${m.heldout.pairs} ההשוואות.`],
     ],
     govAfter: (gov, label) => `${gov} אחרי בחירות ${label}`,
     coalitionStep: (s) => ["קואליציה ואופוזיציה", `בתצוגת הקואליציה כל רשות צבועה לפי אחוז הקולות לרשימות שהרכיבו את הממשלה אחרי אותן בחירות: ${s.govs}. שאר הקולות הלכו לאופוזיציה ולרשימות שלא עברו את אחוז החסימה. ${s.none} הקואליציה רק מתארת את הקנטונים, ולא משמשת לבנייתם.`],
@@ -168,7 +168,7 @@ const TEXT = {
     steps: (m) => [
       ["The data", `Knesset election results for every local authority in the ${m.countEn} elections from ${m.first} to ${m.last}, and municipal boundaries from the Central Bureau of Statistics and the Civil Administration.`],
       ["The division", "Each municipality is described by the vote share of every list that won seats, in each election separately. A network community-detection algorithm (Louvain) groups neighbouring municipalities that vote alike into five cantons. The network also links municipalities that share no border: those where the same bloc wins over 70% of the vote, and municipalities with no neighbour in the data to their most similar ones. So most cantons are not single pieces on the map: mainly the Arab canton and the Haredi cities, and a few single towns, such as Kiryat Shmona and Beit Jann, that belong to a distant canton."],
-      ["The checks", `The map is stable: when the method is run on each election alone, ${m.towns_never_moved} of ${m.towns} municipalities stay in the same canton (${m.testYear} differs most). Cantons built from the ${m.trainFirst}–${m.trainLast} elections only still differ significantly in ${m.testYear}, in ${m.heldout.significant} of ${m.heldout.pairs} comparisons.`],
+      ["The checks", `The map is stable: when the method is run on each election alone, ${m.towns_never_moved} of ${m.towns} municipalities stay in the same canton (${m.differsMostEn}). Cantons built from the ${m.trainFirst}–${m.trainLast} elections only still differ significantly in ${m.testYear}, in ${m.heldout.significant} of ${m.heldout.pairs} comparisons.`],
     ],
     govAfter: (gov, label) => `the ${gov} after the ${label} election`,
     coalitionStep: (s) => ["Coalition and opposition", `In the coalition view each municipality is coloured by the share of the vote for the lists that formed the government after that election: ${s.govs}. The rest went to the opposition and to lists below the threshold. ${s.none} The coalition only describes the cantons; it is not used to build them.`],
@@ -230,12 +230,23 @@ function metaForText() {
     countHe: COUNT_WORDS.he[keys.length] || String(keys.length),
     countEn: COUNT_WORDS.en[keys.length] || String(keys.length),
     coalitionSummary: coalitionSummary(),
+    // "בחירות 2022 שונות יותר מכולן" / "September 2019 and November 2022 differ most"
+    differsMostHe: differsMost("he"),
+    differsMostEn: differsMost("en"),
     first: year(m.elections[keys[0]]),
     last: year(m.elections[keys[keys.length - 1]]),
     trainFirst: year(m.elections[train[0]]),
     trainLast: year(m.elections[train[train.length - 1]]),
     testYear: year(m.elections[String(m.heldout.test)]),
   };
+}
+
+function differsMost(lang) {
+  const keys = data.meta.differs_most || [];
+  const labels = keys.map((k) => data.meta.elections[k][lang]);
+  const list = new Intl.ListFormat(lang === "he" ? "he-IL" : "en-US", { type: "conjunction" }).format(labels);
+  if (lang === "he") return keys.length > 1 ? `בחירות ${list} שונות יותר מהשאר` : `בחירות ${list} שונות יותר מכולן`;
+  return `${list} ${keys.length > 1 ? "differ" : "differs"} most`;
 }
 
 // The governments the coalition view describes, and the elections it leaves out (with the reasons)

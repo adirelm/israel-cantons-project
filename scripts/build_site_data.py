@@ -135,8 +135,8 @@ def towns_geojson(final: dict[str, int], features: pd.DataFrame) -> dict:
 def cantons_json(labeled: pd.DataFrame, features: pd.DataFrame) -> list[dict]:
     stats = pd.read_csv(DATA_PROCESSED / "cantons_final_stats.csv").set_index("canton")
     assignment = labeled[["municipality", "canton"]]
-    colors = app_utils.canton_colors(app_utils.canton_profiles(assignment, features.reset_index()))
     names = dict(labeled[["canton", "label"]].drop_duplicates().values)
+    colors = app_utils.canton_colors(app_utils.canton_profiles(assignment, features.reset_index()), names)
     geo = gpd.read_file(DATA_PROCESSED / "municipalities_dissolved.geojson")
     eng = dict(zip(geo["MUN_HEB"], geo["MUN_ENG"]))
     coalition = pd.read_csv(DATA_PROCESSED / "canton_coalition.csv")
@@ -183,6 +183,12 @@ def coalition_names() -> dict[int, list[tuple[str, str]]]:
     return names
 
 
+def differs_most(changes: pd.DataFrame) -> list[str]:
+    """The election(s) whose own map differs from the primary map in the most towns."""
+    differ = {k: int((changes[f"knesset_{k}"] != changes["primary"]).sum()) for k in KNESSET_IDS}
+    return [str(k) for k in KNESSET_IDS if differ[k] == max(differ.values())]
+
+
 def meta_json(n_towns: int) -> dict:
     stab = pd.read_csv(DATA_PROCESSED / "stability_results.csv").set_index("config")["mean_ari"]
     changes = pd.read_csv(DATA_PROCESSED / "per_election" / "per_election_changes.csv")
@@ -196,6 +202,7 @@ def meta_json(n_towns: int) -> dict:
         "elections": {str(k): election_names(ELECTION_LABELS[k]) for k in KNESSET_IDS},
         "stability_ari": round(float(stab["NMF_5 / Cosine / Louvain"]), 3),
         "towns_never_moved": int((changes["n_differ"] == 0).sum()),
+        "differs_most": differs_most(changes),
         "heldout": {
             "pairs": len(tests),
             "significant": int((tests["p_holm"] < 0.05).sum()),
