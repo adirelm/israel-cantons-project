@@ -40,7 +40,7 @@ from matplotlib import font_manager
 
 from src.clustering.baseline import KMeansBaselineClusterer
 from src.clustering.spectral import LouvainSpatialClusterer
-from src.config import BLOC_COLS, DATA_PROCESSED, KNESSET_IDS, PARTIES_CSV
+from src.config import BLOC_COLS, BLOC_MAPPING, DATA_PROCESSED, KNESSET_IDS, PARTIES_CSV
 from src.data.distance_metrics import CosineDistance
 from src.data.processing import process_all_elections
 from src.data.representations import BlocShares, NMFRepresentation, RawPartyShares
@@ -183,20 +183,29 @@ def describe(name: str, assignment: dict[str, int], reference: dict[str, int], s
 
 
 # ---------------------------------------------------------------------------
-# Camps of 2026
+# Camps
 # ---------------------------------------------------------------------------
 
-def camp_lists() -> dict[str, str]:
-    """2026 ballot letters -> camp (change / arab / netanyahu), for the lists that won seats."""
+# Lists placed by judgement in the "camp" column, and where they go in the other reading:
+# Yisrael Beiteinu in April 2019 (counted in Netanyahu's 65 and recommended him, then refused to join),
+# Yamina in 2021 (ran as a right-wing list, then formed the government of change).
+DISPUTED = {21: {"ל": "change"}, 24: {"ב": "change"}}
+
+
+def camp_lists(knesset: int = NEW, overrides: dict[int, dict[str, str]] | None = None) -> dict[str, str]:
+    """Ballot letters -> camp (change / arab / netanyahu) for the lists that won seats in one election.
+
+    The Netanyahu camp is his bloc on election night; the Arab lists are the Arab camp; the rest is change.
+    """
     t = pd.read_csv(PARTIES_CSV, keep_default_na=False)
-    t = t[(t["knesset"] == NEW) & (t["camp"] != "")]
-    return dict(zip(t["letters"], t["camp"]))
+    t = t[(t["knesset"] == knesset) & (t["camp"] != "")]
+    return dict(zip(t["letters"], t["camp"])) | (overrides or {}).get(knesset, {})
 
 
-def camp_shares(election: pd.DataFrame) -> pd.DataFrame:
-    """Each town's share of the valid vote for each camp, in the three classifications (2026)."""
-    lists = camp_lists()
-    haredi = set(pd.read_csv(PARTIES_CSV).query("knesset == @NEW and bloc == 'haredi'")["letters"])
+def camp_shares(election: pd.DataFrame, knesset: int = NEW, overrides: dict[int, dict[str, str]] | None = None) -> pd.DataFrame:
+    """Each town's share of the valid vote for each camp, in the three classifications."""
+    lists = camp_lists(knesset, overrides)
+    haredi = set(pd.read_csv(PARTIES_CSV).query("knesset == @knesset and bloc == 'haredi'")["letters"])
     df = election.set_index("municipality")
     pct = lambda letters: df[[l for l in letters if l in df.columns]].sum(axis=1) / df["valid"] * 100
     by = lambda camp: [l for l, c in lists.items() if c == camp]
@@ -214,6 +223,31 @@ def camp_shares(election: pd.DataFrame) -> pd.DataFrame:
         out[f"{scheme}_leader"] = out[cols].idxmax(axis=1).str.removeprefix(scheme + "_")
     out["valid"] = df["valid"]
     return out.round(2)
+
+
+def bloc_shares(election: pd.DataFrame, knesset: int) -> pd.DataFrame:
+    """Each town's share of the valid vote for the five blocs of the paper, in one election."""
+    df = election.set_index("municipality")
+    mapping = BLOC_MAPPING[knesset]
+    out = pd.DataFrame({f"blocs5_{bloc}": df[[l for l, b in mapping.items() if b == bloc and l in df.columns]].sum(axis=1)
+                        / df["valid"] * 100 for bloc in BLOC_COLS})
+    out["blocs5_leader"] = out.idxmax(axis=1).str.removeprefix("blocs5_")
+    out["valid"] = df["valid"]
+    return out.round(2)
+
+
+def camp_match(assignment: dict[str, int], camps: pd.DataFrame, scheme: str) -> dict:
+    """How well cantons match a classification: NMI with each town's leading camp, the variance in camp shares
+    the cantons explain (R², voter-weighted), and the % of towns led by the camp that leads their canton."""
+    towns = [t for t in camps.index if t in assignment]
+    camps = camps.loc[towns]
+    cols = [c for c in camps.columns if c.startswith(scheme + "_") and not c.endswith("_leader")]
+    table = crosstab({t: assignment[t] for t in towns}, camps, scheme, {}).set_index("canton")
+    leader = camps[f"{scheme}_leader"]
+    return {"nmi": nmi(assignment, leader.to_dict()),
+            "variance_explained": explained(assignment, camps[cols], camps["valid"]),
+            "towns_in_their_cantons_leading_camp_pct": round(float(
+                sum(table.loc[assignment[t], "leading_camp"] == leader[t] for t in towns) / len(towns) * 100), 1)}
 
 
 def crosstab(assignment: dict[str, int], camps: pd.DataFrame, scheme: str, names: dict[int, str]) -> pd.DataFrame:

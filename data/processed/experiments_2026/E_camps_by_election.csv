@@ -1,0 +1,97 @@
+variant,knesset,election,map,scheme,nmi,variance_explained,towns_in_their_cantons_leading_camp_pct
+main,21,אפריל 2019,primary (2019-2026),camps4,0.445,0.682,68.2
+main,21,אפריל 2019,primary (2019-2026),camps3,0.404,0.667,70.2
+main,21,אפריל 2019,primary (2019-2026),camps2,0.185,0.607,69.8
+main,21,אפריל 2019,primary (2019-2026),blocs5,0.459,0.723,69.4
+main,21,אפריל 2019,that election alone,camps4,0.357,0.664,62.7
+main,21,אפריל 2019,that election alone,camps3,0.312,0.645,64.7
+main,21,אפריל 2019,that election alone,camps2,0.156,0.576,64.7
+main,21,אפריל 2019,that election alone,blocs5,0.361,0.695,63.5
+main,22,ספטמבר 2019,primary (2019-2026),camps4,0.466,0.765,74.9
+main,22,ספטמבר 2019,primary (2019-2026),camps3,0.424,0.763,73.7
+main,22,ספטמבר 2019,primary (2019-2026),camps2,0.176,0.67,77.6
+main,22,ספטמבר 2019,primary (2019-2026),blocs5,0.446,0.756,67.5
+main,22,ספטמבר 2019,that election alone,camps4,0.454,0.752,76.5
+main,22,ספטמבר 2019,that election alone,camps3,0.401,0.743,72.2
+main,22,ספטמבר 2019,that election alone,camps2,0.187,0.645,77.6
+main,22,ספטמבר 2019,that election alone,blocs5,0.434,0.723,65.9
+main,23,מרץ 2020,primary (2019-2026),camps4,0.451,0.775,71.8
+main,23,מרץ 2020,primary (2019-2026),camps3,0.42,0.776,72.5
+main,23,מרץ 2020,primary (2019-2026),camps2,0.187,0.684,76.9
+main,23,מרץ 2020,primary (2019-2026),blocs5,0.444,0.769,67.5
+main,23,מרץ 2020,that election alone,camps4,0.494,0.785,74.1
+main,23,מרץ 2020,that election alone,camps3,0.466,0.786,74.9
+main,23,מרץ 2020,that election alone,camps2,0.196,0.69,76.9
+main,23,מרץ 2020,that election alone,blocs5,0.487,0.781,69.8
+main,24,מרץ 2021,primary (2019-2026),camps4,0.46,0.738,73.3
+main,24,מרץ 2021,primary (2019-2026),camps3,0.416,0.738,71.8
+main,24,מרץ 2021,primary (2019-2026),camps2,0.182,0.65,76.5
+main,24,מרץ 2021,primary (2019-2026),blocs5,0.453,0.74,71.8
+main,24,מרץ 2021,that election alone,camps4,0.431,0.732,71.8
+main,24,מרץ 2021,that election alone,camps3,0.385,0.729,70.2
+main,24,מרץ 2021,that election alone,camps2,0.172,0.639,75.7
+main,24,מרץ 2021,that election alone,blocs5,0.429,0.735,70.6
+main,25,נובמבר 2022,primary (2019-2026),camps4,0.455,0.715,72.5
+main,25,נובמבר 2022,primary (2019-2026),camps3,0.423,0.718,67.1
+main,25,נובמבר 2022,primary (2019-2026),camps2,0.193,0.63,77.3
+main,25,נובמבר 2022,primary (2019-2026),blocs5,0.446,0.753,66.7
+main,25,נובמבר 2022,that election alone,camps4,0.413,0.498,70.6
+main,25,נובמבר 2022,that election alone,camps3,0.429,0.599,63.1
+main,25,נובמבר 2022,that election alone,camps2,0.164,0.45,71.0
+main,25,נובמבר 2022,that election alone,blocs5,0.409,0.579,66.3
+main,26,אוקטובר 2026,primary (2019-2026),camps4,0.46,0.772,73.7
+main,26,אוקטובר 2026,primary (2019-2026),camps3,0.424,0.784,74.1
+main,26,אוקטובר 2026,primary (2019-2026),camps2,0.179,0.696,78.4
+main,26,אוקטובר 2026,primary (2019-2026),blocs5,0.474,0.814,88.6
+main,26,אוקטובר 2026,that election alone,camps4,0.529,0.776,76.9
+main,26,אוקטובר 2026,that election alone,camps3,0.517,0.785,80.0
+main,26,אוקטובר 2026,that election alone,camps2,0.239,0.687,82.0
+main,26,אוקטובר 2026,that election alone,blocs5,0.5,0.817,89.8
+disputed_in_change,21,אפריל 2019,primary (2019-2026),camps4,0.448,0.718,72.5
+disputed_in_change,21,אפריל 2019,primary (2019-2026),camps3,0.416,0.705,73.3
+disputed_in_change,21,אפריל 2019,primary (2019-2026),camps2,0.187,0.636,76.9
+disputed_in_change,21,אפריל 2019,primary (2019-2026),blocs5,0.459,0.723,69.4
+disputed_in_change,21,אפריל 2019,that election alone,camps4,0.362,0.701,68.2
+disputed_in_change,21,אפריל 2019,that election alone,camps3,0.325,0.684,69.0
+disputed_in_change,21,אפריל 2019,that election alone,camps2,0.165,0.605,76.1
+disputed_in_change,21,אפריל 2019,that election alone,blocs5,0.361,0.695,63.5
+disputed_in_change,22,ספטמבר 2019,primary (2019-2026),camps4,0.466,0.765,74.9
+disputed_in_change,22,ספטמבר 2019,primary (2019-2026),camps3,0.424,0.763,73.7
+disputed_in_change,22,ספטמבר 2019,primary (2019-2026),camps2,0.176,0.67,77.6
+disputed_in_change,22,ספטמבר 2019,primary (2019-2026),blocs5,0.446,0.756,67.5
+disputed_in_change,22,ספטמבר 2019,that election alone,camps4,0.454,0.752,76.5
+disputed_in_change,22,ספטמבר 2019,that election alone,camps3,0.401,0.743,72.2
+disputed_in_change,22,ספטמבר 2019,that election alone,camps2,0.187,0.645,77.6
+disputed_in_change,22,ספטמבר 2019,that election alone,blocs5,0.434,0.723,65.9
+disputed_in_change,23,מרץ 2020,primary (2019-2026),camps4,0.451,0.775,71.8
+disputed_in_change,23,מרץ 2020,primary (2019-2026),camps3,0.42,0.776,72.5
+disputed_in_change,23,מרץ 2020,primary (2019-2026),camps2,0.187,0.684,76.9
+disputed_in_change,23,מרץ 2020,primary (2019-2026),blocs5,0.444,0.769,67.5
+disputed_in_change,23,מרץ 2020,that election alone,camps4,0.494,0.785,74.1
+disputed_in_change,23,מרץ 2020,that election alone,camps3,0.466,0.786,74.9
+disputed_in_change,23,מרץ 2020,that election alone,camps2,0.196,0.69,76.9
+disputed_in_change,23,מרץ 2020,that election alone,blocs5,0.487,0.781,69.8
+disputed_in_change,24,מרץ 2021,primary (2019-2026),camps4,0.466,0.758,74.9
+disputed_in_change,24,מרץ 2021,primary (2019-2026),camps3,0.43,0.753,74.5
+disputed_in_change,24,מרץ 2021,primary (2019-2026),camps2,0.164,0.648,78.8
+disputed_in_change,24,מרץ 2021,primary (2019-2026),blocs5,0.453,0.74,71.8
+disputed_in_change,24,מרץ 2021,that election alone,camps4,0.433,0.752,72.5
+disputed_in_change,24,מרץ 2021,that election alone,camps3,0.399,0.745,72.9
+disputed_in_change,24,מרץ 2021,that election alone,camps2,0.156,0.639,78.0
+disputed_in_change,24,מרץ 2021,that election alone,blocs5,0.429,0.735,70.6
+disputed_in_change,25,נובמבר 2022,primary (2019-2026),camps4,0.455,0.715,72.5
+disputed_in_change,25,נובמבר 2022,primary (2019-2026),camps3,0.423,0.718,67.1
+disputed_in_change,25,נובמבר 2022,primary (2019-2026),camps2,0.193,0.63,77.3
+disputed_in_change,25,נובמבר 2022,primary (2019-2026),blocs5,0.446,0.753,66.7
+disputed_in_change,25,נובמבר 2022,that election alone,camps4,0.413,0.498,70.6
+disputed_in_change,25,נובמבר 2022,that election alone,camps3,0.429,0.599,63.1
+disputed_in_change,25,נובמבר 2022,that election alone,camps2,0.164,0.45,71.0
+disputed_in_change,25,נובמבר 2022,that election alone,blocs5,0.409,0.579,66.3
+disputed_in_change,26,אוקטובר 2026,primary (2019-2026),camps4,0.46,0.772,73.7
+disputed_in_change,26,אוקטובר 2026,primary (2019-2026),camps3,0.424,0.784,74.1
+disputed_in_change,26,אוקטובר 2026,primary (2019-2026),camps2,0.179,0.696,78.4
+disputed_in_change,26,אוקטובר 2026,primary (2019-2026),blocs5,0.474,0.814,88.6
+disputed_in_change,26,אוקטובר 2026,that election alone,camps4,0.529,0.776,76.9
+disputed_in_change,26,אוקטובר 2026,that election alone,camps3,0.517,0.785,80.0
+disputed_in_change,26,אוקטובר 2026,that election alone,camps2,0.239,0.687,82.0
+disputed_in_change,26,אוקטובר 2026,that election alone,blocs5,0.5,0.817,89.8
